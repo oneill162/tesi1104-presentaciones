@@ -1,0 +1,1358 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Episodio VII: Texto</title>
+<meta name="description" content="TESI 1104 – Diseño de Elementos para la Web · Unidad VII: Texto · Laboratorio 10: página web de cómic con el Estudio KOMA">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Dela+Gothic+One&family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;700;800&family=Shippori+Mincho+B1:wght@800&display=swap">
+<style>
+/* Concepto: una cinta VHS de anime de los 90. Cada capítulo abre con una «eyecatch»,
+   las láminas son celdas pintadas a mano (borde de tinta, sombra dura), y el laboratorio
+   es un estudio de diseño tipo Figma para armar una página web de cómic. */
+:root{
+  --ink:#140F24;        /* tinta / noche violeta */
+  --ink2:#231B3D;
+  --paper:#FFF4E0;      /* papel de celuloide */
+  --paper2:#F6E5C8;
+  --pink:#FF3D8B;       /* magenta de cinta VHS */
+  --cyan:#25CFE4;       /* cian de cel */
+  --sun:#FFB21E;        /* atardecer */
+  --red:#E8342C;
+  --violet:#5A3BC8;
+  --mute:#6E6488;
+  --f-display:"Dela Gothic One","Arial Black",Impact,sans-serif;
+  --f-body:"M PLUS Rounded 1c","Trebuchet MS","Segoe UI",sans-serif;
+  --f-sfx:Bangers,Impact,"Arial Black",sans-serif;
+  --f-osd:DotGothic16,"Courier New",monospace;
+  --f-title:"Shippori Mincho B1","Times New Roman",serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-body);overflow:hidden;
+  padding-left:max(0px,env(safe-area-inset-left,0px));padding-right:max(0px,env(safe-area-inset-right,0px))}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+
+/* ===== Escenario ===== */
+#viewport{position:fixed;inset:0 0 56px 0;display:grid;place-items:center;overflow:hidden;background:#07050D}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;flex:none;overflow:hidden;background:var(--ink)}
+.slide{position:absolute;inset:0;padding:56px 72px 48px;display:flex;flex-direction:column;gap:22px;visibility:hidden;opacity:0;transform:translateX(60px);transition:opacity .45s, transform .45s cubic-bezier(.2,.8,.2,1),visibility 0s .45s;overflow:hidden}
+.slide.on{visibility:visible;opacity:1;transform:none;transition:opacity .45s, transform .45s cubic-bezier(.2,.8,.2,1)}
+.slide.paper{background:var(--paper);color:var(--ink)}
+.slide.paper::before{content:"";position:absolute;right:-60px;top:-60px;width:360px;height:360px;background:radial-gradient(circle,var(--paper2) 28%,transparent 31%) 0 0/14px 14px;pointer-events:none;opacity:.9}
+.slide.night{background:var(--ink);color:var(--paper)}
+.slide > *{position:relative}
+.slide [data-a]{opacity:0;transform:translateY(18px)}
+.slide.on [data-a]{opacity:1;transform:none;transition:opacity .5s, transform .5s cubic-bezier(.2,.8,.2,1)}
+.slide.on [data-a="1"]{transition-delay:.12s}.slide.on [data-a="2"]{transition-delay:.24s}.slide.on [data-a="3"]{transition-delay:.36s}.slide.on [data-a="4"]{transition-delay:.48s}
+
+/* VHS: líneas de barrido y OSD */
+#scan{position:absolute;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(0,0,0,.06) 0 2px,transparent 2px 4px);mix-blend-mode:multiply}
+#osd{position:absolute;left:24px;top:16px;z-index:51;font-family:var(--f-osd);font-size:18px;letter-spacing:.06em;color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.55);pointer-events:none;display:flex;gap:18px}
+#osd .rec{color:var(--pink)}
+.slide.paper ~ #osd{color:var(--ink)}
+
+/* Tipografía */
+.kicker{font-family:var(--f-osd);font-size:20px;letter-spacing:.12em;text-transform:uppercase;color:var(--pink)}
+h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
+h1{font-family:var(--f-display);font-size:92px;line-height:.95}
+h2{font-family:var(--f-display);font-size:50px;line-height:1.05;max-width:1050px}
+h3{font-family:var(--f-display);font-size:26px;line-height:1.15}
+p{margin:0;font-size:22px;line-height:1.45;text-wrap:pretty}
+.lead{font-size:26px;line-height:1.4;max-width:900px}
+.small{font-size:19px;line-height:1.4}
+.mono{font-family:var(--f-osd)}
+b,strong{font-weight:800}
+.hl{background:linear-gradient(transparent 58%,var(--sun) 58%);padding:0 .1em}
+.night .hl{background:linear-gradient(transparent 58%,var(--violet) 58%)}
+code{font-family:var(--f-osd);font-size:.95em;background:rgba(90,59,200,.14);padding:.05em .3em;border-radius:4px;white-space:nowrap}
+.night code{background:rgba(37,207,228,.16)}
+
+/* Celdas */
+.cel{border:3px solid var(--ink);background:#fff;color:var(--ink);box-shadow:7px 7px 0 var(--ink);border-radius:4px;padding:20px 22px;min-width:0}
+.night .cel{border-color:var(--paper);background:var(--ink2);color:var(--paper);box-shadow:7px 7px 0 var(--pink)}
+.cel h3{margin-bottom:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.row{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.fill{flex:1;min-height:0}
+.tag{display:inline-block;font-family:var(--f-osd);font-size:16px;padding:3px 10px;border:2px solid currentColor;border-radius:999px}
+ul.list{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+ul.list li{font-size:21px;line-height:1.4;padding-left:30px;position:relative}
+ul.list li::before{content:"";position:absolute;left:4px;top:.45em;width:13px;height:13px;background:var(--pink);transform:rotate(45deg)}
+.night ul.list li::before{background:var(--cyan)}
+kbd{font-family:var(--f-osd);font-size:.9em;border:2px solid currentColor;border-bottom-width:4px;border-radius:6px;padding:0 .35em;white-space:nowrap}
+
+/* Controles dentro de las láminas */
+.ctl{display:grid;grid-template-columns:150px 1fr 90px;gap:10px;align-items:center;font-size:19px}
+.ctl output{font-family:var(--f-osd);font-size:18px;text-align:right}
+input[type=range]{accent-color:var(--pink);width:100%}
+.btn{border:3px solid var(--ink);background:#fff;color:var(--ink);font-weight:800;font-size:18px;padding:8px 16px;border-radius:999px;box-shadow:3px 3px 0 var(--ink);transition:transform .1s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.btn[aria-pressed=true],.btn.on{background:var(--pink);color:#fff}
+.night .btn{border-color:var(--paper);background:var(--ink2);color:var(--paper);box-shadow:3px 3px 0 var(--pink)}
+.night .btn[aria-pressed=true],.night .btn.on{background:var(--cyan);color:var(--ink)}
+.codebox{font-family:var(--f-osd);font-size:18px;line-height:1.5;background:var(--ink);color:#B8F5FF;padding:14px 18px;border-radius:6px;white-space:pre-wrap;overflow-wrap:anywhere}
+.night .codebox{background:#0A0716;border:2px solid var(--ink2)}
+
+/* Portada */
+.cover{padding:0;background:linear-gradient(180deg,#2B1250 0%,#8E1F6E 38%,#FF5E7A 62%,#FFB21E 84%)}
+.cover .sun{position:absolute;left:640px;top:250px;width:420px;height:420px;border-radius:50%;background:linear-gradient(180deg,#FFF1A8,#FF9A3D);
+  -webkit-mask:linear-gradient(#000 0 52%,transparent 52% 56%,#000 56% 64%,transparent 64% 69%,#000 69% 76%,transparent 76% 82%,#000 82% 88%,transparent 88%);
+          mask:linear-gradient(#000 0 52%,transparent 52% 56%,#000 56% 64%,transparent 64% 69%,#000 69% 76%,transparent 76% 82%,#000 82% 88%,transparent 88%)}
+.cover canvas{position:absolute;inset:0}
+.cover .content{position:absolute;left:72px;top:96px;width:620px;display:flex;flex-direction:column;gap:18px}
+.cover h1{font-size:150px;line-height:.85;color:#fff;text-shadow:6px 6px 0 var(--ink),-2px -2px 0 var(--ink),2px -2px 0 var(--ink),-2px 2px 0 var(--ink)}
+.cover .jp{position:absolute;right:56px;top:70px;writing-mode:vertical-rl;font-family:var(--f-display);font-size:58px;color:#fff;opacity:.9;letter-spacing:.12em}
+.cover .ep{font-family:var(--f-title);font-size:34px;color:#fff;letter-spacing:.04em}
+.cover .meta{font-size:20px;line-height:1.5;color:#fff;background:rgba(20,15,36,.82);border-left:6px solid var(--pink);padding:10px 16px;align-self:flex-start}
+
+/* Eyecatch */
+.eyecatch{padding:0;align-items:center;justify-content:center;background:var(--ink)}
+.eyecatch .burst{position:absolute;inset:-200px;background:repeating-conic-gradient(from 0deg at 50% 50%,var(--pink) 0 4deg,var(--ink) 4deg 12deg);opacity:.55;animation:spin 40s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.eyecatch .card{position:relative;background:var(--paper);color:var(--ink);border:5px solid var(--ink);box-shadow:14px 14px 0 var(--cyan);padding:34px 56px 38px;text-align:center;transform:rotate(-2deg)}
+.eyecatch .num{font-family:var(--f-sfx);font-size:120px;line-height:.9;color:var(--pink);-webkit-text-stroke:4px var(--ink);paint-order:stroke fill}
+.eyecatch h2{font-size:64px;margin:0 auto}
+.eyecatch .sub{font-family:var(--f-osd);font-size:22px;margin-top:10px;letter-spacing:.08em}
+
+/* Barra */
+#bar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 max(16px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px,env(safe-area-inset-left,0px));background:#0B0816;border-top:3px solid var(--pink);font-family:var(--f-osd);z-index:60}
+#bar button{background:none;border:2px solid #3A3060;color:var(--paper);border-radius:6px;padding:4px 12px;font-size:16px}
+#bar button:hover{border-color:var(--cyan)}
+#map{flex:1;display:flex;gap:3px;height:14px;min-width:0}
+#map i{flex:1;background:#2A2245;border-radius:2px;cursor:pointer}
+#map i.done{background:#6E3A8E}#map i.cur{background:var(--pink)}#map i.ch{background:#3B5C8C}#map i.ch.done{background:#3F7FA8}
+#count{min-width:72px;text-align:center;font-size:17px}
+
+/* Índice y notas */
+.overlay{position:fixed;inset:0 0 56px 0;background:rgba(10,7,20,.94);z-index:70;display:none;overflow:auto;padding:40px max(16px,env(safe-area-inset-left,0px))}
+.overlay.open{display:block}
+#index ol{max-width:1100px;margin:0 auto;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;counter-reset:n}
+#index li button{width:100%;text-align:left;background:var(--ink2);border:2px solid #3A3060;border-radius:6px;padding:10px 14px;font-size:18px;color:var(--paper);display:flex;gap:12px}
+#index li button:hover{border-color:var(--cyan)}
+#index li button span{font-family:var(--f-osd);color:var(--pink);min-width:28px}
+#notes{position:fixed;left:16px;right:16px;bottom:68px;max-width:900px;margin:auto;background:var(--paper);color:var(--ink);border:3px solid var(--ink);box-shadow:6px 6px 0 var(--pink);padding:14px 18px;font-size:18px;line-height:1.45;z-index:65;display:none}
+#notes.open{display:block}
+
+/* ===== Elementos específicos de láminas ===== */
+.demoBox{position:relative;border:3px dashed var(--mute);border-radius:4px;background:#fff;height:250px;overflow:hidden}
+.ptxt{position:absolute;left:24px;top:90px;font-family:var(--f-display);font-size:34px;white-space:nowrap;color:var(--ink)}
+.parbox{position:absolute;left:24px;top:24px;width:330px;height:200px;border:2px solid var(--cyan);font-size:20px;line-height:1.35;padding:6px;color:var(--ink)}
+.parbox i{position:absolute;width:10px;height:10px;background:#fff;border:2px solid var(--cyan)}
+.vr{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.vr .pane{height:230px;border:3px solid var(--ink);background:#fff;overflow:hidden;position:relative;display:grid;place-items:center}
+.vr .lbl{position:absolute;left:8px;top:6px;font-family:var(--f-osd);font-size:16px;color:var(--mute);z-index:2}
+#rasterCv{image-rendering:pixelated}
+.spdemo{background:#fff;border:3px solid var(--ink);padding:24px;height:280px;display:grid;place-items:center;overflow:hidden}
+.spdemo div{font-family:var(--f-display);font-size:58px;color:var(--ink);text-align:center}
+.aldemo{display:grid;grid-template-columns:1fr 240px;gap:20px}
+.aldemo .txt{background:#fff;border:3px solid var(--ink);padding:18px 22px;font-size:21px;line-height:1.45;color:var(--ink);height:300px;overflow:hidden}
+.aldemo .vert{background:#fff;border:3px solid var(--ink);height:300px;display:grid;place-items:center;color:var(--ink)}
+.aldemo .vert div{writing-mode:vertical-rl;font-family:var(--f-display);font-size:34px;letter-spacing:.1em}
+.trdemo{background:#fff;border:3px solid var(--ink);height:330px;display:grid;place-items:center;overflow:hidden;position:relative}
+.trdemo .t{font-family:var(--f-sfx);font-size:96px;color:var(--pink);-webkit-text-stroke:3px var(--ink);paint-order:stroke fill}
+.fontcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.fontcards button{background:#fff;border:3px solid var(--ink);border-radius:6px;padding:10px;text-align:left;color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.fontcards button.on{background:var(--sun)}
+.fontcards b{display:block;font-size:26px;font-weight:400}
+.fontcards small{font-family:var(--f-osd);font-size:14px;color:var(--mute)}
+.balloonDemo{position:relative;height:300px;background:linear-gradient(#BFE9F2,#fff);border:3px solid var(--ink);overflow:hidden}
+.balloonDemo svg{position:absolute;inset:20px 40px 30px}
+.balloonDemo .bt{position:absolute;left:90px;right:90px;top:52px;height:150px;display:grid;place-items:center;text-align:center;color:var(--ink);font-size:26px;line-height:1.2}
+.sfxStage{height:300px;border:3px solid var(--paper);background:repeating-conic-gradient(from 0deg at 50% 50%,#2A1F4A 0 5deg,var(--ink) 5deg 14deg);display:grid;place-items:center;overflow:hidden}
+.sfxStage div{font-family:var(--f-sfx);font-size:110px;line-height:1;white-space:nowrap}
+.swatches{display:flex;gap:8px}
+.swatches button{width:34px;height:34px;border-radius:50%;border:3px solid var(--paper)}
+.swatches button.on{outline:3px solid var(--cyan);outline-offset:2px}
+
+/* anatomía del cómic */
+.anat{display:grid;grid-template-columns:560px 1fr;gap:30px;align-items:start}
+.cpage{position:relative;width:560px;height:520px;background:#fff;border:3px solid var(--ink);padding:14px;display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:12px}
+.cpage .pn{border:4px solid var(--ink);position:relative;overflow:hidden}
+.cpage .pn.wide{grid-column:1/3}
+.hot{position:absolute;width:38px;height:38px;border-radius:50%;background:var(--pink);color:#fff;border:3px solid var(--ink);font-family:var(--f-sfx);font-size:22px;display:grid;place-items:center;z-index:5;transition:transform .15s}
+.hot:hover,.hot.on{transform:scale(1.18);background:var(--cyan);color:var(--ink)}
+.defbox{min-height:200px}
+.defbox h3{font-size:34px;color:var(--pink)}
+.order{position:absolute;width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--sun);display:grid;place-items:center;font-family:var(--f-sfx);font-size:22px;transition:left .5s,top .5s;z-index:6}
+
+/* web wireframe */
+.wf{width:560px;border:3px solid var(--ink);background:#fff;padding:10px;display:grid;gap:8px}
+.wf div{border:3px solid var(--ink);border-radius:4px;display:grid;place-items:center;font-family:var(--f-osd);font-size:17px;color:var(--ink);background:var(--paper);cursor:pointer;transition:background .15s}
+.wf div:hover,.wf div.on{background:var(--sun)}
+
+/* teclado figma */
+.keys{display:flex;flex-wrap:wrap;gap:12px}
+.key{min-width:76px;height:76px;border:3px solid var(--paper);border-bottom-width:8px;border-radius:10px;background:var(--ink2);color:var(--paper);font-family:var(--f-display);font-size:26px;display:grid;place-items:center;padding:0 12px;transition:transform .08s}
+.key.on{background:var(--cyan);color:var(--ink);transform:translateY(3px);border-bottom-width:5px}
+.figwin{border:3px solid var(--paper);border-radius:10px;background:#1E1E1E;height:330px;position:relative;overflow:hidden}
+.figwin .canvas{position:absolute;inset:0 0 54px 0;background:#2C2C2C;display:grid;place-items:center}
+.figwin .tb{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);display:flex;gap:4px;background:#383838;border-radius:10px;padding:5px}
+.figwin .tb span{width:36px;height:36px;border-radius:7px;display:grid;place-items:center;font-family:var(--f-osd);font-size:16px;color:#ddd}
+.figwin .tb span.on{background:#0D99FF;color:#fff}
+.al{display:flex;background:#fff;border:2px dashed #0D99FF;transition:all .3s}
+.al span{background:var(--pink);color:#fff;font-weight:800;font-size:18px;padding:10px 16px;border-radius:999px;white-space:nowrap;transition:all .3s}
+
+/* repaso */
+.q{display:grid;gap:10px}
+.q .ans{display:none;background:var(--sun);color:var(--ink);padding:10px 14px;border-radius:4px;font-size:19px;line-height:1.4}
+.q .ans.open{display:block}
+table.t{border-collapse:collapse;width:100%;font-size:19px}
+table.t th,table.t td{border-bottom:2px solid currentColor;padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacing:.05em}
+.night table.t th,.night table.t td{border-color:#3A3060}
+.check{display:grid;grid-template-columns:repeat(2,1fr);gap:10px 26px}
+.check div{font-size:20px;line-height:1.35;display:flex;gap:12px}
+.check div > b{font-family:var(--f-sfx);font-weight:400;font-size:28px;color:var(--pink);min-width:28px;line-height:1}
+.bigbtn{font-family:var(--f-display);font-size:34px;padding:18px 40px;border:5px solid var(--ink);background:var(--pink);color:#fff;border-radius:14px;box-shadow:9px 9px 0 var(--ink);transform:rotate(-1.5deg)}
+.bigbtn:hover{background:var(--cyan);color:var(--ink)}
+
+@media (prefers-reduced-motion:reduce){
+  .slide,.slide [data-a],.slide.on [data-a]{transition:none!important}
+  .eyecatch .burst{animation:none}
+}
+
+/* ================= ESTUDIO KOMA ================= */
+#studio{position:fixed;inset:0;z-index:200;background:#17131F;color:#EDE7F6;display:none;grid-template-rows:auto 1fr;font-family:var(--f-body);font-size:14px;
+  padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#studio.open{display:grid}
+#studio *{scrollbar-width:thin}
+.st-top{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#0F0C16;border-bottom:2px solid var(--pink);flex-wrap:wrap}
+.st-logo{font-family:var(--f-sfx);font-size:26px;letter-spacing:.04em;color:var(--sun);margin-right:6px;-webkit-text-stroke:1px #000;paint-order:stroke fill}
+.st-top .grp{display:flex;gap:3px;padding-right:8px;margin-right:4px;border-right:1px solid #3A3248}
+.st-top button{background:#231D30;border:1px solid #3A3248;border-radius:6px;color:#EDE7F6;padding:5px 7px;font-size:12.5px;display:flex;gap:6px;align-items:center;white-space:nowrap}
+.st-top button:hover{border-color:var(--cyan)}
+.st-top button.on{background:#0D99FF;border-color:#0D99FF;color:#fff}
+.st-top button kbd{font-size:11px;border-width:1px;border-bottom-width:2px;opacity:.8}
+.st-top .sp{flex:1}
+.st-top button.primary{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700}
+.st-main{display:grid;grid-template-columns:210px 1fr 290px;min-height:0}
+.st-side{background:#1D1828;overflow:auto;min-height:0;border-right:1px solid #2E2740}
+.st-right{border-right:0;border-left:1px solid #2E2740}
+.st-side h4{margin:0;padding:10px 12px 6px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9C90B8;font-weight:700}
+#layers{list-style:none;margin:0;padding:0 6px 10px}
+#layers li{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:5px;cursor:pointer;font-size:13px}
+#layers li:hover{background:#2A2338}
+#layers li.sel{background:#0D99FF33;outline:1px solid #0D99FF}
+#layers li .ic{width:18px;text-align:center;color:#9C90B8;font-family:var(--f-osd)}
+#layers li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#layers li .nm input{width:100%;background:#0F0C16;border:1px solid #0D99FF;color:#fff;border-radius:3px;padding:1px 4px}
+#layers li button{background:none;border:0;color:#9C90B8;padding:0 3px;font-size:13px}
+#layers li.hid .nm{opacity:.45}
+#canvasWrap{overflow:auto;background:#2B2536;position:relative;min-height:0}
+#canvasPad{padding:60px;width:max-content;min-width:100%}
+#artboard{position:relative;transform-origin:0 0;box-shadow:0 0 0 1px #000,0 10px 40px rgba(0,0,0,.45);overflow:hidden}
+#artboardLabel{position:absolute;left:60px;top:38px;font-size:12px;color:#B8AECF;font-family:var(--f-osd)}
+#artboard.grid::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(13,153,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(13,153,255,.12) 1px,transparent 1px);background-size:16px 16px;z-index:9998}
+.el{position:absolute;user-select:none}
+.el .inner{position:absolute;inset:0}
+.el.locked{pointer-events:none}
+.el video,.el audio{pointer-events:none}
+#studio.preview .el video,#studio.preview .el audio{pointer-events:auto}
+.el .txt{white-space:pre-wrap;overflow-wrap:break-word;width:100%;height:100%;outline:none}
+.el .txt[contenteditable=true]{outline:2px solid #0D99FF;cursor:text;user-select:text}
+.el .ph{position:absolute;inset:0;display:grid;place-items:center;text-align:center;color:#6E6488;font-family:var(--f-osd);font-size:14px;background:repeating-linear-gradient(45deg,#EFE6D6 0 10px,#F8F1E4 10px 20px)}
+.el .tone{position:absolute;inset:0;pointer-events:none;mix-blend-mode:multiply}
+.el .tint{position:absolute;inset:0;pointer-events:none}
+.el img{width:100%;height:100%;display:block;pointer-events:none}
+#selbox{position:absolute;border:2px solid #0D99FF;pointer-events:none;z-index:9999;display:none}
+#selbox .h{position:absolute;width:11px;height:11px;background:#fff;border:2px solid #0D99FF;pointer-events:auto;border-radius:2px}
+#selbox .h[data-d=nw]{left:-7px;top:-7px;cursor:nwse-resize}#selbox .h[data-d=ne]{right:-7px;top:-7px;cursor:nesw-resize}
+#selbox .h[data-d=sw]{left:-7px;bottom:-7px;cursor:nesw-resize}#selbox .h[data-d=se]{right:-7px;bottom:-7px;cursor:nwse-resize}
+#selbox .h[data-d=n]{left:calc(50% - 6px);top:-7px;cursor:ns-resize}#selbox .h[data-d=s]{left:calc(50% - 6px);bottom:-7px;cursor:ns-resize}
+#selbox .h[data-d=w]{top:calc(50% - 6px);left:-7px;cursor:ew-resize}#selbox .h[data-d=e]{top:calc(50% - 6px);right:-7px;cursor:ew-resize}
+#selbox .dim{position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);background:#0D99FF;color:#fff;font-size:11px;padding:1px 6px;border-radius:3px;white-space:nowrap;font-family:var(--f-osd)}
+#ghost{position:absolute;border:2px dashed #0D99FF;background:rgba(13,153,255,.08);pointer-events:none;z-index:9999;display:none}
+#studio.preview #selbox{display:none!important}
+.tabs{display:flex;border-bottom:1px solid #2E2740}
+.tabs button{flex:1;background:none;border:0;border-bottom:2px solid transparent;color:#9C90B8;padding:9px 0;font-size:13px;font-weight:700}
+.tabs button.on{color:#fff;border-color:var(--pink)}
+#props{padding:4px 12px 20px;display:grid;gap:4px}
+#props .sec{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#9C90B8;font-weight:700;margin-top:12px;padding-top:10px;border-top:1px solid #2E2740}
+#props .sec:first-child{border-top:0;margin-top:4px;padding-top:4px}
+#props .f{display:grid;grid-template-columns:96px 1fr;gap:8px;align-items:center}
+#props .f2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#props .f2 .f{grid-template-columns:auto 1fr}
+#props label{font-size:12px;color:#C9BEDF}
+#props input[type=number],#props input[type=text],#props select,#props textarea{width:100%;background:#0F0C16;border:1px solid #3A3248;border-radius:4px;padding:4px 6px;font-size:13px;color:#fff}
+#props textarea{min-height:64px;resize:vertical;font-family:var(--f-body)}
+#props input[type=color]{width:100%;height:26px;padding:0;border:1px solid #3A3248;border-radius:4px;background:none}
+#props input[type=range]{accent-color:#0D99FF}
+#props .rng{display:grid;grid-template-columns:96px 1fr 38px;gap:6px;align-items:center}
+#props .rng output{font-size:12px;text-align:right;font-family:var(--f-osd);color:#C9BEDF}
+#props .btns{display:flex;gap:4px;flex-wrap:wrap}
+#props .btns button{flex:1;background:#231D30;border:1px solid #3A3248;border-radius:4px;color:#EDE7F6;padding:5px 6px;font-size:12px}
+#props .btns button.on{background:#0D99FF;border-color:#0D99FF}
+#props .hint{font-size:12px;color:#9C90B8;line-height:1.45}
+#mission{padding:10px 12px 20px;display:none}
+#mission.open{display:block}
+#mission .score{font-family:var(--f-sfx);font-size:40px;color:var(--sun);line-height:1}
+#mission ul{list-style:none;margin:10px 0;padding:0;display:grid;gap:8px}
+#mission li{display:grid;grid-template-columns:24px 1fr;gap:8px;font-size:13px;line-height:1.4;color:#C9BEDF}
+#mission li .ok{width:20px;height:20px;border-radius:50%;border:2px solid #5A4F70;display:grid;place-items:center;font-size:12px}
+#mission li.done{color:#fff}
+#mission li.done .ok{background:#2BB673;border-color:#2BB673;color:#fff}
+#mission li small{display:block;color:#9C90B8}
+.modal{position:fixed;inset:0;background:rgba(8,5,14,.78);z-index:300;display:none;place-items:center;padding:16px}
+.modal.open{display:grid}
+.modal .box{background:#1D1828;border:2px solid var(--pink);border-radius:10px;max-width:860px;width:100%;max-height:90vh;overflow:auto;padding:18px 20px;color:#EDE7F6}
+.modal h3{font-family:var(--f-display);font-size:22px;margin-bottom:10px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:10px 0}
+.gal button{background:#0F0C16;border:2px solid #3A3248;border-radius:6px;padding:0;overflow:hidden;color:#C9BEDF;font-size:12px}
+.gal button:hover{border-color:var(--cyan)}
+.gal img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover}
+.gal span{display:block;padding:5px}
+.modal .row{gap:8px}
+.modal .act{background:#231D30;border:1px solid #3A3248;color:#EDE7F6;border-radius:6px;padding:7px 12px}
+.modal .act.primary{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700}
+.modal textarea{width:100%;height:220px;background:#0F0C16;color:#B8F5FF;border:1px solid #3A3248;border-radius:6px;font-family:var(--f-osd);font-size:12px;padding:8px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#0D99FF;color:#fff;padding:8px 16px;border-radius:999px;font-size:14px;z-index:400;display:none;max-width:calc(100% - 32px)}
+@media (max-width:900px){
+  .st-main{grid-template-columns:1fr;grid-template-rows:minmax(320px,55vh) auto auto;overflow:auto}
+  #canvasWrap{order:-1}
+  .st-side{border:0;border-top:1px solid #2E2740;max-height:none}
+}
+</style>
+</head>
+<body>
+
+<div id="viewport"><div id="stage">
+
+<!-- 1 PORTADA -->
+<section class="slide cover" data-title="Portada" data-notes="Bienvenida. Unidad VII del prontuario: Texto. Hoy veremos cómo se crea, espacia, alinea, transforma, formatea y decora el texto en Photoshop, y lo aplicaremos a una página web de cómic. En el laboratorio darán su primer paso con herramientas tipo Figma.">
+  <canvas id="coverCv" width="1280" height="720"></canvas>
+  <div class="sun"></div>
+  <div class="jp" aria-hidden="true">テキスト</div>
+  <div class="content">
+    <div class="ep">Episodio VII</div>
+    <h1 data-a>¡TEXTO!</h1>
+    <p class="lead" style="color:#fff;text-shadow:2px 2px 0 var(--ink)" data-a="1">Creación, espaciados, alineamiento, transformación, formato, efectos y 3D. Y un estudio para armar tu página de cómic web.</p>
+    <p class="meta" data-a="2"><b>TESI 1104 – Diseño de Elementos para la Web</b><br>Unidad VII · Laboratorio 10 · Photoshop CS6 + herramientas tipo Figma<br>Prof. Eduardo O. De Jesús Arroyo · ITPR Recinto de Manatí</p>
+  </div>
+</section>
+
+<!-- 2 OBJETIVOS -->
+<section class="slide paper" data-title="En este episodio" data-notes="Seis objetivos. Los primeros cuatro son de Photoshop y vienen del prontuario. Los dos últimos conectan el texto con la página web y con Figma, que empezamos a explorar hoy.">
+  <div class="kicker">En este episodio</div>
+  <h2 data-a>Al terminar la clase podrás…</h2>
+  <div class="grid3" data-a="1">
+    <div class="cel"><h3>Crear y editar</h3><p class="small">texto de punto y de párrafo, y saber cuándo usar cada uno.</p></div>
+    <div class="cel"><h3>Espaciar y alinear</h3><p class="small">con kerning, tracking e interlineado, igual que en CSS.</p></div>
+    <div class="cel"><h3>Transformar</h3><p class="small">con Free Transform y Warp Text sin perder la calidad del texto.</p></div>
+    <div class="cel"><h3>Dar formato y efectos</h3><p class="small">fuente, tamaño, color, estilos de capa y texto en 3D.</p></div>
+    <div class="cel"><h3>Diseñar un cómic web</h3><p class="small">con viñetas, globos, onomatopeyas y multimedia.</p></div>
+    <div class="cel"><h3>Usar un editor tipo Figma</h3><p class="small">marcos, capas, propiedades y vista previa.</p></div>
+  </div>
+</section>
+
+<!-- 3 EYECATCH 1 -->
+<section class="slide eyecatch" data-ch="1" data-title="Parte A · El texto en Photoshop" data-notes="Primera parte: los seis temas de la Unidad VII del prontuario.">
+  <div class="burst"></div>
+  <div class="card"><div class="num">PARTE A</div><h2>El texto en Photoshop</h2><div class="sub">UNIDAD VII · TEMAS 1 AL 6</div></div>
+</section>
+
+<!-- 4 PUNTO VS PÁRRAFO -->
+<section class="slide paper" data-title="1. Creación: punto o párrafo" data-notes="Con la herramienta de texto: un clic crea texto de punto, que crece en una sola línea hasta que pulsamos Enter. Arrastrar crea un cuadro de párrafo: el texto se ajusta solo al ancho. Títulos y onomatopeyas, punto. Diálogos largos y sinopsis, párrafo. Pulsen los botones para comparar.">
+  <div class="kicker">1 · Creación y edición</div>
+  <h2 data-a>Un clic o un arrastre: dos clases de texto</h2>
+  <div class="grid2" data-a="1">
+    <div style="display:grid;gap:14px">
+      <div class="row"><button class="btn on" data-pt="p" aria-pressed="true">Texto de punto (clic)</button><button class="btn" data-pt="b" aria-pressed="false">Texto de párrafo (arrastrar)</button></div>
+      <div class="demoBox" id="ptDemo"><div class="ptxt" id="ptA">¡Llegó el capítulo final de la temporada!</div><div class="parbox" id="ptB" hidden>¡Llegó el capítulo final de la temporada! El texto se acomoda solo dentro del cuadro y baja de línea al llegar al borde.<i style="left:-6px;top:-6px"></i><i style="right:-6px;top:-6px"></i><i style="left:-6px;bottom:-6px"></i><i style="right:-6px;bottom:-6px"></i></div></div>
+      <p class="small" id="ptInfo"><b>Punto:</b> crece en una sola línea hasta que pulses <kbd>Enter</kbd>. Ideal para títulos, logos y onomatopeyas.</p>
+    </div>
+    <div class="cel">
+      <h3>Las 4 herramientas de texto <kbd>T</kbd></h3>
+      <ul class="list">
+        <li><b>Horizontal Type</b>: la de siempre.</li>
+        <li><b>Vertical Type</b>: columnas de arriba abajo, como en el manga.</li>
+        <li><b>Horizontal / Vertical Type Mask</b>: no crean texto, crean una <b>selección</b> con forma de letras.</li>
+        <li><kbd>Shift</kbd>+<kbd>T</kbd> cambia entre ellas. <kbd>Ctrl</kbd>+<kbd>Enter</kbd> confirma; <kbd>Esc</kbd> cancela.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5 VECTOR VS RASTER -->
+<section class="slide paper" data-title="Capa de texto: vector o píxeles" data-notes="La capa de texto guarda contornos vectoriales: se puede editar y agrandar sin perder calidad. Si la rasterizan (Layer > Rasterize > Type) se convierte en píxeles: ya no se edita y al agrandarla se pixela. Muevan el control del zoom. Regla: rasterizar solo cuando un filtro lo exija, y siempre en una copia.">
+  <div class="kicker">1 · Creación y edición</div>
+  <h2 data-a>La capa de texto es vector… hasta que la rasterizas</h2>
+  <div class="vr" data-a="1">
+    <div class="pane"><span class="lbl">CAPA DE TEXTO (vector)</span><svg id="vecSvg" viewBox="0 0 120 40" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"><text id="vecT" x="60" y="27" text-anchor="middle" font-family="Dela Gothic One, Arial Black" font-size="16" fill="#140F24">¡KOMA!</text></svg></div>
+    <div class="pane"><span class="lbl">RASTERIZADA (píxeles)</span><canvas id="rasterCv" width="120" height="40"></canvas></div>
+  </div>
+  <div class="ctl" data-a="2"><label for="zoomR">Zoom</label><input id="zoomR" type="range" min="1" max="8" step="0.5" value="1"><output id="zoomO">100 %</output></div>
+  <p class="small" data-a="3">Para rasterizar: <code>Layer › Rasterize › Type</code>. Hazlo solo si un filtro lo exige, y en una <b>copia</b> de la capa. En la web pasa igual: el texto en HTML siempre se ve nítido; el texto dentro de un JPG, no.</p>
+</section>
+
+<!-- 6 ESPACIADOS -->
+<section class="slide paper" data-title="2. Espaciados" data-notes="Tres espaciados. Kerning: entre un par de letras, como A y V. Tracking: igual para todas las letras de la selección. Ambos se miden en milésimas de em: 100 es una décima del tamaño de la letra. Interlineado (leading): de línea base a línea base, en puntos. En CSS: letter-spacing y line-height. Muevan los controles y vean el CSS.">
+  <div class="kicker">2 · Espaciados</div>
+  <h2 data-a>Kerning, tracking e interlineado</h2>
+  <div class="grid2" data-a="1">
+    <div class="spdemo"><div id="spT"><span id="spAV">AV</span>ANZA,<br>NO TE RINDAS</div></div>
+    <div style="display:grid;gap:14px">
+      <div class="ctl"><label for="spK">Kerning «AV»</label><input id="spK" type="range" min="-200" max="200" step="10" value="0"><output id="spKo">0</output></div>
+      <div class="ctl"><label for="spTr">Tracking</label><input id="spTr" type="range" min="-100" max="400" step="10" value="0"><output id="spTro">0</output></div>
+      <div class="ctl"><label for="spL">Interlineado</label><input id="spL" type="range" min="44" max="110" step="2" value="64"><output id="spLo">64 pt</output></div>
+      <div class="codebox" id="spCss"></div>
+      <p class="small">Panel <code>Window › Character</code>. Kerning y tracking se miden en <b>milésimas de em</b>: 100 = 0.1 del tamaño de la letra.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 ALINEAMIENTO -->
+<section class="slide paper" data-title="3. Alineamiento" data-notes="El panel Paragraph alinea el texto a la izquierda, al centro, a la derecha o justificado. En los globos de cómic el texto va centrado. En la web, los párrafos largos van a la izquierda: el justificado deja ríos de espacio. Y el texto vertical del manga: herramienta Vertical Type en Photoshop o writing-mode en CSS.">
+  <div class="kicker">3 · Alineamiento</div>
+  <h2 data-a>Cada texto tiene su alineación</h2>
+  <div class="row" data-a="1">
+    <button class="btn on" data-al="left" aria-pressed="true">Izquierda</button><button class="btn" data-al="center" aria-pressed="false">Centro</button><button class="btn" data-al="right" aria-pressed="false">Derecha</button><button class="btn" data-al="justify" aria-pressed="false">Justificado</button>
+  </div>
+  <div class="aldemo" data-a="2">
+    <div class="txt" id="alTxt">Esa noche, bajo los cables de luz del barrio, Akari entendió que el examen de Photoshop no era el final. Era apenas el primer capítulo. Guardó su archivo PSD, apagó la computadora y miró la ciudad encendida.</div>
+    <div class="vert"><div>魂の文字</div></div>
+  </div>
+  <p class="small" id="alInfo" data-a="3"><b>Izquierda:</b> la mejor para leer párrafos largos en la web. CSS: <code>text-align: left</code></p>
+</section>
+
+<!-- 8 TRANSFORMACIÓN -->
+<section class="slide paper" data-title="4. Transformación" data-notes="Free Transform, Ctrl+T, rota, escala e inclina la capa de texto sin rasterizarla. Warp Text, el botón de la T curva en la barra de opciones, tiene 15 estilos: Arc, Arch, Bulge, Flag, Wave, Fish y otros. El control Curvar imita el estilo Arc. Todo sigue editable.">
+  <div class="kicker">4 · Transformación</div>
+  <h2 data-a>Rotar, inclinar, escalar y curvar sin perder el texto</h2>
+  <div class="grid2" data-a="1">
+    <div class="trdemo"><svg id="trSvg" viewBox="0 0 560 320" width="100%" height="100%"><defs><path id="trPath" d="M60 200 Q280 200 500 200"/></defs><g id="trG" style="transform-origin:280px 170px"><text font-family="Bangers, Impact" font-size="92" fill="#FF3D8B" stroke="#140F24" stroke-width="6" paint-order="stroke" text-anchor="middle" letter-spacing="2"><textPath href="#trPath" startOffset="50%">¡ZAAAS!</textPath></text></g></svg></div>
+    <div style="display:grid;gap:12px">
+      <div class="ctl"><label for="trR">Rotar</label><input id="trR" type="range" min="-45" max="45" value="0"><output id="trRo">0°</output></div>
+      <div class="ctl"><label for="trS">Inclinar</label><input id="trS" type="range" min="-30" max="30" value="0"><output id="trSo">0°</output></div>
+      <div class="ctl"><label for="trZ">Escalar</label><input id="trZ" type="range" min="50" max="130" value="100"><output id="trZo">100 %</output></div>
+      <div class="ctl"><label for="trB">Curvar (Arc)</label><input id="trB" type="range" min="-100" max="100" value="0"><output id="trBo">0 %</output></div>
+      <p class="small"><kbd>Ctrl</kbd>+<kbd>T</kbd> Free Transform · clic derecho › <i>Skew</i> para inclinar · <b>Warp Text</b> en la barra de opciones: 15 estilos (Arc, Arch, Bulge, Flag, Wave, Fish, Rise, Twist…).</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 FORMATO -->
+<section class="slide paper" data-title="5. Formato" data-notes="Formato es la fuente, el tamaño, el peso, el color y el estilo. La fuente comunica: una redondeada es amable, una de cómic es para diálogo, una mincho con trazos finos es dramática, como los títulos de anime de los 90. Prueben las fuentes en el globo. Ojo con el tamaño: a 72 ppi un punto equivale a un píxel; en CSS, 1 pt equivale a 1.333 px.">
+  <div class="kicker">5 · Formato</div>
+  <h2 data-a>La fuente también actúa</h2>
+  <div class="grid2" data-a="1">
+    <div class="balloonDemo"><svg viewBox="0 0 400 230" width="400" height="230" style="width:calc(100% - 80px);height:calc(100% - 50px)" preserveAspectRatio="none"><path d="M200 12 C320 12 388 55 388 105 C388 155 320 190 230 192 L180 228 L190 190 C80 188 12 155 12 105 C12 55 80 12 200 12Z" fill="#fff" stroke="#140F24" stroke-width="4" vector-effect="non-scaling-stroke"/></svg><div class="bt" id="fmT">¡No pienso rendirme hasta terminar mi página web!</div></div>
+    <div style="display:grid;gap:12px">
+      <div class="fontcards" id="fmCards">
+        <button class="on" data-f="'Comic Neue'" data-u="1"><b style="font-family:'Comic Neue';font-weight:700">Rotulación</b><small>diálogo de cómic</small></button>
+        <button data-f="'M PLUS Rounded 1c'"><b style="font-family:'M PLUS Rounded 1c';font-weight:800">Redondeada</b><small>amable, juvenil</small></button>
+        <button data-f="'Shippori Mincho B1'"><b style="font-family:'Shippori Mincho B1';font-weight:800">Mincho</b><small>serif dramática</small></button>
+        <button data-f="'Dela Gothic One'"><b style="font-family:'Dela Gothic One'">Gótica gruesa</b><small>títulos, impacto</small></button>
+        <button data-f="Bangers" data-u="1"><b style="font-family:Bangers">BANGERS</b><small>gritos, onomatopeyas</small></button>
+        <button data-f="DotGothic16"><b style="font-family:DotGothic16">Pixel</b><small>videojuego, pantalla</small></button>
+      </div>
+      <div class="ctl"><label for="fmS">Tamaño</label><input id="fmS" type="range" min="14" max="40" value="26"><output id="fmSo">26 pt</output></div>
+      <p class="small">Panel <code>Character</code>: familia, estilo, tamaño, color, <i>Faux Bold</i>, <i>All Caps</i>. A 72 ppi, 1 pt = 1 px. En CSS, <code>1pt = 1.333px</code>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 10 EFECTOS Y 3D -->
+<section class="slide night" data-title="6. Efectos y 3D" data-notes="Los estilos de capa (doble clic en la capa, o fx en el panel Layers) se aplican al texto sin rasterizarlo: Stroke, Drop Shadow, Outer Glow, Gradient Overlay. Así se hace una onomatopeya. El 3D: en Photoshop CS6 Extended, 3D › New 3D Extrusion from Selected Layer. Aquí lo imitamos con sombras apiladas. Cada efecto tiene su CSS.">
+  <div class="kicker">6 · Efectos y 3D</div>
+  <h2 data-a>Fabrica tu onomatopeya</h2>
+  <div class="grid2" data-a="1">
+    <div class="sfxStage"><div id="sfxT">¡BOOM!</div></div>
+    <div style="display:grid;gap:10px">
+      <div class="ctl"><label for="sfxIn">Texto</label><input id="sfxIn" type="text" value="¡BOOM!" maxlength="10" style="grid-column:2/4;background:var(--ink2);border:2px solid #3A3060;border-radius:6px;padding:4px 10px;font-size:20px"></div>
+      <div class="ctl"><label>Color</label><div class="swatches" id="sfxSw" style="grid-column:2/4"><button style="background:#FFB21E" data-c="#FFB21E" class="on" aria-label="Amarillo"></button><button style="background:#FF3D8B" data-c="#FF3D8B" aria-label="Magenta"></button><button style="background:#25CFE4" data-c="#25CFE4" aria-label="Cian"></button><button style="background:#E8342C" data-c="#E8342C" aria-label="Rojo"></button><button style="background:#FFFFFF" data-c="#FFFFFF" aria-label="Blanco"></button></div></div>
+      <div class="ctl"><label for="sfxSt">Stroke</label><input id="sfxSt" type="range" min="0" max="12" value="6"><output id="sfxSto">6 px</output></div>
+      <div class="ctl"><label for="sfxD">Profundidad 3D</label><input id="sfxD" type="range" min="0" max="14" value="8"><output id="sfxDo">8</output></div>
+      <div class="ctl"><label for="sfxR">Rotar</label><input id="sfxR" type="range" min="-20" max="20" value="-8"><output id="sfxRo">-8°</output></div>
+      <div class="codebox" id="sfxCss" style="font-size:15px"></div>
+    </div>
+  </div>
+  <p class="small" data-a="2">Estilos de capa: doble clic en la capa o <b>fx</b> en el panel Layers. 3D real: <code>3D › New 3D Extrusion from Selected Layer</code>, solo en <b>Photoshop CS6 Extended</b>.</p>
+</section>
+
+<!-- 11 EYECATCH 2 -->
+<section class="slide eyecatch" data-ch="1" data-title="Parte B · La página de cómic" data-notes="Segunda parte: aplicamos el texto a una página de cómic y luego a una página web.">
+  <div class="burst"></div>
+  <div class="card"><div class="num">PARTE B</div><h2>La página de cómic</h2><div class="sub">DEL PAPEL A LA PANTALLA</div></div>
+</section>
+
+<!-- 12 ANATOMÍA -->
+<section class="slide paper" data-title="Anatomía de una página de cómic" data-notes="Pulsen los números. Viñeta, calle, cartela, globo de diálogo con su cola, globo de pensamiento, grito y onomatopeya. Casi todo es texto: por eso esta unidad encaja con el cómic.">
+  <div class="kicker">Anatomía</div>
+  <h2 data-a>Casi todo en una página de cómic es texto</h2>
+  <div class="anat" data-a="1">
+    <div class="cpage" id="cpage">
+      <div class="pn" style="background:linear-gradient(#2B1250,#FF5E7A 70%,#FFB21E)"></div>
+      <div class="pn" style="background:#BFE9F2"></div>
+      <div class="pn wide" style="background:repeating-conic-gradient(from 0deg at 50% 60%,#fff 0 4deg,#E9E2F5 4deg 10deg)"></div>
+      <svg viewBox="0 0 560 520" width="560" height="520" style="position:absolute;inset:0;pointer-events:none">
+        <rect x="26" y="24" width="150" height="34" fill="#FFF4E0" stroke="#140F24" stroke-width="3"/><text x="101" y="47" font-family="Comic Neue" font-weight="700" font-size="15" text-anchor="middle">Tokio, 1996…</text>
+        <path d="M400 40 C470 40 520 60 520 92 C520 124 470 140 420 140 L400 170 L404 140 C350 138 330 120 330 92 C330 60 350 40 400 40Z" fill="#fff" stroke="#140F24" stroke-width="3"/><text x="425" y="96" font-family="Comic Neue" font-weight="700" font-size="16" text-anchor="middle">¿Otra vez tú?</text>
+        <ellipse cx="200" cy="190" rx="78" ry="34" fill="#fff" stroke="#140F24" stroke-width="3"/><circle cx="246" cy="232" r="8" fill="#fff" stroke="#140F24" stroke-width="3"/><circle cx="262" cy="248" r="5" fill="#fff" stroke="#140F24" stroke-width="3"/><text x="200" y="196" font-family="Comic Neue" font-size="15" font-style="italic" text-anchor="middle">No me reconoce…</text>
+        <polygon points="120,330 150,312 160,282 190,306 226,290 228,322 262,330 232,350 246,384 206,370 180,398 168,364 128,372 148,346" fill="#FFB21E" stroke="#140F24" stroke-width="3"/><text x="190" y="350" font-family="Bangers" font-size="22" text-anchor="middle">¡ALTO!</text>
+        <text x="420" y="440" font-family="Bangers" font-size="70" fill="#FF3D8B" stroke="#140F24" stroke-width="4" paint-order="stroke" text-anchor="middle" transform="rotate(-10 420 440)">KRASH!</text>
+      </svg>
+      <button class="hot" style="left:4px;top:120px" data-h="0">1</button>
+      <button class="hot" style="left:296px;top:250px" data-h="1">2</button>
+      <button class="hot" style="left:150px;top:6px" data-h="2">3</button>
+      <button class="hot" style="left:500px;top:24px" data-h="3">4</button>
+      <button class="hot" style="left:380px;top:150px" data-h="4">5</button>
+      <button class="hot" style="left:262px;top:210px" data-h="5">6</button>
+      <button class="hot" style="left:96px;top:300px" data-h="6">7</button>
+      <button class="hot" style="left:500px;top:380px" data-h="7">8</button>
+    </div>
+    <div class="cel defbox" id="anDef"><h3>Pulsa un número</h3><p class="small">Cada parte de la página tiene un nombre y una función. En el laboratorio vas a crear cada una.</p></div>
+  </div>
+</section>
+
+<!-- 13 ORDEN DE LECTURA -->
+<section class="slide paper" data-title="Orden de lectura: cómic y manga" data-notes="En el cómic occidental se lee de izquierda a derecha y de arriba abajo, en Z. En el manga japonés, de derecha a izquierda. Los globos se colocan en ese orden: el primero que habla va primero. En una página web en español usamos el orden occidental.">
+  <div class="kicker">Rotulación</div>
+  <h2 data-a>El orden de los globos dirige la mirada</h2>
+  <div class="row" data-a="1"><button class="btn on" data-ro="w" aria-pressed="true">Cómic occidental</button><button class="btn" data-ro="m" aria-pressed="false">Manga japonés</button></div>
+  <div class="grid2" data-a="2">
+    <div style="position:relative;width:520px;height:330px;background:#fff;border:3px solid var(--ink);padding:10px;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px" id="roPage">
+      <div style="border:4px solid var(--ink)"></div><div style="border:4px solid var(--ink)"></div><div style="border:4px solid var(--ink)"></div><div style="border:4px solid var(--ink)"></div>
+      <span class="order" data-o="0">1</span><span class="order" data-o="1">2</span><span class="order" data-o="2">3</span><span class="order" data-o="3">4</span>
+    </div>
+    <div class="cel">
+      <h3 id="roH">Izquierda → derecha, en Z</h3>
+      <ul class="list" style="margin-top:8px">
+        <li>El globo que habla <b>primero</b> va más arriba y más a la izquierda.</li>
+        <li>La cola apunta a la boca de quien habla.</li>
+        <li>Texto <b>centrado</b> y en mayúsculas o en una fuente de rotulación.</li>
+        <li>En la web, el orden del HTML debe ser el orden de lectura: así lo leen los lectores de pantalla.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 14 DEL PAPEL A LA PANTALLA -->
+<section class="slide night" data-title="Del papel a la pantalla" data-notes="Tres formas de publicar un cómic en la web. Página escaneada: rápida, pero el texto queda dentro de la imagen. Webtoon: tira vertical para leer con el dedo en el teléfono. Cómic multimedia: el texto es HTML vivo y se suma audio, video o animación. El texto vivo se puede buscar, traducir, leer con lector de pantalla y agrandar sin pixelarse.">
+  <div class="kicker">Cómic web</div>
+  <h2 data-a>Tres formas de publicar un cómic en la web</h2>
+  <div class="grid3" data-a="1">
+    <div class="cel"><h3>Página escaneada</h3><p class="small">Una imagen JPG o PNG por página. Rápida de publicar, pero el texto queda <b>atrapado</b> en los píxeles.</p></div>
+    <div class="cel"><h3>Webtoon vertical</h3><p class="small">Una tira larga para leer con el dedo. Viñetas a todo el ancho del teléfono y espacio entre ellas para el ritmo.</p></div>
+    <div class="cel"><h3>Cómic multimedia</h3><p class="small">Texto en HTML, más <b>audio</b>, <b>video</b>, GIF o animación. Es lo que harás hoy.</p></div>
+  </div>
+  <div class="cel" data-a="2" style="box-shadow:7px 7px 0 var(--cyan)"><p><b>Texto vivo &gt; texto en imagen.</b> El texto en HTML se puede buscar en Google, traducir, leer con un lector de pantalla y agrandar sin pixelarse. Las imágenes llevan texto alternativo (<code>alt</code>).</p></div>
+</section>
+
+<!-- 15 WIREFRAME -->
+<section class="slide paper" data-title="La página web del cómic" data-notes="Antes de decorar se arma el esqueleto, el wireframe. Pasen el ratón por cada zona. Este es el orden que les pido en el laboratorio.">
+  <div class="kicker">Maquetado</div>
+  <h2 data-a>Primero el esqueleto: el wireframe</h2>
+  <div style="display:grid;grid-template-columns:560px 1fr;gap:30px;align-items:start" data-a="1">
+    <div class="wf" id="wf">
+      <div style="height:44px" data-w="0">ENCABEZADO + MENÚ</div>
+      <div style="height:120px" data-w="1">PORTADA (HÉROE) + TÍTULO</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;border:0;background:none;padding:0;place-items:stretch" data-w="2"><div style="height:96px" data-w="2">VIÑETA</div><div style="height:96px" data-w="2">VIÑETA</div><div style="height:96px" data-w="2">VIÑETA</div></div>
+      <div style="height:60px" data-w="3">MULTIMEDIA: VIDEO / AUDIO</div>
+      <div style="height:54px" data-w="4">SINOPSIS Y PERSONAJES</div>
+      <div style="height:36px" data-w="5">PIE DE PÁGINA</div>
+    </div>
+    <div class="cel defbox" id="wfDef"><h3>Pasa el ratón por cada zona</h3><p class="small">El wireframe responde qué va y dónde, sin colores ni fotos. Después se aplica el diseño.</p></div>
+  </div>
+</section>
+
+<!-- 16 EYECATCH 3 -->
+<section class="slide eyecatch" data-ch="1" data-title="Parte C · Primer contacto con Figma" data-notes="Tercera parte: Figma, la herramienta que usa la industria para diseñar interfaces.">
+  <div class="burst"></div>
+  <div class="card"><div class="num">PARTE C</div><h2>Primer contacto con Figma</h2><div class="sub">DISEÑO DE INTERFACES EN EL NAVEGADOR</div></div>
+</section>
+
+<!-- 17 QUÉ ES FIGMA -->
+<section class="slide night" data-title="¿Qué es Figma?" data-notes="Figma es un editor de diseño de interfaces que funciona en el navegador o en una app de escritorio. Es vectorial y colaborativo: varias personas trabajan en el mismo archivo a la vez. Es gratis para estudiantes y profesores que verifiquen su condición educativa. Photoshop edita fotos; Figma diseña pantallas. Se complementan.">
+  <div class="kicker">Figma</div>
+  <h2 data-a>Photoshop edita la imagen. Figma diseña la pantalla.</h2>
+  <div class="grid2" data-a="1">
+    <div style="overflow-x:auto"><table class="t">
+      <tr><th></th><th>PHOTOSHOP CS6</th><th>FIGMA</th></tr>
+      <tr><td><b>Para</b></td><td>Retocar y crear imágenes</td><td>Pantallas, páginas y apps</td></tr>
+      <tr><td><b>Base</b></td><td>Píxeles (raster)</td><td>Vectores</td></tr>
+      <tr><td><b>Lienzo</b></td><td>Documento</td><td>Marcos (Frames) en un lienzo infinito</td></tr>
+      <tr><td><b>Equipo</b></td><td>Un archivo por persona</td><td>Varios editan a la vez, en el navegador</td></tr>
+      <tr><td><b>Salida</b></td><td>JPG, PNG, PSD</td><td>Prototipo navegable y medidas para CSS</td></tr>
+    </table></div>
+    <div class="cel">
+      <h3>Para empezar</h3>
+      <ul class="list" style="margin-top:8px">
+        <li>Se usa en <b>figma.com</b> o en la app de escritorio.</li>
+        <li><b>Gratis</b> para estudiantes y docentes que verifican su condición educativa.</li>
+        <li>Flujo de trabajo: imágenes listas en Photoshop → página armada en Figma → código HTML/CSS.</li>
+        <li>Hoy practicamos sus herramientas en el <b>Estudio KOMA</b>, que funciona igual.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 18 ATAJOS -->
+<section class="slide night" data-title="Herramientas y atajos de Figma" data-notes="Pulsen las teclas en el teclado o con el ratón. Los mismos atajos funcionan en el Estudio KOMA: V mover, F marco, R rectángulo, O elipse, T texto. En Figma la barra de herramientas está abajo, en el centro.">
+  <div class="kicker">Figma</div>
+  <h2 data-a>Una tecla por herramienta (pruébalas en tu teclado)</h2>
+  <div class="grid2" data-a="1">
+    <div style="display:grid;gap:16px">
+      <div class="keys" id="keys">
+        <button class="key" data-k="v">V</button><button class="key" data-k="f">F</button><button class="key" data-k="r">R</button><button class="key" data-k="o">O</button><button class="key" data-k="l">L</button><button class="key" data-k="p">P</button><button class="key" data-k="t">T</button><button class="key" data-k="h">H</button><button class="key" data-k="c">C</button><button class="key" data-k="sa" style="font-size:20px">⇧ A</button>
+      </div>
+      <div class="cel" id="keyDef" style="min-height:120px"><h3>Pulsa una tecla</h3><p class="small">Verás qué hace en Figma.</p></div>
+    </div>
+    <div class="figwin"><div class="canvas" id="figCanvas"><div style="width:220px;height:140px;background:#fff;border-radius:2px;position:relative" id="figFrame"><span style="position:absolute;left:0;top:-18px;font-size:11px;color:#bbb;font-family:var(--f-osd)">Frame 1</span></div></div>
+      <div class="tb" id="figTb"><span data-k="v">▲</span><span data-k="f">#</span><span data-k="r">▭</span><span data-k="p">✒</span><span data-k="t">T</span><span data-k="h">✋</span><span data-k="c">💬</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 19 CONCEPTOS -->
+<section class="slide night" data-title="Marcos, capas y Auto layout" data-notes="Cuatro ideas de Figma. Frame es la pantalla o sección. Capas como en Photoshop. Componentes: un botón maestro y copias que se actualizan solas. Auto layout: los elementos se acomodan solos, como flexbox en CSS. Muevan los controles: es exactamente display flex con flex-direction, gap y padding.">
+  <div class="kicker">Figma</div>
+  <h2 data-a>Auto layout: el menú se acomoda solo</h2>
+  <div class="grid2" data-a="1">
+    <div style="display:grid;gap:14px">
+      <div style="height:250px;border:3px solid var(--paper);border-radius:8px;background:#2C2C2C;display:grid;place-items:center;overflow:hidden"><div class="al" id="alBox"><span>Inicio</span><span>Episodios</span><span>Personajes</span></div></div>
+      <div class="row"><button class="btn on" id="alDir" aria-pressed="true">Horizontal</button><span class="small">Atajo: <kbd>Shift</kbd>+<kbd>A</kbd></span></div>
+      <div class="ctl"><label for="alGap">Espacio (gap)</label><input id="alGap" type="range" min="0" max="40" value="12"><output id="alGapO">12</output></div>
+      <div class="ctl"><label for="alPad">Relleno (padding)</label><input id="alPad" type="range" min="0" max="40" value="16"><output id="alPadO">16</output></div>
+    </div>
+    <div style="display:grid;gap:14px">
+      <div class="codebox" id="alCss"></div>
+      <div class="cel"><ul class="list">
+        <li><b>Frame</b> <kbd>F</kbd>: una pantalla o una sección.</li>
+        <li><b>Capas</b>: igual que en Photoshop, se nombran y se ordenan.</li>
+        <li><b>Componente</b> <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>K</kbd>: un botón maestro y sus copias.</li>
+        <li><b>Prototipo</b>: conecta pantallas para probar la navegación.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- 20 EYECATCH LAB -->
+<section class="slide eyecatch" data-ch="1" data-title="Laboratorio 10" data-notes="Ahora el laboratorio.">
+  <div class="burst" style="background:repeating-conic-gradient(from 0deg at 50% 50%,var(--cyan) 0 4deg,var(--ink) 4deg 12deg)"></div>
+  <div class="card" style="box-shadow:14px 14px 0 var(--pink)"><div class="num" style="color:var(--sun)">LAB 10</div><h2>Tu página de cómic web</h2><div class="sub">ESTUDIO KOMA · 3 HORAS</div></div>
+</section>
+
+<!-- 21 MISIÓN -->
+<section class="slide paper" data-title="La misión" data-notes="La situación: el club de cómic del recinto prepara su primera revista web y necesita la página de presentación de un cómic original. Las ocho metas se marcan solas en la pestaña Misión del estudio. Personajes e historia originales: nada de personajes con derechos de autor.">
+  <div class="kicker">Laboratorio 10 · Situación</div>
+  <h2 data-a>El club de cómic del recinto lanza su revista web</h2>
+  <p class="lead" data-a="1">Diseña la página de presentación de un <b>cómic original</b> (personajes e historia tuyos) con estética de anime de los 90. La pestaña <b>Misión</b> del estudio marca cada meta cuando la cumples.</p>
+  <div class="check" data-a="2">
+    <div><b>1</b><span>Un <b>título</b> de 40 px o más.</span></div>
+    <div><b>2</b><span>Un <b>menú</b> con 3 botones o más.</span></div>
+    <div><b>3</b><span>Tres <b>viñetas</b> con imagen y borde.</span></div>
+    <div><b>4</b><span>Dos <b>globos</b> de diálogo con tu texto.</span></div>
+    <div><b>5</b><span>Una <b>onomatopeya</b> con contorno (stroke).</span></div>
+    <div><b>6</b><span>Una imagen <b>editada</b>: filtro, trama o capa de color.</span></div>
+    <div><b>7</b><span><b>Espaciado</b> ajustado: tracking o interlineado.</span></div>
+    <div><b>8</b><span>Un bloque <b>multimedia</b>: video o audio.</span></div>
+  </div>
+</section>
+
+<!-- 22 ABRIR ESTUDIO -->
+<section class="slide night" data-title="Estudio KOMA" data-notes="Abran el estudio. Pueden empezar con la plantilla o en blanco. Los atajos son los de Figma. Doble clic en una viñeta para ponerle imagen; doble clic en un texto para escribir. El trabajo se guarda solo en este navegador, pero deben descargar el proyecto al final.">
+  <div class="kicker">Laboratorio 10</div>
+  <h2 data-a>Abre el Estudio KOMA</h2>
+  <div class="grid2" data-a="1" style="align-items:center">
+    <div style="display:grid;gap:22px;justify-items:start">
+      <button class="bigbtn" id="openStudio">▶ ABRIR EL ESTUDIO</button>
+      <p class="small">Se abre a pantalla completa. Para volver a la presentación, pulsa <b>Cerrar</b> arriba a la derecha.</p>
+      <p class="small">Se guarda solo en este navegador. Al final, <b>descarga el proyecto</b> (.json) y la <b>página</b> (.html).</p>
+    </div>
+    <div class="cel" style="overflow-x:auto"><table class="t" style="font-size:18px">
+      <tr><td><kbd>V</kbd></td><td>Mover y seleccionar</td></tr>
+      <tr><td><kbd>F</kbd> · <kbd>I</kbd></td><td>Viñeta · imagen sin borde</td></tr>
+      <tr><td><kbd>R</kbd> · <kbd>O</kbd></td><td>Rectángulo · elipse</td></tr>
+      <tr><td><kbd>T</kbd> · <kbd>B</kbd></td><td>Texto · globo</td></tr>
+      <tr><td><kbd>U</kbd> · <kbd>M</kbd></td><td>Botón · multimedia</td></tr>
+      <tr><td>Doble clic</td><td>Escribir texto o poner imagen</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Z</kbd> · <kbd>Ctrl</kbd>+<kbd>D</kbd></td><td>Deshacer · duplicar</td></tr>
+      <tr><td><kbd>Ctrl</kbd>+<kbd>]</kbd> · <kbd>[</kbd></td><td>Traer adelante · enviar atrás</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- 23 TIEMPO Y ENTREGA -->
+<section class="slide paper" data-title="Tiempo, entrega y rúbrica" data-notes="Distribución de las tres horas y la rúbrica de 100 puntos. Deben entregar tres archivos en una carpeta comprimida por OrbundSIS: la página HTML, el proyecto JSON y una captura PNG.">
+  <div class="kicker">Laboratorio 10</div>
+  <h2 data-a>Tiempo, entrega y evaluación</h2>
+  <div class="grid2" data-a="1">
+    <div style="display:grid;gap:16px">
+      <div class="cel" style="padding:14px 20px"><h3>Las 3 horas</h3><table class="t" style="font-size:17px">
+        <tr><td class="mono" style="white-space:nowrap">0:00–0:20</td><td>Idea, nombre y wireframe</td></tr>
+        <tr><td class="mono" style="white-space:nowrap">0:20–1:20</td><td>Viñetas, imágenes y edición</td></tr>
+        <tr><td class="mono" style="white-space:nowrap">1:20–2:20</td><td>Título, globos, onomatopeya, sinopsis</td></tr>
+        <tr><td class="mono" style="white-space:nowrap">2:20–2:45</td><td>Menú, multimedia y vista previa</td></tr>
+        <tr><td class="mono" style="white-space:nowrap">2:45–3:00</td><td>Exportar y entregar</td></tr>
+      </table></div>
+      <div class="cel" style="padding:14px 20px"><h3>Entrega por OrbundSIS</h3><p class="small" style="font-size:17px"><code>Apellido_Nombre_TESI1104_Lab10.zip</code> con la página <code>.html</code>, el proyecto <code>.json</code>, la carpeta <code>media/</code> y una captura <code>.png</code>.</p></div>
+    </div>
+    <div class="cel" style="overflow-x:auto"><h3>Rúbrica (100 puntos)</h3><table class="t" style="font-size:18px">
+      <tr><td>Las 8 metas de la misión (8 × 5)</td><td class="mono">40</td></tr>
+      <tr><td>Calidad del texto: jerarquía, legibilidad, espaciado</td><td class="mono">20</td></tr>
+      <tr><td>Edición de imágenes con propósito</td><td class="mono">15</td></tr>
+      <tr><td>Composición y estética coherente</td><td class="mono">15</td></tr>
+      <tr><td>Capas con nombre y orden</td><td class="mono">5</td></tr>
+      <tr><td>Entrega completa y a tiempo</td><td class="mono">5</td></tr>
+      <tr><td><b>Reto Figma</b> (opcional)</td><td class="mono">+10</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- 24 RETO FIGMA -->
+<section class="slide night" data-title="Reto Figma (opcional)" data-notes="Reto opcional para diez puntos de bono: recrear el encabezado y el menú en Figma real, con Auto layout en el menú. Entregan el enlace del archivo de Figma con permiso de ver.">
+  <div class="kicker">Bono +10</div>
+  <h2 data-a>Reto: lleva tu encabezado a Figma</h2>
+  <div class="grid2" data-a="1">
+    <ul class="list">
+      <li>Entra a <b>figma.com</b> con tu cuenta y crea un <b>Design file</b>.</li>
+      <li>Crea un <b>Frame</b> <kbd>F</kbd> de 1024 × 600 llamado «Encabezado».</li>
+      <li>Coloca el título con <kbd>T</kbd> y aplica el mismo tracking que en el estudio.</li>
+      <li>Haz los 3 botones del menú y selecciónalos: <kbd>Shift</kbd>+<kbd>A</kbd> para Auto layout.</li>
+      <li>Convierte un botón en componente: <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>K</kbd>.</li>
+      <li>Entrega el enlace con permiso de ver (<b>Share › Anyone with the link · can view</b>).</li>
+    </ul>
+    <div class="cel" style="box-shadow:7px 7px 0 var(--cyan)"><h3>¿Por qué?</h3><p class="small">En la industria, el diseñador entrega el archivo de Figma y el programador lo convierte en HTML y CSS. Si tu maqueta usa Auto layout, el programador ve el <code>display:flex</code>, el <code>gap</code> y el <code>padding</code> exactos.</p></div>
+  </div>
+</section>
+
+<!-- 25 REPASO -->
+<section class="slide paper" data-title="Repaso" data-notes="Cuatro preguntas de repaso. Den tiempo para pensar antes de revelar cada respuesta.">
+  <div class="kicker">Repaso</div>
+  <h2 data-a>Antes de los créditos finales</h2>
+  <div class="grid2" data-a="1">
+    <div class="q cel"><p><b>1.</b> ¿Cuándo usas texto de párrafo en vez de texto de punto?</p><button class="btn" data-rv>Ver respuesta</button><div class="ans">Cuando el texto es largo y debe ajustarse a un ancho fijo: diálogos largos, sinopsis. Se crea arrastrando con la herramienta de texto.</div></div>
+    <div class="q cel"><p><b>2.</b> ¿Qué diferencia hay entre kerning y tracking?</p><button class="btn" data-rv>Ver respuesta</button><div class="ans">El kerning ajusta el espacio entre un par de letras. El tracking ajusta el espacio de todas las letras seleccionadas. En CSS: <code>letter-spacing</code>.</div></div>
+    <div class="q cel"><p><b>3.</b> ¿Por qué no conviene rasterizar una capa de texto?</p><button class="btn" data-rv>Ver respuesta</button><div class="ans">Porque se convierte en píxeles: ya no se puede editar el texto y se pixela al agrandarlo. Si un filtro lo exige, rasteriza una copia.</div></div>
+    <div class="q cel"><p><b>4.</b> ¿Qué hace el Auto layout de Figma y a qué equivale en CSS?</p><button class="btn" data-rv>Ver respuesta</button><div class="ans">Acomoda los elementos solos en fila o columna con un espacio y un relleno fijos. Equivale a <code>display:flex</code> con <code>gap</code> y <code>padding</code>.</div></div>
+  </div>
+</section>
+
+<!-- 26 REFERENCIAS -->
+<section class="slide night" data-title="Referencias" data-notes="Referencias del prontuario y fuentes de las herramientas.">
+  <div class="kicker">Créditos</div>
+  <h2 data-a>Referencias</h2>
+  <ul class="list small" data-a="1" style="max-width:1080px">
+    <li>Chavez, C. (2024). <i>Adobe Photoshop classroom in a book (2025 release)</i>. Adobe Press.</li>
+    <li>Smith, S. A. (s. f.). <i>Getting started with Photoshop CS6: Reference guide</i>. Balfour.</li>
+    <li>Beaird, J., &amp; George, J. (2023). <i>The principles of beautiful web design</i> (5th ed.). SitePoint.</li>
+    <li>Williams, R., &amp; Tollett, J. (2022). <i>The non-designer's web book</i> (5th ed.). Peachpit Press.</li>
+    <li>Duckett, J. (2022). <i>HTML &amp; CSS: Design and build websites</i> (2nd ed.). Wiley.</li>
+    <li>Figma. (s. f.). <i>Figma for Education</i>. https://www.figma.com/education/</li>
+  </ul>
+  <p class="small" data-a="2" style="color:var(--mute)">Imágenes del estudio generadas por computadora. Fuentes tipográficas de Google Fonts (SIL Open Font License).</p>
+</section>
+
+<div id="scan"></div>
+<div id="osd"><span class="rec">● PLAY</span><span>SP</span><span id="tc">0:00:01</span></div>
+</div></div>
+
+<nav id="bar" aria-label="Navegación de la presentación">
+  <button id="prev" aria-label="Lámina anterior">◀</button>
+  <span id="count">1 / 26</span>
+  <button id="next" aria-label="Lámina siguiente">▶</button>
+  <div id="map"></div>
+  <button id="btnIdx">Índice (I)</button>
+  <button id="btnNotes">Notas (N)</button>
+  <button id="btnFs">Pantalla (F)</button>
+</nav>
+<div class="overlay" id="index"><ol id="idxList"></ol></div>
+<div id="notes"></div>
+
+<!-- ================= ESTUDIO ================= -->
+<div id="studio" aria-label="Estudio KOMA">
+  <div class="st-top">
+    <span class="st-logo">KOMA</span>
+    <div class="grp" id="tools">
+      <button data-tool="move" class="on" title="Mover (V)">▲ Mover</button>
+      <button data-tool="panel" title="Viñeta (F)"># Viñeta</button>
+      <button data-tool="image" title="Imagen sin borde (I)">▣ Imagen</button>
+      <button data-tool="rect" title="Rectángulo (R)">▭</button>
+      <button data-tool="ellipse" title="Elipse (O)">◯</button>
+      <button data-tool="text" title="Texto (T)">T Texto</button>
+      <button data-tool="balloon" title="Globo (B)">💬 Globo</button>
+      <button data-tool="button" title="Botón (U)">⬭ Botón</button>
+      <button data-tool="media" title="Multimedia (M)">▶ Media</button>
+    </div>
+    <div class="grp">
+      <button id="undo" title="Deshacer (Ctrl+Z)">↶</button><button id="redo" title="Rehacer (Ctrl+Shift+Z)">↷</button>
+    </div>
+    <div class="grp">
+      <button id="zOut" title="Alejar">−</button><button id="zFit" title="Ajustar a la ventana">100%</button><button id="zIn" title="Acercar">+</button>
+      <button id="gridBtn" title="Cuadrícula: ajusta a 8 px">Rejilla</button>
+    </div>
+    <span class="sp"></span>
+    <button id="tplBtn">Plantilla</button>
+    <button id="prevBtn">▶ Vista previa</button>
+    <button id="exportBtn" class="primary">Exportar</button>
+    <button id="closeStudio">Cerrar ✕</button>
+  </div>
+  <div class="st-main">
+    <aside class="st-side"><h4>Capas</h4><ul id="layers"></ul></aside>
+    <div id="canvasWrap"><div id="canvasPad"><div id="artboardLabel">Página · 1024 px</div><div id="artboard"><div id="selbox"><div class="h" data-d="nw"></div><div class="h" data-d="n"></div><div class="h" data-d="ne"></div><div class="h" data-d="e"></div><div class="h" data-d="se"></div><div class="h" data-d="s"></div><div class="h" data-d="sw"></div><div class="h" data-d="w"></div><span class="dim"></span></div><div id="ghost"></div></div></div></div>
+    <aside class="st-side st-right">
+      <div class="tabs"><button id="tabProps" class="on">Propiedades</button><button id="tabMission">Misión <span id="misCount">0/8</span></button></div>
+      <div id="props"></div>
+      <div id="mission"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal" id="imgModal"><div class="box">
+  <h3>Elige una imagen</h3>
+  <p class="small" style="font-size:14px;color:#C9BEDF">Fondos de la biblioteca del estudio, o sube una foto o dibujo tuyo (JPG, PNG o GIF).</p>
+  <div class="gal" id="gal"></div>
+  <div class="row"><label class="act primary" for="upImg" style="cursor:pointer">Subir desde mi computadora</label><input type="file" id="upImg" accept="image/*" hidden><span class="sp" style="flex:1"></span><button class="act" data-close>Cancelar</button></div>
+</div></div>
+
+<div class="modal" id="mediaModal"><div class="box">
+  <h3>Bloque multimedia</h3>
+  <p style="font-size:14px;color:#C9BEDF;line-height:1.5">Sube un video (MP4, WebM) o un audio (MP3, WAV, OGG). En la página exportada se buscará en la carpeta <code>media/</code>: copia el archivo ahí con el mismo nombre. Si todavía no lo tienes, deja un bloque de reserva.</p>
+  <div class="row" style="margin-top:12px"><label class="act primary" for="upMedia" style="cursor:pointer">Subir video o audio</label><input type="file" id="upMedia" accept="video/*,audio/*" hidden>
+  <button class="act" id="phVideo">Reserva de video</button><button class="act" id="phAudio">Reserva de audio</button><span style="flex:1"></span><button class="act" data-close>Cancelar</button></div>
+</div></div>
+
+<div class="modal" id="exportModal"><div class="box">
+  <h3>Exportar y guardar</h3>
+  <div class="row" style="margin:8px 0 12px">
+    <button class="act primary" id="dlHtml">Descargar página (.html)</button>
+    <button class="act" id="dlJson">Descargar proyecto (.json)</button>
+    <label class="act" for="openJson" style="cursor:pointer">Abrir proyecto (.json)</label><input type="file" id="openJson" accept=".json,application/json" hidden>
+    <button class="act" id="newBlank">Página en blanco</button>
+  </div>
+  <p style="font-size:13px;color:#C9BEDF;line-height:1.5">Si la descarga no empieza, copia el código y pégalo en el Bloc de notas: guárdalo como <code>Apellido_Nombre_Lab10.html</code> (o <code>.json</code>), con codificación UTF-8.</p>
+  <div class="row" style="margin:8px 0"><button class="act" id="cpHtml">Copiar HTML</button><button class="act" id="cpJson">Copiar proyecto</button><span style="flex:1"></span><button class="act" data-close>Cerrar</button></div>
+  <textarea id="expOut" readonly aria-label="Código exportado"></textarea>
+</div></div>
+<div id="toast" role="status"></div>
+
+<script>
+/* ======================= PRESENTACIÓN ======================= */
+(function(){
+const stage=document.getElementById('stage'),vp=document.getElementById('viewport');
+const slides=[...document.querySelectorAll('.slide')];
+let cur=0;
+function fit(){const s=Math.min(vp.clientWidth/1280,vp.clientHeight/720);stage.style.transform='scale('+s+')';}
+addEventListener('resize',fit);fit();
+const map=document.getElementById('map'),idx=document.getElementById('idxList');
+slides.forEach((s,i)=>{const b=document.createElement('i');if(s.dataset.ch)b.classList.add('ch');b.title=(i+1)+'. '+(s.dataset.title||'');b.onclick=()=>go(i);map.appendChild(b);
+  const li=document.createElement('li');li.innerHTML='<button><span>'+(i+1)+'</span>'+(s.dataset.title||'')+'</button>';li.firstChild.onclick=()=>{go(i);toggleIdx(false)};idx.appendChild(li);});
+document.getElementById('count').textContent='1 / '+slides.length;
+function go(n){n=Math.max(0,Math.min(slides.length-1,n));slides[cur].classList.remove('on');cur=n;slides[cur].classList.add('on');
+  [...map.children].forEach((b,i)=>{b.classList.toggle('cur',i===cur);b.classList.toggle('done',i<cur)});
+  document.getElementById('count').textContent=(cur+1)+' / '+slides.length;
+  const t=cur*37+1;document.getElementById('tc').textContent='0:'+String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
+  const osd=document.getElementById('osd');osd.style.color=slides[cur].classList.contains('paper')?'var(--ink)':'#fff';
+  document.getElementById('notes').textContent=slides[cur].dataset.notes||'';
+  try{history.replaceState(null,'','#'+(cur+1))}catch(e){}
+  if(slides[cur].dataset.title==='Capa de texto: vector o píxeles')drawRaster();}
+function toggleIdx(v){document.getElementById('index').classList.toggle('open',v)}
+document.getElementById('prev').onclick=()=>go(cur-1);
+document.getElementById('next').onclick=()=>go(cur+1);
+document.getElementById('btnIdx').onclick=()=>toggleIdx();
+document.getElementById('btnNotes').onclick=()=>document.getElementById('notes').classList.toggle('open');
+function fs(){try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}catch(e){}}
+document.getElementById('btnFs').onclick=fs;
+const studioOpen=()=>document.getElementById('studio').classList.contains('open');
+addEventListener('keydown',e=>{
+  if(studioOpen())return;
+  const tg=e.target;if(tg.matches&&tg.matches('input[type=text],textarea'))return;
+  if(slides[cur].dataset.title==='Herramientas y atajos de Figma'){const k=e.key.toLowerCase();if(e.shiftKey&&k==='a'){figKey('sa');e.preventDefault();return}if('vfrolptch'.includes(k)&&k.length===1&&!e.ctrlKey&&!e.metaKey){figKey(k);return}}
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='i'||e.key==='I')toggleIdx();
+  else if(e.key==='f'||e.key==='F')fs();
+  else if(e.key==='n'||e.key==='N')document.getElementById('notes').classList.toggle('open');
+  else if(e.key==='Escape'){toggleIdx(false);document.getElementById('notes').classList.remove('open')}
+});
+let tx=null;vp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+vp.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>60&&!e.target.closest('input,.cel button,.btn'))go(cur+(dx<0?1:-1));tx=null});
+const h=parseInt((location.hash||'').slice(1));go(isNaN(h)?0:h-1);
+
+/* portada: ciudad y cables */
+(function(){const c=document.getElementById('coverCv'),x=c.getContext('2d');let seed=7;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  x.fillStyle='#fff';for(let i=0;i<70;i++){x.globalAlpha=r()*.7;x.fillRect(r()*1280,r()*260,2,2)}x.globalAlpha=1;
+  let px=0;x.fillStyle='#140F24';while(px<1280){const w=40+r()*80,h=90+r()*170;x.fillRect(px,720-h,w,h);
+    x.fillStyle='#FFD36B';for(let wy=720-h+14;wy<700;wy+=22)for(let wx=px+8;wx<px+w-10;wx+=16)if(r()<.28)x.fillRect(wx,wy,7,10);x.fillStyle='#140F24';px+=w+2}
+  x.fillRect(1080,330,14,390);x.fillRect(1040,350,94,8);x.fillRect(1050,378,74,6);
+  x.strokeStyle='#140F24';x.lineWidth=2;[[354,0],[382,40],[360,-30]].forEach(([y,sag])=>{x.beginPath();x.moveTo(0,y+40);x.quadraticCurveTo(540,y+120+sag,1087,y);x.stroke();x.beginPath();x.moveTo(1087,y);x.quadraticCurveTo(1190,y+30,1280,y+10);x.stroke()});})();
+
+/* 4 punto/párrafo */
+document.querySelectorAll('[data-pt]').forEach(b=>b.onclick=()=>{const p=b.dataset.pt==='p';document.querySelectorAll('[data-pt]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});
+  document.getElementById('ptA').hidden=!p;document.getElementById('ptB').hidden=p;
+  document.getElementById('ptInfo').innerHTML=p?'<b>Punto:</b> crece en una sola línea hasta que pulses <kbd>Enter</kbd>. Ideal para títulos, logos y onomatopeyas.':'<b>Párrafo:</b> arrastra un cuadro; el texto baja de línea solo al llegar al borde. Ideal para diálogos largos y sinopsis.'});
+/* 5 vector/raster */
+function drawRaster(){const c=document.getElementById('rasterCv'),x=c.getContext('2d');x.clearRect(0,0,120,40);x.fillStyle='#fff';x.fillRect(0,0,120,40);x.fillStyle='#140F24';x.font='16px "Dela Gothic One", "Arial Black"';x.textAlign='center';x.fillText('¡KOMA!',60,27);}
+document.fonts&&document.fonts.ready.then(drawRaster);drawRaster();
+const zr=document.getElementById('zoomR');zr.oninput=()=>{const z=+zr.value;document.getElementById('zoomO').textContent=Math.round(z*100)+' %';
+  const v=document.getElementById('vecSvg');v.setAttribute('viewBox',`${60-60/z} ${20-20/z} ${120/z} ${40/z}`);
+  document.getElementById('rasterCv').style.transform='scale('+(z*2.2)+')';};zr.oninput();
+/* 6 espaciados */
+function sp(){const k=+spK.value,t=+spTr.value,l=+spL.value;spKo.textContent=k;spTro.textContent=t;spLo.textContent=l+' pt';
+  spT.style.letterSpacing=(t/1000)+'em';spT.style.lineHeight=(l/58).toFixed(2);
+  spAV.style.letterSpacing=((t+k)/1000)+'em';
+  spCss.textContent='/* Photoshop → CSS */\nletter-spacing: '+(t/1000)+'em;   /* tracking '+t+' */\nline-height: '+(l/58).toFixed(2)+';      /* '+l+' pt ÷ 58 pt */\n/* kerning «AV» '+k+' → '+(k/1000)+'em en ese par */';}
+const spK=document.getElementById('spK'),spTr=document.getElementById('spTr'),spL=document.getElementById('spL'),spKo=document.getElementById('spKo'),spTro=document.getElementById('spTro'),spLo=document.getElementById('spLo'),spT=document.getElementById('spT'),spAV=document.getElementById('spAV'),spCss=document.getElementById('spCss');
+[spK,spTr,spL].forEach(i=>i.oninput=sp);sp();
+/* 7 alineación */
+const alI={left:'<b>Izquierda:</b> la mejor para leer párrafos largos en la web. CSS: <code>text-align: left</code>',center:'<b>Centro:</b> para globos de cómic, títulos y botones. CSS: <code>text-align: center</code>',right:'<b>Derecha:</b> para fechas, precios o un pie de foto junto a una imagen. CSS: <code>text-align: right</code>',justify:'<b>Justificado:</b> bloques parejos, pero en la web abre «ríos» de espacio entre palabras. CSS: <code>text-align: justify</code>'};
+document.querySelectorAll('[data-al]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-al]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});document.getElementById('alTxt').style.textAlign=b.dataset.al;document.getElementById('alInfo').innerHTML=alI[b.dataset.al]});
+/* 8 transformación */
+function tr(){const r=+trR.value,s=+trS.value,z=+trZ.value,b=+trB.value;trRo.textContent=r+'°';trSo.textContent=s+'°';trZo.textContent=z+' %';trBo.textContent=b+' %';
+  document.getElementById('trG').style.transform=`rotate(${r}deg) skewX(${s}deg) scale(${z/100})`;
+  document.getElementById('trPath').setAttribute('d',`M60 200 Q280 ${200-b*2.4} 500 200`);}
+const trR=document.getElementById('trR'),trS=document.getElementById('trS'),trZ=document.getElementById('trZ'),trB=document.getElementById('trB'),trRo=document.getElementById('trRo'),trSo=document.getElementById('trSo'),trZo=document.getElementById('trZo'),trBo=document.getElementById('trBo');
+[trR,trS,trZ,trB].forEach(i=>i.oninput=tr);tr();
+/* 9 formato */
+const fmT=document.getElementById('fmT');
+document.querySelectorAll('#fmCards button').forEach(b=>b.onclick=()=>{document.querySelectorAll('#fmCards button').forEach(x=>x.classList.toggle('on',x===b));fmT.style.fontFamily=b.dataset.f;fmT.style.fontWeight=b.dataset.f.includes('Neue')||b.dataset.f.includes('Rounded')?'700':'400';fmT.style.textTransform=b.dataset.u?'uppercase':'none'});
+document.querySelector('#fmCards button').onclick();
+const fmS=document.getElementById('fmS');fmS.oninput=()=>{fmT.style.fontSize=fmS.value+'px';document.getElementById('fmSo').textContent=fmS.value+' pt'};fmS.oninput();
+/* 10 SFX */
+let sfxC='#FFB21E';
+function sfx(){const t=document.getElementById('sfxT'),st=+sfxSt.value,d=+sfxD.value,r=+sfxR.value;t.textContent=sfxIn.value||' ';
+  sfxSto.textContent=st+' px';sfxDo.textContent=d;sfxRo.textContent=r+'°';
+  const sh=[];for(let i=1;i<=d;i++)sh.push(`${i}px ${i}px 0 #140F24`);if(d)sh.push(`${d+4}px ${d+4}px 0 #FF3D8B`);
+  t.style.color=sfxC;t.style.webkitTextStroke=st+'px #140F24';t.style.paintOrder='stroke fill';t.style.textShadow=sh.join(',')||'none';t.style.transform=`rotate(${r}deg)`;
+  document.getElementById('sfxCss').textContent=`color: ${sfxC};\n-webkit-text-stroke: ${st}px #140F24; /* Stroke */\npaint-order: stroke fill;\ntext-shadow: ${d?`1px 1px 0 #140F24 … ${d}px ${d}px 0 #140F24`:'none'}; /* 3D */\ntransform: rotate(${r}deg);`;}
+const sfxSt=document.getElementById('sfxSt'),sfxD=document.getElementById('sfxD'),sfxR=document.getElementById('sfxR'),sfxIn=document.getElementById('sfxIn'),sfxSto=document.getElementById('sfxSto'),sfxDo=document.getElementById('sfxDo'),sfxRo=document.getElementById('sfxRo');
+[sfxSt,sfxD,sfxR,sfxIn].forEach(i=>i.oninput=sfx);
+document.querySelectorAll('#sfxSw button').forEach(b=>b.onclick=()=>{sfxC=b.dataset.c;document.querySelectorAll('#sfxSw button').forEach(x=>x.classList.toggle('on',x===b));sfx()});sfx();
+/* 12 anatomía */
+const AN=[['Viñeta','El recuadro que contiene una escena. Su tamaño marca el tiempo: una viñeta ancha es una pausa; varias pequeñas, acción rápida.'],['Calle (canal)','El espacio en blanco entre viñetas. El lector «imagina» lo que pasa entre una y otra. En la web es el gap.'],['Cartela','Recuadro del narrador: lugar, tiempo o voz en off. Suele ir arriba a la izquierda.'],['Globo de diálogo','Lo que dice un personaje. Texto centrado, fuente de rotulación, sin pasar de 25 palabras.'],['Cola del globo','El pico que apunta a la boca de quien habla. Sin cola, no se sabe quién habla.'],['Globo de pensamiento','Forma de nube y cola de burbujas. Texto en itálica: lo que el personaje piensa y no dice.'],['Grito (globo de estallido)','Borde en picos, texto grande y en mayúsculas. Indica volumen y emoción.'],['Onomatopeya','El sonido dibujado: KRASH, ZAAS, BOOM. Es texto transformado con contorno, color, inclinación y 3D.']];
+document.querySelectorAll('.hot').forEach(b=>b.onclick=()=>{document.querySelectorAll('.hot').forEach(x=>x.classList.toggle('on',x===b));const a=AN[+b.dataset.h];document.getElementById('anDef').innerHTML='<h3>'+a[0]+'</h3><p class="small">'+a[1]+'</p>'});
+/* 13 orden */
+function ro(m){const pos=m?[[440,20],[180,20],[440,180],[180,180]]:[[20,20],[280,20],[20,180],[280,180]];document.querySelectorAll('.order').forEach((o,i)=>{o.style.left=pos[i][0]+'px';o.style.top=pos[i][1]+'px'});
+  document.getElementById('roH').textContent=m?'Derecha → izquierda (manga)':'Izquierda → derecha, en Z';}
+document.querySelectorAll('[data-ro]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-ro]').forEach(x=>{x.classList.toggle('on',x===b);x.setAttribute('aria-pressed',x===b)});ro(b.dataset.ro==='m')});ro(false);
+/* 15 wireframe */
+const WF=[['Encabezado + menú','Logo o nombre del cómic y los enlaces: Inicio, Episodios, Personajes. Siempre arriba y fácil de encontrar.'],['Portada (héroe)','La imagen principal con el título en grande. Es lo primero que se ve: debe decir de qué trata.'],['Viñetas','Las escenas del episodio, con sus globos y onomatopeyas. En el teléfono se apilan en una columna.'],['Multimedia','El tráiler en video, el tema musical o un efecto de sonido. Con controles, sin reproducción automática con sonido.'],['Sinopsis y personajes','Texto de párrafo: de qué trata la historia y quién es quién. Aquí importa el interlineado.'],['Pie de página','Créditos, autor, año y curso. Texto pequeño, pero legible.']];
+document.querySelectorAll('#wf [data-w]').forEach(d=>{const f=()=>{const a=WF[+d.dataset.w];document.querySelectorAll('#wf [data-w]').forEach(x=>x.classList.toggle('on',x.dataset.w===d.dataset.w));document.getElementById('wfDef').innerHTML='<h3>'+a[0]+'</h3><p class="small">'+a[1]+'</p>'};d.onmouseenter=f;d.onclick=f});
+/* 18 teclas */
+const KD={v:['V · Mover','Selecciona y mueve. Es la herramienta a la que siempre vuelves.'],f:['F · Frame (marco)','Dibuja una pantalla o sección. También con A. En el estudio, F hace una viñeta.'],r:['R · Rectángulo','Fondos, tarjetas, botones.'],o:['O · Elipse','Círculos y óvalos. Con Shift, círculo perfecto.'],l:['L · Línea','Separadores y líneas guía.'],p:['P · Pluma (Pen)','Trazos vectoriales a mano: formas libres, globos personalizados.'],t:['T · Texto','Clic para texto de punto; arrastra para texto de cuadro. Igual que en Photoshop.'],h:['H · Mano','Mueve el lienzo. También manteniendo la barra espaciadora.'],c:['C · Comentario','Deja una nota en el diseño para el equipo o el profesor.'],sa:['Shift + A · Auto layout','Agrupa lo seleccionado en una fila o columna que se acomoda sola.']};
+function figKey(k){document.querySelectorAll('.key').forEach(x=>x.classList.toggle('on',x.dataset.k===k));document.querySelectorAll('#figTb span').forEach(x=>x.classList.toggle('on',x.dataset.k===k));const d=KD[k];document.getElementById('keyDef').innerHTML='<h3>'+d[0]+'</h3><p class="small">'+d[1]+'</p>';}
+window.figKey=figKey;document.querySelectorAll('.key').forEach(b=>b.onclick=()=>figKey(b.dataset.k));
+/* 19 auto layout */
+let alH=true;function al(){const b=document.getElementById('alBox'),g=+alGap.value,p=+alPad.value;b.style.flexDirection=alH?'row':'column';b.style.gap=g+'px';b.style.padding=p+'px';alGapO.textContent=g;alPadO.textContent=p;
+  document.getElementById('alCss').textContent=`/* Auto layout → CSS */\ndisplay: flex;\nflex-direction: ${alH?'row':'column'};\ngap: ${g}px;\npadding: ${p}px;`;}
+const alGap=document.getElementById('alGap'),alPad=document.getElementById('alPad'),alGapO=document.getElementById('alGapO'),alPadO=document.getElementById('alPadO'),alDir=document.getElementById('alDir');
+alGap.oninput=al;alPad.oninput=al;alDir.onclick=()=>{alH=!alH;alDir.textContent=alH?'Horizontal':'Vertical';al()};al();
+/* repaso */
+document.querySelectorAll('[data-rv]').forEach(b=>b.onclick=()=>{const a=b.nextElementSibling;a.classList.toggle('open');b.textContent=a.classList.contains('open')?'Ocultar':'Ver respuesta'});
+document.getElementById('openStudio').onclick=()=>window.KOMA.open();
+})();
+
+/* ======================= ESTUDIO KOMA ======================= */
+(function(){
+const $=s=>document.querySelector(s);
+const studio=$('#studio'),art=$('#artboard'),wrap=$('#canvasWrap'),selbox=$('#selbox'),ghost=$('#ghost');
+const FONTS=[["Comic Neue","Rotulación (Comic Neue)"],["M PLUS Rounded 1c","Redondeada"],["Dela Gothic One","Gótica gruesa"],["Bangers","Bangers (SFX)"],["Shippori Mincho B1","Mincho dramática"],["DotGothic16","Pixel"]];
+const KEY='koma-tesi1104-lab10';
+let S={page:{w:1024,h:1900,bg:'#FFF4E0',tone:false},els:[]};
+let sel=null,tool='move',zoom=1,grid=false,hist=[],hi=-1,nid=1,editing=null,pickTarget=null;
+const mediaURL={}; // id -> objectURL (solo en esta sesión)
+
+/* ---------- imágenes de la biblioteca (generadas) ---------- */
+const LIB=[];
+function mk(name,fn){const c=document.createElement('canvas');c.width=960;c.height=600;const x=c.getContext('2d');let seed=name.length*977;const r=()=>(seed=(seed*16807)%2147483647)/2147483647;fn(x,r);LIB.push({name,src:c.toDataURL('image/jpeg',.86)});}
+function sky(x,stops){const g=x.createLinearGradient(0,0,0,600);stops.forEach((s,i)=>g.addColorStop(i/(stops.length-1),s));x.fillStyle=g;x.fillRect(0,0,960,600);}
+function skyline(x,r,base,col,win){let px=-10;while(px<960){const w=50+r()*90,h=80+r()*200;x.fillStyle=col;x.fillRect(px,base-h,w,h+200);if(win){x.fillStyle=win;for(let wy=base-h+16;wy<base;wy+=24)for(let wx=px+10;wx<px+w-12;wx+=18)if(r()<.3)x.fillRect(wx,wy,8,11)}px+=w+3}}
+function stripedSun(x,cx,cy,R){x.save();const g=x.createLinearGradient(0,cy-R,0,cy+R);g.addColorStop(0,'#FFF3A6');g.addColorStop(1,'#FF8A3D');x.fillStyle=g;x.beginPath();x.arc(cx,cy,R,0,Math.PI*2);x.fill();x.globalCompositeOperation='destination-out';for(let i=0;i<6;i++){const y=cy+R*.1+i*R*.17;x.fillRect(cx-R,y,R*2,4+i*2.4)}x.restore();}
+function cables(x){x.strokeStyle='#140F24';x.lineWidth=3;x.fillStyle='#140F24';x.fillRect(780,180,16,420);x.fillRect(740,200,96,9);x.fillRect(752,232,72,7);[[190,0],[220,40],[200,-30]].forEach(([y,s])=>{x.beginPath();x.moveTo(0,y+50);x.quadraticCurveTo(400,y+130+s,788,y+20);x.stroke();x.beginPath();x.moveTo(788,y+20);x.quadraticCurveTo(880,y+60,960,y+30);x.stroke()});}
+function build(){
+ mk('Atardecer en la ciudad',(x,r)=>{sky(x,['#2B1250','#8E1F6E','#FF5E7A','#FFB21E']);stripedSun(x,560,380,190);skyline(x,r,600,'#140F24','#FFD36B');cables(x)});
+ mk('Noche con cables de luz',(x,r)=>{sky(x,['#05030C','#1B1450','#4A2E8E']);x.fillStyle='#fff';for(let i=0;i<160;i++){x.globalAlpha=r();x.fillRect(r()*960,r()*420,2,2)}x.globalAlpha=1;x.fillStyle='#FFF4C8';x.beginPath();x.arc(220,140,70,0,7);x.fill();x.fillStyle='#1B1450';x.beginPath();x.arc(250,120,64,0,7);x.fill();skyline(x,r,600,'#0A0716','#7FE6F2');cables(x)});
+ mk('Líneas de velocidad',(x,r)=>{x.fillStyle='#fff';x.fillRect(0,0,960,600);x.fillStyle='#140F24';for(let i=0;i<220;i++){const a=r()*Math.PI*2,w=.004+r()*.012,R1=150+r()*120;x.beginPath();x.moveTo(480+Math.cos(a)*R1,300+Math.sin(a)*R1);x.lineTo(480+Math.cos(a-w)*900,300+Math.sin(a-w)*900);x.lineTo(480+Math.cos(a+w)*900,300+Math.sin(a+w)*900);x.fill()}});
+ mk('Mar Caribe',(x,r)=>{sky(x,['#25CFE4','#BFF4FA']);x.fillStyle='#fff';[[160,120],[620,90],[820,160]].forEach(([cx,cy])=>{for(let i=0;i<6;i++){x.beginPath();x.arc(cx+i*26-60,cy+(i%2)*-14,34+r()*14,0,7);x.fill()}});
+   stripedSun(x,480,360,120);for(let i=0;i<7;i++){x.fillStyle=['#1595C4','#0E7FB0','#0B6B9C','#09578A','#074779','#05396A','#032B5A'][i];x.fillRect(0,350+i*36,960,40)}
+   x.strokeStyle='#140F24';x.lineWidth=10;x.beginPath();x.moveTo(110,600);x.quadraticCurveTo(140,400,90,260);x.stroke();x.fillStyle='#140F24';for(let i=0;i<7;i++){x.save();x.translate(90,260);x.rotate(-2.6+i*.55);x.beginPath();x.ellipse(70,0,80,14,0,0,7);x.fill();x.restore()}});
+ mk('Explosión',(x,r)=>{x.fillStyle='#FFB21E';x.fillRect(0,0,960,600);const star=(R1,R2,c)=>{x.fillStyle=c;x.beginPath();for(let i=0;i<32;i++){const a=i/32*Math.PI*2,R=i%2?R2:R1*(0.8+r()*.4);x.lineTo(480+Math.cos(a)*R*1.5,300+Math.sin(a)*R)}x.closePath();x.fill()};star(360,190,'#E8342C');star(250,130,'#FFF3A6');});
+ mk('Trama manga',(x,r)=>{x.fillStyle='#fff';x.fillRect(0,0,960,600);x.fillStyle='#140F24';for(let y=0;y<600;y+=12)for(let xx=(y/12%2)*6;xx<960;xx+=12){const s=(xx/960)*5.2;x.beginPath();x.arc(xx,y,s,0,7);x.fill()}});
+ mk('Salón de clases',(x,r)=>{sky(x,['#FFE7C2','#FFC98A']);x.fillStyle='#2E5E4E';x.fillRect(120,90,720,300);x.strokeStyle='#8B5A2B';x.lineWidth=18;x.strokeRect(120,90,720,300);x.fillStyle='#fff';x.font='bold 46px "Comic Neue", sans-serif';x.fillText('Unidad VII: Texto',250,230);x.font='30px "Comic Neue", sans-serif';x.fillText('kerning · tracking · leading',250,290);x.fillStyle='#C98F4E';x.fillRect(0,470,960,130);for(let i=0;i<4;i++){x.fillStyle='#8B5A2B';x.fillRect(60+i*240,430,180,26);x.fillRect(80+i*240,456,12,90);x.fillRect(208+i*240,456,12,90)}x.fillStyle='rgba(255,255,255,.35)';x.beginPath();x.moveTo(840,0);x.lineTo(960,0);x.lineTo(960,600);x.lineTo(700,600);x.fill()});
+}
+
+/* ---------- utilidades ---------- */
+const clone=o=>JSON.parse(JSON.stringify(o));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600);}
+function byId(id){return S.els.find(e=>e.id===id)}
+const NAMES={panel:'Viñeta',image:'Imagen',rect:'Rectángulo',ellipse:'Elipse',text:'Texto',balloon:'Globo',button:'Botón',video:'Video',audio:'Audio'};
+function defaults(type,x,y,w,h){
+  const b={id:'e'+(nid++),type,x:Math.round(x),y:Math.round(y),w:Math.round(w),h:Math.round(h),rot:0,skew:0,op:100,name:'',hidden:false,locked:false};
+  const t={text:'Escribe aquí',font:'Comic Neue',size:24,weight:700,italic:false,upper:false,color:'#140F24',ls:0,lh:1.25,align:'left',tsw:0,tsc:'#140F24',shx:0,shy:0,shc:'#FF3D8B',bgc:''};
+  if(type==='rect')Object.assign(b,{fill:'#25CFE4',stroke:'#140F24',sw:0,radius:0});
+  if(type==='ellipse')Object.assign(b,{fill:'#FF3D8B',stroke:'#140F24',sw:0});
+  if(type==='panel'||type==='image')Object.assign(b,{src:'',fit:'cover',posx:50,posy:50,stroke:'#140F24',sw:type==='panel'?5:0,radius:0,f:{br:100,ct:100,sa:100,hu:0,se:0,gr:0,bl:0},tone:0,toneSize:6,tint:'',tintMode:'multiply',tintOp:50});
+  if(type==='text')Object.assign(b,t);
+  if(type==='balloon')Object.assign(b,t,{text:'¡Hola!',align:'center',kind:'dialogo',tail:'bl',fill:'#FFFFFF',stroke:'#140F24',sw:3});
+  if(type==='button')Object.assign(b,t,{text:'Botón',font:'M PLUS Rounded 1c',size:18,weight:800,align:'center',color:'#FFFFFF',fill:'#FF3D8B',stroke:'#140F24',sw:3,radius:999,href:'#'});
+  if(type==='video'||type==='audio')Object.assign(b,{file:'',fill:'#140F24',loop:false,muted:false});
+  return b;
+}
+function nm(e){return e.name||NAMES[e.type]}
+
+/* ---------- historial ---------- */
+function snap(){return JSON.stringify(S)}
+function commit(){hist=hist.slice(0,hi+1);hist.push(snap());if(hist.length>80)hist.shift();hi=hist.length-1;save();renderMission();}
+function restore(s){S=JSON.parse(s);if(sel&&!byId(sel))sel=null;renderAll();save();renderMission();}
+function undo(){if(hi>0){hi--;restore(hist[hi])}}
+function redo(){if(hi<hist.length-1){hi++;restore(hist[hi])}}
+function save(){try{localStorage.setItem(KEY,snap())}catch(e){}}
+
+/* ---------- render de elementos ---------- */
+function filt(f){return `brightness(${f.br}%) contrast(${f.ct}%) saturate(${f.sa}%) hue-rotate(${f.hu}deg) sepia(${f.se}%) grayscale(${f.gr}%) blur(${f.bl}px)`}
+function textCss(e){const sh=[];if(e.shx||e.shy)sh.push(`${e.shx}px ${e.shy}px 0 ${e.shc}`);
+  return `font-family:'${e.font}',sans-serif;font-size:${e.size}px;font-weight:${e.weight};font-style:${e.italic?'italic':'normal'};text-transform:${e.upper?'uppercase':'none'};color:${e.color};letter-spacing:${e.ls/1000}em;line-height:${e.lh};text-align:${e.align};`+
+   (e.tsw?`-webkit-text-stroke:${e.tsw}px ${e.tsc};paint-order:stroke fill;`:'')+(sh.length?`text-shadow:${sh.join(',')};`:'');}
+function balloonSvg(e){
+  const sw=e.sw, f=e.fill, s=e.stroke;let body='',tail='';
+  const tp={bl:[[30,70],[18,98],[44,74]],br:[[56,74],[82,98],[70,70]],tl:[[30,30],[18,2],[44,26]],tr:[[56,26],[82,2],[70,30]]};
+  if(e.kind==='cartela')body=`<rect x="1" y="1" width="98" height="98" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke"/>`;
+  else if(e.kind==='grito'){let pts=[];for(let i=0;i<28;i++){const a=i/28*Math.PI*2,R=i%2?40:50;pts.push((50+Math.cos(a)*R).toFixed(1)+','+(50+Math.sin(a)*R*.92).toFixed(1))}body=`<polygon points="${pts.join(' ')}" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke" stroke-linejoin="miter"/>`;}
+  else{
+    const top=e.tail&&e.tail[0]==='t';const cy=e.tail==='none'?50:(top?56:44),ry=e.tail==='none'?48:40;
+    if(e.kind==='pensamiento'){body=`<ellipse cx="50" cy="${cy}" rx="48" ry="${ry}" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke" stroke-dasharray="0"/>`;
+      if(e.tail!=='none'){const p=tp[e.tail];const bx=p[1][0],by=p[1][1];const mx=(p[0][0]+bx)/2,my=(top?cy-ry:cy+ry);tail=`<ellipse cx="${(mx+bx)/2}" cy="${(my+by)/2}" rx="4" ry="4" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke"/><ellipse cx="${bx}" cy="${by}" rx="2.4" ry="2.4" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke"/>`;}}
+    else{body=`<ellipse cx="50" cy="${cy}" rx="48" ry="${ry}" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke"/>`;
+      if(e.tail!=='none'){const p=tp[e.tail];tail=`<polygon points="${p.map(q=>q.join(',')).join(' ')}" fill="${f}" stroke="${s}" stroke-width="${sw}" vector-effect="non-scaling-stroke" stroke-linejoin="round"/><polygon points="${p[0][0]+1.5},${p[0][1]+(top?2:-2)} ${p[1][0]},${p[1][1]+(top?2.5:-2.5)} ${p[2][0]-1.5},${p[2][1]+(top?2:-2)}" fill="${f}"/>`;}}
+    return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">${tail}${body}${e.kind==='pensamiento'?'':''}</svg>`.replace('</svg>', e.kind==='pensamiento'?'</svg>':'</svg>');
+  }
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position:absolute;inset:0;width:100%;height:100%;overflow:visible">${body}</svg>`;
+}
+function balloonTextBox(e){if(e.kind==='cartela')return 'left:6%;right:6%;top:8%;bottom:8%';if(e.kind==='grito')return 'left:22%;right:22%;top:24%;bottom:24%';
+  const top=e.tail&&e.tail[0]==='t';if(e.tail==='none')return 'left:15%;right:15%;top:14%;bottom:14%';return top?'left:15%;right:15%;top:26%;bottom:6%':'left:15%;right:15%;top:6%;bottom:26%';}
+function inner(e,exp){
+  const vc='display:flex;flex-direction:column;justify-content:center;';
+  switch(e.type){
+  case 'rect':case 'ellipse':return `<div class="inner" style="background:${e.fill};border:${e.sw}px solid ${e.stroke};border-radius:${e.type==='ellipse'?'50%':e.radius+'px'};box-sizing:border-box"></div>`;
+  case 'panel':case 'image':{
+    let h=`<div class="inner" style="overflow:hidden;border:${e.sw}px solid ${e.stroke};border-radius:${e.radius}px;box-sizing:border-box;background:#fff">`;
+    if(e.src)h+=`<img src="${e.src}" alt="${esc(nm(e))}" style="width:100%;height:100%;display:block;object-fit:${e.fit};object-position:${e.posx}% ${e.posy}%;filter:${filt(e.f)}">`;
+    else if(!exp)h+=`<div class="ph">${e.type==='panel'?'VIÑETA':'IMAGEN'}<br>doble clic para poner imagen</div>`;
+    if(e.tint)h+=`<div class="tint" style="position:absolute;inset:0;background:${e.tint};mix-blend-mode:${e.tintMode};opacity:${e.tintOp/100};pointer-events:none"></div>`;
+    if(e.tone)h+=`<div class="tone" style="position:absolute;inset:0;mix-blend-mode:multiply;opacity:${e.tone/100};pointer-events:none;background:radial-gradient(circle,#140F24 30%,transparent 33%) 0 0/${e.toneSize}px ${e.toneSize}px"></div>`;
+    return h+'</div>';}
+  case 'text':return `<div class="txt" style="${textCss(e)}${e.bgc?'background:'+e.bgc+';':''}">${esc(e.text)}</div>`;
+  case 'balloon':return balloonSvg(e)+`<div style="position:absolute;${balloonTextBox(e)};${vc}"><div class="txt" style="${textCss(e)}height:auto">${esc(e.text)}</div></div>`;
+  case 'button':return `<div class="inner" style="background:${e.fill};border:${e.sw}px solid ${e.stroke};border-radius:${e.radius}px;box-sizing:border-box;${vc}padding:0 10px"><div class="txt" style="${textCss(e)}height:auto">${esc(e.text)}</div></div>`;
+  case 'video':case 'audio':{
+    const src=exp?(e.file?'media/'+e.file:''):(mediaURL[e.id]||'');
+    if(src){return e.type==='video'?`<video src="${esc(src)}" controls ${e.loop?'loop':''} ${e.muted?'muted':''} playsinline style="width:100%;height:100%;background:#000;display:block;object-fit:contain"></video>`:`<div class="inner" style="background:${e.fill};${vc}padding:8px;border-radius:10px"><audio src="${esc(src)}" controls ${e.loop?'loop':''} style="width:100%"></audio></div>`;}
+    return `<div class="inner" style="background:${e.fill};color:#FFF4E0;border-radius:${e.type==='audio'?10:0}px;display:grid;place-items:center;text-align:center;font-family:DotGothic16,monospace;font-size:14px">${e.type==='video'?'▶ VIDEO':'♪ AUDIO'}${e.file?'<br>media/'+esc(e.file):'<br>(reserva)'}</div>`;}
+  }return '';
+}
+function outer(e){return `left:${e.x}px;top:${e.y}px;width:${e.w}px;height:${e.h}px;opacity:${e.op/100};transform:rotate(${e.rot}deg) skewX(${e.skew}deg);`}
+function nodeFor(e){const d=document.createElement('div');d.className='el'+(e.locked?' locked':'');d.dataset.id=e.id;d.style.cssText=outer(e);d.innerHTML=inner(e);d.hidden=e.hidden;return d;}
+function renderCanvas(){
+  art.querySelectorAll('.el').forEach(n=>n.remove());
+  art.style.width=S.page.w+'px';art.style.height=S.page.h+'px';art.style.background=S.page.bg;
+  art.style.backgroundImage=S.page.tone?'radial-gradient(circle,rgba(20,15,36,.12) 30%,transparent 33%)':'none';art.style.backgroundSize='8px 8px';
+  S.els.forEach(e=>art.insertBefore(nodeFor(e),selbox));
+  art.style.transform=`scale(${zoom})`;
+  $('#canvasPad').style.width=(S.page.w*zoom+120)+'px';$('#canvasPad').style.height=(S.page.h*zoom+120)+'px';
+  $('#artboardLabel').textContent='Página · '+S.page.w+' × '+S.page.h+' px';
+  $('#zFit').textContent=Math.round(zoom*100)+'%';
+  placeSel();
+}
+function updateNode(e){const n=art.querySelector(`.el[data-id="${e.id}"]`);if(!n)return;n.style.cssText=outer(e);n.className='el'+(e.locked?' locked':'');n.hidden=e.hidden;if(editing!==e.id)n.innerHTML=inner(e);placeSel();}
+function placeSel(){const e=sel&&byId(sel);if(!e||e.hidden){selbox.style.display='none';return}
+  selbox.style.display='block';selbox.style.cssText+=`;left:${e.x}px;top:${e.y}px;width:${e.w}px;height:${e.h}px;transform:rotate(${e.rot}deg);border-width:${2/zoom}px`;
+  selbox.querySelectorAll('.h').forEach(h=>{h.style.transform=`scale(${1/zoom})`;h.hidden=e.locked});
+  const d=selbox.querySelector('.dim');d.textContent=e.w+' × '+e.h;d.style.transform=`translateX(-50%) scale(${1/zoom})`;d.style.transformOrigin='top center';}
+function renderAll(){renderCanvas();renderLayers();renderProps();}
+
+/* ---------- capas ---------- */
+const ICON={panel:'#',image:'▣',rect:'▭',ellipse:'◯',text:'T',balloon:'💬',button:'⬭',video:'▶',audio:'♪'};
+function renderLayers(){const ul=$('#layers');ul.innerHTML='';
+  [...S.els].reverse().forEach(e=>{const li=document.createElement('li');li.className=(e.id===sel?'sel ':'')+(e.hidden?'hid':'');
+    li.innerHTML=`<span class="ic">${ICON[e.type]}</span><span class="nm" title="Doble clic para cambiar el nombre">${esc(nm(e))}</span><button title="${e.hidden?'Mostrar':'Ocultar'}" data-a="hide">${e.hidden?'◌':'●'}</button><button title="${e.locked?'Desbloquear':'Bloquear'}" data-a="lock">${e.locked?'🔒':'🔓'}</button>`;
+    li.onclick=ev=>{const a=ev.target.dataset.a;if(a==='hide'){e.hidden=!e.hidden;commit();renderAll();return}if(a==='lock'){e.locked=!e.locked;commit();renderAll();return}select(e.id)};
+    li.querySelector('.nm').ondblclick=ev=>{ev.stopPropagation();const s=ev.currentTarget;s.innerHTML=`<input value="${esc(nm(e))}" aria-label="Nombre de la capa">`;const i=s.firstChild;i.focus();i.select();
+      const done=()=>{const v=i.value.trim();e.name=(v&&v!==NAMES[e.type])?v:'';commit();renderLayers();renderProps()};i.onblur=done;i.onkeydown=k=>{if(k.key==='Enter')i.blur();if(k.key==='Escape'){i.value=nm(e);i.blur()}}};
+    ul.appendChild(li);});
+  if(!S.els.length)ul.innerHTML='<li style="color:#9C90B8;cursor:default">Todavía no hay capas. Elige una herramienta y dibuja en la página.</li>';
+}
+
+/* ---------- propiedades ---------- */
+const P=$('#props');
+function num(k,l,v,min,max,step){return `<div class="f"><label for="p-${k}">${l}</label><input type="number" id="p-${k}" data-k="${k}" value="${v}" ${min!=null?'min="'+min+'"':''} ${max!=null?'max="'+max+'"':''} step="${step||1}"></div>`}
+function rng(k,l,v,min,max,step,unit){return `<div class="rng"><label for="p-${k}">${l}</label><input type="range" id="p-${k}" data-k="${k}" value="${v}" min="${min}" max="${max}" step="${step||1}"><output>${v}${unit||''}</output></div>`}
+function col(k,l,v){return `<div class="f"><label for="p-${k}">${l}</label><input type="color" id="p-${k}" data-k="${k}" value="${v||'#000000'}"></div>`}
+function sel_(k,l,v,opts){return `<div class="f"><label for="p-${k}">${l}</label><select id="p-${k}" data-k="${k}">${opts.map(o=>`<option value="${esc(o[0])}" ${String(o[0])===String(v)?'selected':''}>${o[1]}</option>`).join('')}</select></div>`}
+function chk(k,l,v){return `<div class="f"><label for="p-${k}">${l}</label><input type="checkbox" id="p-${k}" data-k="${k}" ${v?'checked':''} style="justify-self:start"></div>`}
+function btns(k,v,opts){return `<div class="btns" data-g="${k}">${opts.map(o=>`<button data-v="${o[0]}" class="${String(o[0])===String(v)?'on':''}" title="${o[2]||''}">${o[1]}</button>`).join('')}</div>`}
+function sec(t){return `<div class="sec">${t}</div>`}
+function textProps(e,full){let h=sec('Texto')+`<div class="f" style="grid-template-columns:1fr"><textarea id="p-text" data-k="text" aria-label="Texto">${esc(e.text)}</textarea></div>`+
+  sel_('font','Fuente',e.font,FONTS)+`<div class="f2">${num('size','Tam.',e.size,6,400)}${sel_('weight','Peso',e.weight,[[400,'Normal'],[700,'Negrita'],[800,'Extra']])}</div>`+
+  col('color','Color',e.color)+btns('align',e.align,[['left','Izq.'],['center','Centro'],['right','Der.'],['justify','Just.']])+
+  `<div class="f2">${chk('italic','Itálica',e.italic)}${chk('upper','MAYÚS',e.upper)}</div>`+
+  sec('Espaciados')+rng('ls','Tracking',e.ls,-100,800,10,'')+rng('lh','Interlineado',e.lh,.7,2.5,.05,'');
+  if(full)h+=sec('Efectos de texto')+rng('tsw','Contorno',e.tsw,0,16,1,' px')+col('tsc','Color contorno',e.tsc)+`<div class="f2">${num('shx','X',e.shx,-40,40)}${num('shy','Y',e.shy,-40,40)}</div>`+col('shc','Color sombra',e.shc)+
+    `<div class="f"><label for="p-bgc">Fondo</label><div class="btns"><input type="color" id="p-bgc" data-k="bgc" value="${e.bgc||'#ffffff'}" style="flex:1"><button data-clear="bgc">${e.bgc?'Quitar':'Sin fondo'}</button></div></div>`+
+    `<p class="hint">Contorno + sombra = onomatopeya. Tracking en milésimas de em, como en Photoshop.</p>`;
+  return h;}
+function renderProps(){
+  const e=sel&&byId(sel);let h='';
+  if(!e){h=sec('Página')+sel_('pw','Ancho',S.page.w,[[1024,'Escritorio · 1024'],[1280,'Escritorio · 1280'],[390,'Teléfono · 390']])+num('ph','Alto',S.page.h,400,8000,10)+col('pbg','Fondo',S.page.bg)+chk('ptone','Trama de fondo',S.page.tone)+
+    `<p class="hint" style="margin-top:12px">Elige una herramienta arriba y <b>arrastra</b> sobre la página para dibujar. Un clic crea el elemento con su tamaño normal.<br><br>Doble clic en un texto para escribir; doble clic en una viñeta para ponerle imagen.<br><br><b>Ctrl+rueda</b> acerca o aleja. Flechas mueven 1 px (Shift: 10 px).</p>`;}
+  else{
+    h=sec(NAMES[e.type])+`<div class="f"><label for="p-name">Nombre</label><input type="text" id="p-name" data-k="name" value="${esc(nm(e))}"></div>`+
+      `<div class="f2">${num('x','X',e.x)}${num('y','Y',e.y)}${num('w','W',e.w,4)}${num('h','H',e.h,4)}</div>`+
+      `<div class="f2">${num('rot','↻',e.rot,-180,180)}${num('skew','⧄',e.skew,-45,45)}</div>`+rng('op','Opacidad',e.op,0,100,1,'%')+
+      `<div class="btns"><button data-act="front" title="Ctrl+]">Al frente</button><button data-act="fwd">Subir</button><button data-act="back">Bajar</button><button data-act="bottom" title="Ctrl+[">Al fondo</button></div>`+
+      `<div class="btns"><button data-act="dup" title="Ctrl+D">Duplicar</button><button data-act="del" title="Supr">Eliminar</button></div>`;
+    if(e.type==='rect'||e.type==='ellipse')h+=sec('Relleno y borde')+col('fill','Relleno',e.fill)+col('stroke','Borde',e.stroke)+rng('sw','Grosor',e.sw,0,20,1,' px')+(e.type==='rect'?rng('radius','Esquinas',e.radius,0,200,1,' px'):'');
+    if(e.type==='panel'||e.type==='image'){
+      h+=sec('Imagen')+`<div class="btns"><button data-act="pick">${e.src?'Cambiar imagen':'Poner imagen'}</button>${e.src?'<button data-act="noimg">Quitar</button>':''}</div>`+
+        btns('fit',e.fit,[['cover','Llenar'],['contain','Ajustar']])+rng('posx','Encuadre X',e.posx,0,100,1,'%')+rng('posy','Encuadre Y',e.posy,0,100,1,'%')+
+        sec('Ajustes de la imagen')+rng('f.br','Brillo',e.f.br,0,200,1,'%')+rng('f.ct','Contraste',e.f.ct,0,200,1,'%')+rng('f.sa','Saturación',e.f.sa,0,300,1,'%')+rng('f.hu','Tono (hue)',e.f.hu,-180,180,1,'°')+rng('f.se','Sepia',e.f.se,0,100,1,'%')+rng('f.gr','Blanco y negro',e.f.gr,0,100,1,'%')+rng('f.bl','Desenfoque',e.f.bl,0,20,.5,'')+
+        `<div class="btns"><button data-preset="manga">Manga B/N</button><button data-preset="vhs">VHS 90s</button><button data-preset="atardecer">Atardecer</button><button data-preset="reset">Original</button></div>`+
+        sec('Trama y capa de color')+rng('tone','Trama manga',e.tone,0,100,1,'%')+rng('toneSize','Tamaño trama',e.toneSize,3,20,1,' px')+
+        `<div class="f"><label for="p-tint">Capa de color</label><div class="btns"><input type="color" id="p-tint" data-k="tint" value="${e.tint||'#FF3D8B'}" style="flex:1"><button data-clear="tint">${e.tint?'Quitar':'Sin capa'}</button></div></div>`+
+        sel_('tintMode','Modo de fusión',e.tintMode,[['multiply','Multiply'],['screen','Screen'],['overlay','Overlay'],['color','Color'],['soft-light','Soft Light']])+rng('tintOp','Opacidad capa',e.tintOp,0,100,1,'%')+
+        sec('Borde de viñeta')+col('stroke','Color',e.stroke)+rng('sw','Grosor',e.sw,0,20,1,' px')+rng('radius','Esquinas',e.radius,0,200,1,' px');}
+    if(e.type==='text')h+=textProps(e,true);
+    if(e.type==='balloon')h+=sec('Globo')+btns('kind',e.kind,[['dialogo','Diálogo'],['pensamiento','Pienso'],['grito','Grito'],['cartela','Cartela']])+
+      sel_('tail','Cola',e.tail,[['bl','Abajo izquierda'],['br','Abajo derecha'],['tl','Arriba izquierda'],['tr','Arriba derecha'],['none','Sin cola']])+col('fill','Relleno',e.fill)+col('stroke','Borde',e.stroke)+rng('sw','Grosor',e.sw,0,10,1,' px')+textProps(e,false);
+    if(e.type==='button')h+=sec('Botón')+`<div class="f"><label for="p-href">Enlace</label><input type="text" id="p-href" data-k="href" value="${esc(e.href)}" placeholder="#personajes o https://…"></div>`+col('fill','Relleno',e.fill)+col('stroke','Borde',e.stroke)+rng('sw','Grosor',e.sw,0,10,1,' px')+rng('radius','Esquinas',e.radius,0,999,1,'')+textProps(e,true);
+    if(e.type==='video'||e.type==='audio')h+=sec(e.type==='video'?'Video':'Audio')+`<p class="hint">${e.file?'Archivo: <b>media/'+esc(e.file)+'</b>'+(mediaURL[e.id]?'':'<br>Vuelve a subirlo para verlo aquí.'):'Bloque de reserva. Sube el archivo cuando lo tengas.'}</p><div class="btns"><button data-act="media">${e.file?'Cambiar archivo':'Subir archivo'}</button></div>`+chk('loop','Repetir',e.loop)+(e.type==='video'?chk('muted','Sin sonido',e.muted):'')+col('fill','Fondo',e.fill)+`<p class="hint">Usa <b>▶ Vista previa</b> para reproducirlo.</p>`;
+  }
+  P.innerHTML=h;
+  P.querySelectorAll('[data-k]').forEach(inp=>{const k=inp.dataset.k;
+    const apply=fin=>{let v=inp.type==='checkbox'?inp.checked:inp.value;if(inp.type==='number'||inp.type==='range'||k==='weight')v=+v;
+      if(inp.type==='range'&&inp.nextElementSibling)inp.nextElementSibling.textContent=v+(inp.nextElementSibling.textContent.replace(/^[-\d.]+/,''));
+      if(!e){if(k==='pw'){S.page.w=+v}else if(k==='ph')S.page.h=Math.max(400,+v||400);else if(k==='pbg')S.page.bg=v;else if(k==='ptone')S.page.tone=v;renderCanvas();if(fin)commit();return}
+      if(k==='name'){e.name=(v.trim()&&v.trim()!==NAMES[e.type])?v.trim():'';renderLayers();if(fin)commit();return}
+      if(k.startsWith('f.'))e.f[k.slice(2)]=v;else e[k]=v;
+      if(k==='w'||k==='h')e[k]=Math.max(4,v||4);
+      updateNode(e);if(fin)commit();};
+    inp.addEventListener('input',()=>apply(false));inp.addEventListener('change',()=>apply(true));});
+  P.querySelectorAll('[data-g] button').forEach(b=>b.onclick=()=>{const k=b.parentElement.dataset.g;e[k]=b.dataset.v;updateNode(e);commit();renderProps()});
+  P.querySelectorAll('[data-clear]').forEach(b=>b.onclick=()=>{const k=b.dataset.clear;if(e[k]){e[k]=''}else{e[k]=k==='tint'?'#FF3D8B':'#FFFFFF'}updateNode(e);commit();renderProps()});
+  P.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>act(b.dataset.act));
+  P.querySelectorAll('[data-preset]').forEach(b=>b.onclick=()=>{const p=b.dataset.preset;
+    if(p==='manga'){e.f={br:110,ct:160,sa:100,hu:0,se:0,gr:100,bl:0};e.tone=35;e.tint=''}
+    if(p==='vhs'){e.f={br:105,ct:115,sa:150,hu:-12,se:10,gr:0,bl:.5};e.tint='#5A3BC8';e.tintMode='screen';e.tintOp=25}
+    if(p==='atardecer'){e.f={br:100,ct:110,sa:130,hu:0,se:20,gr:0,bl:0};e.tint='#FF5E7A';e.tintMode='soft-light';e.tintOp=60}
+    if(p==='reset'){e.f={br:100,ct:100,sa:100,hu:0,se:0,gr:0,bl:0};e.tone=0;e.tint=''}
+    updateNode(e);commit();renderProps()});
+}
+
+/* ---------- acciones ---------- */
+function select(id){if(editing)stopEdit();sel=id;placeSel();renderLayers();renderProps();}
+function act(a){const e=sel&&byId(sel);if(!e&&a!=='pick')return;const i=S.els.indexOf(e);
+  if(a==='del'){S.els.splice(i,1);sel=null}
+  else if(a==='dup'){const c=clone(e);c.id='e'+(nid++);c.x+=20;c.y+=20;if(c.name)c.name+=' copia';if(mediaURL[e.id])mediaURL[c.id]=mediaURL[e.id];S.els.splice(i+1,0,c);sel=c.id}
+  else if(a==='front'){S.els.splice(i,1);S.els.push(e)}else if(a==='bottom'){S.els.splice(i,1);S.els.unshift(e)}
+  else if(a==='fwd'&&i<S.els.length-1){S.els.splice(i,1);S.els.splice(i+1,0,e)}else if(a==='back'&&i>0){S.els.splice(i,1);S.els.splice(i-1,0,e)}
+  else if(a==='pick'){openPicker(e.id);return}else if(a==='noimg'){e.src=''}
+  else if(a==='media'){pickTarget=e.id;$('#mediaModal').classList.add('open');return}
+  else return;
+  commit();renderAll();}
+function setTool(t){tool=t;document.querySelectorAll('#tools button').forEach(b=>b.classList.toggle('on',b.dataset.tool===t));wrap.style.cursor=t==='move'?'default':'crosshair';
+  if(t==='media'){pickTarget=null;$('#mediaModal').classList.add('open')}}
+document.querySelectorAll('#tools button').forEach(b=>b.onclick=()=>setTool(b.dataset.tool));
+
+/* ---------- puntero ---------- */
+function pt(ev){const r=art.getBoundingClientRect();return{x:(ev.clientX-r.left)/zoom,y:(ev.clientY-r.top)/zoom}}
+const sn=v=>grid?Math.round(v/8)*8:Math.round(v);
+let drag=null;
+const DEF={panel:[300,220],image:[300,200],rect:[200,120],ellipse:[140,140],text:[260,60],balloon:[230,140],button:[150,48],video:[480,270],audio:[320,60]};
+art.addEventListener('pointerdown',ev=>{
+  if(studio.classList.contains('preview'))return;
+  if(ev.button!==0)return;const p=pt(ev);
+  const h=ev.target.closest('.h');
+  if(h&&sel){const e=byId(sel);drag={mode:'resize',d:h.dataset.d,p0:p,e0:clone(e)};art.setPointerCapture(ev.pointerId);ev.preventDefault();return}
+  if(tool!=='move'&&tool!=='media'){drag={mode:'draw',p0:p};ghost.style.display='block';Object.assign(ghost.style,{left:p.x+'px',top:p.y+'px',width:'0px',height:'0px'});art.setPointerCapture(ev.pointerId);ev.preventDefault();return}
+  const n=ev.target.closest('.el');
+  if(n&&editing===n.dataset.id)return;
+  if(n){const e=byId(n.dataset.id);if(sel!==e.id)select(e.id);if(e.locked)return;drag={mode:'move',p0:p,e0:clone(e),moved:false};art.setPointerCapture(ev.pointerId);ev.preventDefault();}
+  else{select(null)}
+});
+art.addEventListener('pointermove',ev=>{if(!drag)return;const p=pt(ev),dx=p.x-drag.p0.x,dy=p.y-drag.p0.y;
+  if(drag.mode==='draw'){const x=Math.min(p.x,drag.p0.x),y=Math.min(p.y,drag.p0.y);Object.assign(ghost.style,{left:x+'px',top:y+'px',width:Math.abs(dx)+'px',height:Math.abs(dy)+'px'});return}
+  const e=byId(sel);if(!e)return;
+  if(drag.mode==='move'){if(Math.abs(dx)+Math.abs(dy)>2)drag.moved=true;e.x=sn(drag.e0.x+dx);e.y=sn(drag.e0.y+dy);}
+  else{const o=drag.e0,d=drag.d;let x=o.x,y=o.y,w=o.w,h=o.h;
+    if(d.includes('e'))w=o.w+dx;if(d.includes('s'))h=o.h+dy;if(d.includes('w')){w=o.w-dx;x=o.x+dx}if(d.includes('n')){h=o.h-dy;y=o.y+dy}
+    if(ev.shiftKey&&d.length===2){const r=o.w/o.h;if(Math.abs(w/o.w)>Math.abs(h/o.h))h=w/r;else w=h*r;if(d.includes('w'))x=o.x+o.w-w;if(d.includes('n'))y=o.y+o.h-h;}
+    if(w<8){if(d.includes('w'))x-=8-w;w=8}if(h<8){if(d.includes('n'))y-=8-h;h=8}
+    e.x=sn(x);e.y=sn(y);e.w=sn(w);e.h=sn(h);drag.moved=true;}
+  updateNode(e);});
+art.addEventListener('pointerup',ev=>{if(!drag)return;const p=pt(ev);
+  if(drag.mode==='draw'){ghost.style.display='none';let x=Math.min(p.x,drag.p0.x),y=Math.min(p.y,drag.p0.y),w=Math.abs(p.x-drag.p0.x),h=Math.abs(p.y-drag.p0.y);
+    const t=tool;if(w<12&&h<12){[w,h]=DEF[t];x=drag.p0.x;y=drag.p0.y}
+    if(t==='ellipse'&&ev.shiftKey){h=w}
+    const e=defaults(t,sn(x),sn(y),sn(w),sn(h));
+    if(t==='text'&&w>=12&&h>=12){}
+    S.els.push(e);drag=null;setTool('move');commit();sel=e.id;renderAll();
+    if(t==='panel'||t==='image')openPicker(e.id);
+    if(t==='text'||t==='balloon'||t==='button')setTimeout(()=>startEdit(e.id),30);
+    return}
+  if(drag.moved){commit();renderProps()}drag=null;});
+art.addEventListener('dblclick',ev=>{if(studio.classList.contains('preview'))return;const n=(document.elementsFromPoint(ev.clientX,ev.clientY).find(x=>x.closest&&x.closest('.el')&&art.contains(x))||{closest:()=>null}).closest('.el');if(!n)return;const e=byId(n.dataset.id);if(e.locked)return;
+  if(['text','balloon','button'].includes(e.type))startEdit(e.id);else if(e.type==='panel'||e.type==='image')openPicker(e.id);else if(e.type==='video'||e.type==='audio'){pickTarget=e.id;$('#mediaModal').classList.add('open')}});
+function startEdit(id){const e=byId(id);const n=art.querySelector(`.el[data-id="${id}"] .txt`);if(!n)return;editing=id;sel=id;placeSel();n.contentEditable='true';n.focus();
+  const r=document.createRange();r.selectNodeContents(n);const s=getSelection();s.removeAllRanges();s.addRange(r);
+  n.onblur=()=>stopEdit();n.onkeydown=k=>{if(k.key==='Escape'||(k.key==='Enter'&&(k.ctrlKey||k.metaKey))){k.preventDefault();k.stopPropagation();n.blur()}};}
+function stopEdit(){if(!editing)return;const id=editing;editing=null;const e=byId(id);const n=art.querySelector(`.el[data-id="${id}"] .txt`);
+  if(e&&n){const t=n.innerText.replace(/\n$/,'');if(t!==e.text){e.text=t;commit()}n.contentEditable='false';updateNode(e);renderProps();renderLayers()}}
+
+/* ---------- teclado ---------- */
+addEventListener('keydown',ev=>{if(!studio.classList.contains('open'))return;
+  if(document.querySelector('.modal.open')){if(ev.key==='Escape')closeModals();return}
+  const tg=ev.target;if(editing||tg.matches('input,textarea,select')||tg.isContentEditable)return;
+  const k=ev.key.toLowerCase(),c=ev.ctrlKey||ev.metaKey;
+  if(c&&k==='z'){ev.preventDefault();ev.shiftKey?redo():undo();return}
+  if(c&&k==='y'){ev.preventDefault();redo();return}
+  if(c&&k==='d'){ev.preventDefault();act('dup');return}
+  if(c&&ev.key===']'){ev.preventDefault();act('front');return}
+  if(c&&ev.key==='['){ev.preventDefault();act('bottom');return}
+  if(c&&(k==='='||k==='+')){ev.preventDefault();setZoom(zoom*1.2);return}
+  if(c&&k==='-'){ev.preventDefault();setZoom(zoom/1.2);return}
+  if(c)return;
+  const T={v:'move',f:'panel',i:'image',r:'rect',o:'ellipse',t:'text',b:'balloon',u:'button',m:'media'};
+  if(T[k]&&!ev.altKey){setTool(T[k]);return}
+  if(k==='delete'||k==='backspace'){ev.preventDefault();act('del');return}
+  if(k==='escape'){if(studio.classList.contains('preview'))togglePreview();else{select(null);setTool('move')}return}
+  if(k==='enter'&&sel){const e=byId(sel);if(e&&['text','balloon','button'].includes(e.type)){ev.preventDefault();startEdit(e.id)}return}
+  const A={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};
+  if(A[k]&&sel){ev.preventDefault();const e=byId(sel),m=ev.shiftKey?10:1;e.x+=A[k][0]*m;e.y+=A[k][1]*m;updateNode(e);clearTimeout(act.t);act.t=setTimeout(()=>{commit();renderProps()},300);}
+});
+
+/* ---------- zoom ---------- */
+function setZoom(z){zoom=Math.max(.15,Math.min(3,z));renderCanvas();}
+$('#zIn').onclick=()=>setZoom(zoom*1.2);$('#zOut').onclick=()=>setZoom(zoom/1.2);
+$('#zFit').onclick=()=>setZoom(Math.min(1,(wrap.clientWidth-130)/S.page.w));
+wrap.addEventListener('wheel',ev=>{if(ev.ctrlKey||ev.metaKey){ev.preventDefault();setZoom(zoom*(ev.deltaY<0?1.1:1/1.1))}},{passive:false});
+$('#gridBtn').onclick=()=>{grid=!grid;art.classList.toggle('grid',grid);$('#gridBtn').classList.toggle('on',grid)};
+$('#undo').onclick=undo;$('#redo').onclick=redo;
+
+/* ---------- imágenes ---------- */
+function openPicker(id){pickTarget=id;const g=$('#gal');if(!g.children.length)LIB.forEach(l=>{const b=document.createElement('button');b.innerHTML=`<img src="${l.src}" alt=""><span>${l.name}</span>`;b.onclick=()=>setImg(l.src,l.name);g.appendChild(b)});$('#imgModal').classList.add('open');}
+function setImg(src,name){const e=byId(pickTarget);if(e){e.src=src;if(!e.name&&name)e.name=(e.type==='panel'?'Viñeta · ':'')+name;commit();renderAll()}closeModals();}
+$('#upImg').onchange=ev=>{const f=ev.target.files[0];ev.target.value='';if(!f)return;const rd=new FileReader();
+  rd.onload=()=>{if(f.type==='image/gif'||f.size<400000){setImg(rd.result,f.name.replace(/\.\w+$/,''));return}
+    const im=new Image();im.onload=()=>{const m=1600,s=Math.min(1,m/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);setImg(c.toDataURL('image/jpeg',.85),f.name.replace(/\.\w+$/,''))};im.onerror=()=>toast('No se pudo abrir esa imagen. Prueba con JPG o PNG.');im.src=rd.result};
+  rd.readAsDataURL(f);};
+/* ---------- multimedia ---------- */
+function newMedia(type,file){let e=pickTarget&&byId(pickTarget);
+  if(!e||(e.type!==type)){const [w,h]=DEF[type];const ww=Math.min(w,S.page.w-40);const pos=e?{x:e.x,y:e.y}:{x:(S.page.w-ww)/2,y:Math.round(wrap.scrollTop/zoom)+80};
+    if(e){S.els.splice(S.els.indexOf(e),1)}e=defaults(type,pos.x,pos.y,ww,type==='video'?Math.round(ww*9/16):h);S.els.push(e);}
+  if(file){e.file=file.name.replace(/[^\w.\-]+/g,'_');mediaURL[e.id]=URL.createObjectURL(file);if(!e.name)e.name=(type==='video'?'Video · ':'Audio · ')+e.file;}
+  sel=e.id;closeModals();setTool('move');commit();renderAll();}
+$('#upMedia').onchange=ev=>{const f=ev.target.files[0];ev.target.value='';if(!f)return;const t=f.type.startsWith('audio')?'audio':f.type.startsWith('video')?'video':null;if(!t){toast('Ese archivo no es video ni audio.');return}newMedia(t,f);toast('Recuerda copiar «'+f.name.replace(/[^\w.\-]+/g,'_')+'» a la carpeta media/ al entregar.');};
+$('#phVideo').onclick=()=>newMedia('video');$('#phAudio').onclick=()=>newMedia('audio');
+function closeModals(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('open'));if(tool==='media')setTool('move');}
+document.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeModals);
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('pointerdown',ev=>{if(ev.target===m)closeModals()}));
+
+/* ---------- misión ---------- */
+const TPL_TITLE='TÍTULO DE TU CÓMIC',TPL_B='…';
+function checks(){const E=S.els.filter(e=>!e.hidden);const tx=e=>(e.text||'').trim();
+  return[
+   ['Título de 40 px o más','Texto con tamaño ≥ 40 y tu propio título.',E.some(e=>e.type==='text'&&e.size>=40&&tx(e)&&tx(e)!==TPL_TITLE&&tx(e)!=='Escribe aquí')],
+   ['Menú con 3 botones','Tres botones o más (herramienta U).',E.filter(e=>e.type==='button').length>=3],
+   ['Tres viñetas con imagen','Viñetas con imagen y borde de 3 px o más.',E.filter(e=>(e.type==='panel'||e.type==='image')&&e.src&&e.sw>=3).length>=3],
+   ['Dos globos con tu texto','Globos cuyo texto ya no sea el de ejemplo.',E.filter(e=>e.type==='balloon'&&tx(e)&&tx(e)!=='¡Hola!'&&tx(e)!==TPL_B).length>=2],
+   ['Una onomatopeya','Texto con contorno de 2 px o más.',E.some(e=>e.type==='text'&&e.tsw>=2&&tx(e))],
+   ['Una imagen editada','Filtro, trama manga o capa de color.',E.some(e=>(e.type==='panel'||e.type==='image')&&e.src&&(e.tone>0||e.tint||Object.entries(e.f).some(([k,v])=>v!==({br:100,ct:100,sa:100}[k]??0))))],
+   ['Espaciado ajustado','Tracking distinto de 0 o interlineado distinto de 1.25 en un texto.',E.some(e=>['text','balloon','button'].includes(e.type)&&(e.ls!==0||Math.abs(e.lh-1.25)>.001))],
+   ['Bloque multimedia','Un video o un audio.',E.some(e=>e.type==='video'||e.type==='audio')]];}
+function renderMission(){const c=checks(),n=c.filter(x=>x[2]).length;$('#misCount').textContent=n+'/8';
+  const named=S.els.filter(e=>e.name).length;
+  $('#mission').innerHTML=`<div class="score">${n} / 8</div><div style="font-size:13px;color:#C9BEDF">metas cumplidas · ${n*5} de 40 puntos</div><ul>`+c.map(x=>`<li class="${x[2]?'done':''}"><span class="ok">${x[2]?'✓':''}</span><span>${x[0]}<small>${x[1]}</small></span></li>`).join('')+`</ul>`+
+   `<p class="hint" style="font-size:12px;color:#9C90B8;line-height:1.5">Capas con nombre propio: <b style="color:#fff">${named}</b>. Nombra tus capas (doble clic en el panel Capas): cuenta para la rúbrica.<br><br>Al terminar: <b>Exportar</b> › descarga la página y el proyecto.</p>`;}
+$('#tabProps').onclick=()=>{$('#tabProps').classList.add('on');$('#tabMission').classList.remove('on');$('#props').hidden=false;$('#mission').classList.remove('open')};
+$('#tabMission').onclick=()=>{$('#tabMission').classList.add('on');$('#tabProps').classList.remove('on');$('#props').hidden=true;$('#mission').classList.add('open');renderMission()};
+
+/* ---------- plantilla ---------- */
+function template(){nid=1;const D=(t,x,y,w,h,o)=>Object.assign(defaults(t,x,y,w,h),o||{});
+  return{page:{w:1024,h:1900,bg:'#FFF4E0',tone:false},els:[
+   D('rect',0,0,1024,72,{fill:'#140F24',name:'Encabezado · fondo'}),
+   D('text',32,16,300,44,{text:'LOGO',font:'Bangers',size:36,weight:400,color:'#FFB21E',name:'Logo'}),
+   D('button',560,14,130,44,{text:'Botón',name:'Menú 1'}),D('button',705,14,130,44,{text:'Botón',name:'Menú 2'}),D('button',850,14,140,44,{text:'Botón',name:'Menú 3'}),
+   D('panel',0,72,1024,460,{sw:0,name:'Portada (héroe)'}),
+   D('text',60,340,900,110,{text:TPL_TITLE,font:'Dela Gothic One',size:72,weight:400,color:'#FFFFFF',tsw:0,shx:6,shy:6,shc:'#140F24',name:'Título'}),
+   D('text',60,560,600,40,{text:'EPISODIO 1',font:'DotGothic16',size:22,weight:400,color:'#FF3D8B',name:'Etiqueta del episodio'}),
+   D('panel',40,610,460,320,{name:'Viñeta 1'}),D('panel',524,610,460,320,{name:'Viñeta 2'}),D('panel',40,954,944,380,{name:'Viñeta 3'}),
+   D('balloon',300,630,190,120,{text:TPL_B,name:'Globo 1'}),D('balloon',784,640,190,120,{text:TPL_B,tail:'br',name:'Globo 2'}),
+   D('video',40,1370,520,292,{name:'Tráiler (video)'}),
+   D('text',590,1370,394,40,{text:'Sinopsis',font:'Dela Gothic One',size:30,weight:400,name:'Subtítulo sinopsis'}),
+   D('text',590,1420,394,230,{text:'Escribe aquí de qué trata tu historia: quién es el personaje principal, dónde ocurre y qué problema enfrenta.',font:'M PLUS Rounded 1c',size:18,weight:400,lh:1.25,name:'Sinopsis'}),
+   D('rect',0,1720,1024,180,{fill:'#140F24',name:'Pie · fondo'}),
+   D('text',40,1770,944,80,{text:'© 2026 Tu nombre · TESI 1104 · ITPR Recinto de Manatí',font:'M PLUS Rounded 1c',size:16,weight:400,color:'#FFF4E0',align:'center',name:'Créditos'})]};}
+$('#tplBtn').onclick=()=>{if(S.els.length&&!$('#tplBtn').dataset.sure){$('#tplBtn').dataset.sure='1';$('#tplBtn').textContent='¿Reemplazar? Pulsa otra vez';setTimeout(()=>{delete $('#tplBtn').dataset.sure;$('#tplBtn').textContent='Plantilla'},3000);return}
+  delete $('#tplBtn').dataset.sure;$('#tplBtn').textContent='Plantilla';S=template();sel=null;commit();renderAll();toast('Plantilla cargada: reemplaza cada pieza con tu cómic.');};
+
+/* ---------- vista previa ---------- */
+function togglePreview(){studio.classList.toggle('preview');const on=studio.classList.contains('preview');$('#prevBtn').classList.toggle('on',on);$('#prevBtn').textContent=on?'■ Salir de la vista previa':'▶ Vista previa';if(on)select(null);}
+$('#prevBtn').onclick=togglePreview;
+
+/* ---------- exportar ---------- */
+function exportHtml(){const title=(S.els.find(e=>e.type==='text'&&e.size>=40)||{}).text||'Mi cómic web';
+  const body=S.els.filter(e=>!e.hidden).map(e=>{let h=inner(e,true);
+    if(e.type==='button')return `<a href="${esc(e.href||'#')}" style="position:absolute;${outer(e)}text-decoration:none;display:block">${h}</a>`;
+    return `<div style="position:absolute;${outer(e)}">${h}</div>`;}).join('\n');
+  return `<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${esc(title.replace(/\n/g,' '))}</title>
+<!-- Hecho en el Estudio KOMA · TESI 1104 Laboratorio 10 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Dela+Gothic+One&family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;700;800&family=Shippori+Mincho+B1:wght@800&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#140F24;overflow-x:hidden}
+.pagina{position:relative;width:${S.page.w}px;height:${S.page.h}px;margin:0 auto;overflow:hidden;background:${S.page.bg};${S.page.tone?'background-image:radial-gradient(circle,rgba(20,15,36,.12) 30%,transparent 33%);background-size:8px 8px;':''}transform-origin:top left}
+.pagina .inner{position:absolute;inset:0}
+.pagina .txt{white-space:pre-wrap;overflow-wrap:break-word;width:100%;height:100%}
+.pagina img{width:100%;height:100%;display:block}
+</style>
+</head>
+<body>
+<main class="pagina" id="pagina">
+${body}
+</main>
+<script>
+/* Ajusta la página al ancho de la pantalla (teléfono). */
+function ajustar(){var p=document.getElementById('pagina'),s=Math.min(1,window.innerWidth/${S.page.w});p.style.transform='scale('+s+')';p.style.marginLeft=s<1?'0':'auto';document.body.style.height=(${S.page.h}*s)+'px';}
+window.addEventListener('resize',ajustar);ajustar();
+<\/script>
+</body>
+</html>`;}
+function projJson(){return JSON.stringify({app:'KOMA',version:1,curso:'TESI 1104',lab:10,guardado:new Date().toISOString(),proyecto:S},null,1)}
+function download(name,text,type){try{const b=new Blob([text],{type});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Descargando '+name+'. Si no aparece, usa «Copiar».')}catch(e){toast('La descarga no está disponible aquí: usa «Copiar».')}}
+async function copy(text){$('#expOut').value=text;try{await navigator.clipboard.writeText(text);toast('Copiado. Pégalo en el Bloc de notas y guárdalo.')}catch(e){$('#expOut').focus();$('#expOut').select();toast('Selecciona todo el texto de abajo y cópialo con Ctrl+C.')}}
+$('#exportBtn').onclick=()=>{$('#expOut').value='';$('#exportModal').classList.add('open')};
+$('#dlHtml').onclick=()=>download('Apellido_Nombre_Lab10.html',exportHtml(),'text/html');
+$('#dlJson').onclick=()=>download('Apellido_Nombre_Lab10.json',projJson(),'application/json');
+$('#cpHtml').onclick=()=>copy(exportHtml());$('#cpJson').onclick=()=>copy(projJson());
+$('#openJson').onchange=ev=>{const f=ev.target.files[0];ev.target.value='';if(!f)return;const rd=new FileReader();rd.onload=()=>{try{const o=JSON.parse(rd.result);const p=o.proyecto||o;if(!p.els||!p.page)throw 0;S=p;nid=S.els.reduce((m,e)=>Math.max(m,+String(e.id).slice(1)||0),0)+1;sel=null;commit();renderAll();closeModals();toast('Proyecto abierto. Vuelve a subir tus videos o audios para verlos.')}catch(e){toast('Ese archivo no es un proyecto de KOMA.')}};rd.readAsText(f)};
+$('#newBlank').onclick=()=>{if(!$('#newBlank').dataset.sure){$('#newBlank').dataset.sure='1';$('#newBlank').textContent='¿Borrar todo? Pulsa otra vez';setTimeout(()=>{delete $('#newBlank').dataset.sure;$('#newBlank').textContent='Página en blanco'},3000);return}
+  delete $('#newBlank').dataset.sure;$('#newBlank').textContent='Página en blanco';S={page:{w:1024,h:1900,bg:'#FFF4E0',tone:false},els:[]};sel=null;commit();renderAll();closeModals();};
+
+/* ---------- abrir / cerrar ---------- */
+let booted=false;
+function open(){studio.classList.add('open');if(!booted){booted=true;build();let s=null;try{s=localStorage.getItem(KEY)}catch(e){}
+  if(s){try{S=JSON.parse(s);nid=S.els.reduce((m,e)=>Math.max(m,+String(e.id).slice(1)||0),0)+1}catch(e){S=template()}}else S=template();
+  hist=[snap()];hi=0;renderAll();renderMission();setTimeout(()=>setZoom(Math.min(1,(wrap.clientWidth-130)/S.page.w)),30);}
+  else renderAll();}
+$('#closeStudio').onclick=()=>{if(studio.classList.contains('preview'))togglePreview();studio.classList.remove('open')};
+window.KOMA={open};
+if(/[?&]estudio\b/.test(location.search)||location.hash==='#estudio')setTimeout(open,50);
+})();
+</script>
+</body>
+</html>
