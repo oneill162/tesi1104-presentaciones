@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nivel VIII: Retoque</title>
+<meta name="description" content="TESI 1104 – Diseño de Elementos para la Web · Unidad VIII: Retoque y transformación · Laboratorio 11: banner de lanzamiento de un videojuego original con el Taller GEN">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Audiowide&family=Exo+2:wght@400;600;800&family=Orbitron:wght@500;700;900&family=Press+Start+2P&family=Rajdhani:wght@500;700&family=Russo+One&family=Share+Tech+Mono&display=swap">
+<style>
+/* Concepto: cinco generaciones de consolas de videojuegos, cinco paletas.
+   Cada parte de la unidad es un «nivel» con los colores de una generación:
+   GEN 1 gris plástico (1994) · GEN 2 negro y azul profundo (2000) · GEN 3 negro piano y plata (2006)
+   GEN 4 azul de barra de luz (2013) · GEN 5 blanco y negro bitono (2020).
+   Sin logotipos ni símbolos de marca: solo colores y materiales. */
+:root{
+  --f-display:Orbitron,"Arial Black",sans-serif;
+  --f-body:"Exo 2","Segoe UI",sans-serif;
+  --f-mono:"Share Tech Mono","Courier New",monospace;
+  --f-pixel:"Press Start 2P","Courier New",monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:#050507;color:#eee;font-family:var(--f-body);overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid #2F8BFF;outline-offset:2px}
+
+/* ===== Paletas por generación ===== */
+.g1{--bg:#CBCAC5;--fg:#23232A;--card:#DEDDD8;--line:#97968F;--acc:#3E4596;--acc2:#6B6B74;--soft:#B9B8B2;--r:3px}
+.g2{--bg:#0A0B10;--fg:#E8ECF6;--card:#121729;--line:#263566;--acc:#2E5DFF;--acc2:#8AAEFF;--soft:#0F1424;--r:4px}
+.g3{--bg:#070709;--fg:#E7E8EB;--card:#16171B;--line:#3A3C43;--acc:#C9CED6;--acc2:#6FA8E8;--soft:#101114;--r:14px}
+.g4{--bg:#061630;--fg:#EAF2FF;--card:#0C2552;--line:#1F4C90;--acc:#3D96FF;--acc2:#8CCBFF;--soft:#0A1E44;--r:10px}
+.g5{--bg:#F3F4F6;--fg:#0D0E12;--card:#FFFFFF;--line:#D2D5DC;--acc:#2D64F0;--acc2:#0D0E12;--soft:#E7E9EE;--r:22px}
+.g1,.g5{color-scheme:light}
+
+/* ===== Escenario ===== */
+#viewport{position:fixed;inset:0 0 56px 0;display:grid;place-items:center;overflow:hidden;background:#020203}
+#stage{width:1280px;height:720px;position:relative;transform-origin:center center;flex:none;overflow:hidden;background:#000}
+.slide{position:absolute;inset:0;padding:64px 72px 44px;display:flex;flex-direction:column;gap:20px;visibility:hidden;opacity:0;transition:opacity .4s,visibility 0s .4s;overflow:hidden;background:var(--bg);color:var(--fg)}
+.slide.on{visibility:visible;opacity:1;transition:opacity .4s}
+.slide > *{position:relative;z-index:1}
+.slide [data-a]{opacity:0;transform:translateY(16px)}
+.slide.on [data-a]{opacity:1;transform:none;transition:opacity .5s,transform .5s cubic-bezier(.2,.8,.2,1)}
+.slide.on [data-a="1"]{transition-delay:.1s}.slide.on [data-a="2"]{transition-delay:.2s}.slide.on [data-a="3"]{transition-delay:.3s}.slide.on [data-a="4"]{transition-delay:.4s}
+
+/* Fondos de cada generación */
+.slide.g1::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 2px,transparent 2px 9px);pointer-events:none}
+.slide.g1::after{content:"";position:absolute;left:0;right:0;bottom:0;height:10px;background:linear-gradient(90deg,var(--acc) 0 30%,#8E8D88 30%);pointer-events:none}
+.slide.g2::before{content:"";position:absolute;inset:0;background:radial-gradient(60px 420px at 8% 100%,rgba(46,93,255,.35),transparent 70%),radial-gradient(60px 520px at 92% 100%,rgba(46,93,255,.28),transparent 70%),radial-gradient(900px 300px at 50% 120%,rgba(46,93,255,.22),transparent 70%);pointer-events:none}
+.slide.g3::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-40px;height:260px;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1400 260' preserveAspectRatio='none'%3E%3Cpath d='M0 150 C 250 60 450 230 700 140 S 1150 70 1400 150' fill='none' stroke='%23C9CED6' stroke-opacity='.35' stroke-width='2'/%3E%3Cpath d='M0 170 C 260 90 470 240 720 160 S 1160 100 1400 175' fill='none' stroke='%236FA8E8' stroke-opacity='.35' stroke-width='3'/%3E%3Cpath d='M0 190 C 240 120 480 250 740 180 S 1170 130 1400 195' fill='none' stroke='%23ffffff' stroke-opacity='.15' stroke-width='14'/%3E%3C/svg%3E") center/100% 100% no-repeat;animation:wave 9s ease-in-out infinite alternate}
+@keyframes wave{to{transform:translateX(6%) scaleY(1.15)}}
+.slide.g4::before{content:"";position:absolute;inset:0;background:radial-gradient(700px 380px at 0% 0%,rgba(61,150,255,.28),transparent 70%),radial-gradient(500px 300px at 100% 100%,rgba(61,150,255,.18),transparent 70%);pointer-events:none}
+.slide.g4::after{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(90deg,transparent,var(--acc),transparent);box-shadow:0 0 18px var(--acc);pointer-events:none}
+.slide.g5::before{content:"";position:absolute;right:-260px;top:-120px;width:620px;height:960px;border-radius:50%;background:#0D0E12;opacity:.045;pointer-events:none}
+
+/* OSD de generación */
+#osd{position:absolute;left:24px;top:18px;z-index:40;font-family:var(--f-mono);font-size:16px;letter-spacing:.1em;display:flex;gap:16px;pointer-events:none;opacity:.8}
+#osd .dot{width:10px;height:10px;border-radius:50%;display:inline-block;background:currentColor;margin-right:6px;vertical-align:1px}
+
+/* Tipografía */
+.kicker{font-family:var(--f-mono);font-size:18px;letter-spacing:.18em;text-transform:uppercase;color:var(--acc)}
+.g1 .kicker{font-family:var(--f-pixel);font-size:13px;letter-spacing:.06em}
+.g5 .kicker{color:var(--acc)}
+h1,h2,h3{margin:0;font-weight:700;text-wrap:balance}
+h1{font-family:var(--f-display);font-size:78px;line-height:1;font-weight:900;letter-spacing:.02em}
+h2{font-family:var(--f-display);font-size:42px;line-height:1.08;max-width:1100px}
+h3{font-family:var(--f-display);font-size:21px;line-height:1.2;letter-spacing:.02em}
+p{margin:0;font-size:21px;line-height:1.45;text-wrap:pretty}
+.lead{font-size:24px;line-height:1.4;max-width:980px}
+.small{font-size:17px;line-height:1.4}
+.mono{font-family:var(--f-mono)}
+b,strong{font-weight:800}
+code{font-family:var(--f-mono);font-size:.92em;background:color-mix(in srgb,var(--acc) 16%,transparent);padding:.05em .35em;border-radius:4px;white-space:nowrap}
+kbd{font-family:var(--f-mono);font-size:.88em;border:1.5px solid currentColor;border-bottom-width:3px;border-radius:5px;padding:0 .35em;white-space:nowrap}
+.mute{opacity:.72}
+
+/* Tarjetas */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;min-width:0}
+.g1 .card{box-shadow:inset 2px 2px 0 rgba(255,255,255,.7),inset -2px -2px 0 rgba(0,0,0,.18)}
+.g2 .card{box-shadow:0 10px 30px rgba(46,93,255,.12),inset 0 -2px 0 var(--acc)}
+.g3 .card{background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(255,255,255,0) 40%),var(--card)}
+.g4 .card{border-left:4px solid var(--acc)}
+.g5 .card{border:0;box-shadow:0 8px 28px rgba(13,14,18,.08)}
+.card h3{margin-bottom:6px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:16px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.fill{flex:1;min-height:0}
+ul.list{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+ul.list li{font-size:19px;line-height:1.38;padding-left:24px;position:relative}
+ul.list li::before{content:"";position:absolute;left:3px;top:.5em;width:10px;height:10px;background:var(--acc);border-radius:2px}
+.g3 ul.list li::before,.g5 ul.list li::before{border-radius:50%}
+
+/* Botones de demos */
+.btn{border:1.5px solid var(--line);background:var(--card);color:var(--fg);border-radius:calc(var(--r) + 2px);padding:6px 12px;font-size:16px;font-family:var(--f-body);font-weight:600}
+.btn:hover{border-color:var(--acc)}
+.btn.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.g3 .btn.on{color:#0B0B0D}
+.btn.big{font-family:var(--f-display);font-size:20px;padding:14px 26px;background:var(--acc);border-color:var(--acc);color:#fff}
+label.ctl{display:flex;align-items:center;gap:8px;font-size:16px}
+label.ctl input[type=range]{width:150px;accent-color:var(--acc)}
+.codebox{font-family:var(--f-mono);font-size:15px;line-height:1.5;background:#0B0D14;color:#BFE0FF;border-radius:8px;padding:10px 14px;white-space:pre-wrap;word-break:break-word}
+.g5 .codebox{background:#0D0E12}
+canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch-action:none}
+
+/* ===== Portada (arranque) ===== */
+.cover{justify-content:center;align-items:flex-start;padding-left:96px}
+#bootBars{position:absolute;right:90px;bottom:120px;display:flex;gap:14px;align-items:flex-end;z-index:1}
+#bootBars i{width:46px;height:0;border-radius:6px;display:block;transition:height 1s cubic-bezier(.2,.9,.2,1)}
+.on #bootBars i{height:var(--h)}
+.on #bootBars i:nth-child(2){transition-delay:.15s}.on #bootBars i:nth-child(3){transition-delay:.3s}.on #bootBars i:nth-child(4){transition-delay:.45s}.on #bootBars i:nth-child(5){transition-delay:.6s}
+#bootBars span{position:absolute;bottom:-34px;left:0;right:0;display:flex;gap:14px;font-family:var(--f-mono);font-size:13px}
+#bootBars span b{width:46px;text-align:center;font-weight:400}
+.cover h1 span{display:block;font-size:30px;font-weight:500;letter-spacing:.12em;margin-top:14px;color:var(--acc)}
+.press{font-family:var(--f-pixel);font-size:15px;margin-top:26px;animation:blink 1.2s steps(2,start) infinite}
+@keyframes blink{to{visibility:hidden}}
+
+/* Eyecatch */
+.eyecatch{justify-content:center;align-items:center;text-align:center;gap:16px}
+.eyecatch .ring{width:220px;height:220px;border-radius:50%;border:10px solid var(--acc);display:grid;place-items:center;font-family:var(--f-display);font-size:96px;font-weight:900;box-shadow:0 0 40px color-mix(in srgb,var(--acc) 40%,transparent)}
+.g1.eyecatch .ring{border-radius:12px;border-width:8px;box-shadow:6px 6px 0 rgba(0,0,0,.25);font-family:var(--f-pixel);font-size:64px}
+.eyecatch .load{width:420px;height:8px;border-radius:4px;background:color-mix(in srgb,var(--fg) 15%,transparent);overflow:hidden}
+.eyecatch .load i{display:block;height:100%;width:0;background:var(--acc)}
+.eyecatch.on .load i{width:100%;transition:width 1.6s ease}
+.eyecatch .gen{font-family:var(--f-mono);letter-spacing:.3em;font-size:18px}
+
+/* Selector de niveles */
+.levels{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.lvl{border-radius:12px;padding:16px 14px;min-height:250px;display:flex;flex-direction:column;gap:10px;color:#fff;border:0;text-align:left}
+.lvl .n{font-family:var(--f-display);font-size:40px;font-weight:900}
+.lvl h3{font-size:17px}
+.lvl p{font-size:15px;line-height:1.35}
+.lvl .yr{margin-top:auto;font-family:var(--f-mono);font-size:13px;opacity:.85}
+
+/* Lámina «trucos» */
+.cheats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px 18px}
+.cheat{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px dashed var(--line);padding:6px 2px;font-size:17px}
+.cheat kbd{font-size:15px}
+
+/* Repaso */
+.qa{cursor:pointer;text-align:left;width:100%}
+.qa .a{display:none;margin-top:8px;color:var(--acc);font-weight:600}
+.qa.open .a{display:block}
+
+/* ===== Barra de navegación ===== */
+#bar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:12px;padding:0 max(16px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px,env(safe-area-inset-left,0px));background:#0A0A0D;border-top:3px solid #3D96FF;font-family:var(--f-mono);z-index:60;color:#E8ECF6}
+#bar button{background:none;border:1.5px solid #30343F;color:#E8ECF6;border-radius:6px;padding:4px 12px;font-size:15px}
+#bar button:hover{border-color:#3D96FF}
+#map{flex:1;display:flex;gap:3px;height:12px;min-width:0}
+#map i{flex:1;border-radius:2px;cursor:pointer;opacity:.35}
+#map i.done{opacity:.75}#map i.cur{opacity:1;outline:2px solid #fff;outline-offset:1px}
+#count{min-width:70px;text-align:center;font-size:16px}
+.overlay{position:fixed;inset:0 0 56px 0;background:rgba(5,6,10,.95);z-index:70;display:none;overflow:auto;padding:40px max(16px,env(safe-area-inset-left,0px))}
+.overlay.open{display:block}
+#idxList{max-width:820px;margin:auto;columns:2;gap:24px;padding:0;list-style:none}
+#idxList button{display:flex;gap:12px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid #222631;padding:9px 4px;color:#E8ECF6;font-size:16px}
+#idxList button span{font-family:var(--f-mono);color:#8CCBFF;min-width:26px}
+#notes{position:fixed;left:16px;right:16px;bottom:68px;max-width:900px;margin:auto;background:#F3F4F6;color:#0D0E12;border-left:6px solid #3D96FF;border-radius:8px;padding:14px 18px;font-size:17px;line-height:1.45;z-index:65;display:none;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+#notes.open{display:block}
+@media (max-width:700px){#btnIdx,#btnNotes,#btnFs{font-size:12px!important;padding:3px 6px!important}#map{display:none}}
+
+/* ===== Taller GEN (interfaz al estilo Photoshop CS6) ===== */
+#studio{position:fixed;inset:0;z-index:200;background:#282828;color:#D6D6D6;display:none;flex-direction:column;font-family:"Segoe UI",system-ui,sans-serif;font-size:13px;color-scheme:dark}
+#studio.open{display:flex}
+.ps-menu{display:flex;align-items:center;gap:2px;min-height:34px;padding:0 8px;background:#323232;border-bottom:1px solid #1d1d1d;flex-wrap:wrap}
+.ps-logo{font-family:var(--f-display);font-weight:900;font-size:12px;background:#0D1B3D;color:#8CCBFF;border:1px solid #3D96FF;border-radius:3px;padding:3px 6px;margin-right:8px;letter-spacing:.05em}
+.ps-menu .mi{padding:6px 9px;border-radius:3px;cursor:default;user-select:none}
+.ps-menu .mi:hover,.ps-menu .mi.open{background:#4a4a4a}
+.ps-menu .sp{flex:1}
+.ps-menu input{background:#1f1f1f;border:1px solid #474747;border-radius:3px;padding:4px 7px;color:#ddd;width:150px}
+.ps-menu button{background:#3d3d3d;border:1px solid #4d4d4d;border-radius:3px;color:#ddd;padding:4px 10px;margin-left:4px}
+.ps-menu button:hover{background:#4a4a4a}
+.ps-menu button.primary{background:#1473E6;border-color:#1473E6;color:#fff;font-weight:600}
+.ps-menu button:disabled{opacity:.4;cursor:not-allowed}
+#psDrop{position:fixed;z-index:260;background:#3a3a3a;border:1px solid #1d1d1d;box-shadow:0 8px 24px rgba(0,0,0,.5);min-width:300px;padding:4px 0;display:none;color:#ddd;font-size:13px;font-family:"Segoe UI",system-ui,sans-serif}
+#psDrop.open{display:block}
+#psDrop button{display:flex;justify-content:space-between;gap:24px;width:100%;background:none;border:0;padding:5px 16px;color:#ddd;text-align:left}
+#psDrop button:hover{background:#1473E6;color:#fff}
+#psDrop button span{color:#9a9a9a;font-family:var(--f-mono)}#psDrop button:hover span{color:#dce9ff}
+#psDrop hr{border:0;border-top:1px solid #4d4d4d;margin:4px 0}
+.ps-opts{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:5px 10px;background:#3a3a3a;border-bottom:1px solid #1d1d1d;min-height:38px}
+.ps-opts .tname{font-weight:600;color:#fff;padding-right:10px;border-right:1px solid #555}
+.ps-opts button,.ps-opts select,.ps-opts input[type=number]{background:#2b2b2b;border:1px solid #4d4d4d;border-radius:3px;padding:3px 8px;color:#ddd}
+.ps-opts button:hover{border-color:#1473E6}
+.ps-opts button.on{background:#1473E6;border-color:#1473E6;color:#fff}
+.ps-opts button.ok{background:#2e7d32;border-color:#2e7d32;color:#fff;font-weight:600}
+.ps-opts button.no{background:#8e2b2b;border-color:#8e2b2b;color:#fff}
+.ps-opts label{display:flex;gap:5px;align-items:center}
+.ps-opts input[type=range]{width:100px;accent-color:#1473E6}
+.ps-opts input[type=number]{width:70px}
+.ps-opts .hint{color:#a8a8a8}
+.ps-opts .grp{display:flex;gap:2px}
+.st-main{flex:1;display:grid;grid-template-columns:48px 1fr 300px;min-height:0}
+.st-tools{background:#323232;border-right:1px solid #1d1d1d;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;overflow-y:auto}
+.st-tools button{width:38px;height:34px;flex:none;background:none;border:1px solid transparent;border-radius:3px;color:#cfcfcf;display:grid;place-items:center;position:relative;padding:0}
+.st-tools button svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.st-tools button:hover{background:#454545}
+.st-tools button.on{background:#1d1d1d;border-color:#5a5a5a;color:#fff}
+.st-tools button .k{position:absolute;right:2px;bottom:0;font-size:9px;color:#9a9a9a;font-family:var(--f-mono)}
+.st-tools hr{width:28px;border:0;border-top:1px solid #4a4a4a;margin:4px 0}
+.swatch{position:relative;width:38px;height:42px;margin-top:4px;flex:none}
+.swatch i{position:absolute;width:22px;height:22px;border:1px solid #9a9a9a;box-shadow:0 0 0 1px #1d1d1d;cursor:pointer}
+.swatch .fg{left:3px;top:3px;z-index:2}.swatch .bgs{left:14px;top:15px}
+.swatch b{position:absolute;right:0;top:0;font-size:10px;color:#bbb;cursor:pointer;font-weight:400}
+#stWrap{position:relative;display:flex;flex-direction:column;min-width:0;min-height:0;background:#282828}
+.ps-tab{align-self:flex-start;background:#3a3a3a;color:#ddd;padding:5px 14px;border-right:1px solid #1d1d1d;font-size:12px}
+#stStage{flex:1;display:grid;place-items:center;min-height:0;overflow:hidden;padding:16px}
+#stCv{max-width:100%;max-height:100%;background:repeating-conic-gradient(#cfcfcf 0 25%,#fff 0 50%) 0 0/16px 16px;box-shadow:0 0 0 1px #111,0 6px 24px rgba(0,0,0,.45);touch-action:none}
+.ps-status{display:flex;gap:18px;padding:4px 10px;background:#323232;border-top:1px solid #1d1d1d;font-size:12px;color:#aaa;flex-wrap:wrap}
+.st-side{background:#323232;border-left:1px solid #1d1d1d;display:flex;flex-direction:column;min-height:0}
+.st-tabs{display:flex;background:#2b2b2b}
+.st-tabs button{flex:1;background:none;border:0;border-right:1px solid #1d1d1d;color:#9a9a9a;padding:7px 2px;font-size:12px}
+.st-tabs button.on{color:#fff;background:#3a3a3a}
+.st-pane{flex:1;overflow:auto;padding:8px}
+.lay-top{display:grid;grid-template-columns:1fr 120px;gap:6px;margin-bottom:6px;align-items:center}
+.lay-top select{background:#2b2b2b;border:1px solid #4d4d4d;border-radius:3px;color:#ddd;padding:3px}
+.lay-top label{display:flex;gap:4px;align-items:center;font-size:12px}
+.lay-top input{width:70px;accent-color:#1473E6}
+#layers{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:#1d1d1d;border:1px solid #1d1d1d}
+#layers li{display:flex;align-items:center;gap:6px;background:#3a3a3a;padding:4px 6px;cursor:pointer}
+#layers li.sel{background:#5a5a5a}
+#layers li.clip .nm{padding-left:14px}
+#layers li canvas{width:44px;height:26px;background:#fff;flex:none;border:1px solid #222}
+#layers li canvas.mk{width:26px;background:#000}
+#layers li .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#layers li .bd{font-family:var(--f-mono);font-size:11px;color:#8CCBFF}
+#layers li button{background:none;border:0;color:#ddd;padding:2px 3px;width:20px}
+.lyr-acts{display:flex;gap:3px;flex-wrap:wrap;margin-top:6px}
+.lyr-acts button,.pp button{background:#2b2b2b;border:1px solid #4d4d4d;border-radius:3px;padding:4px 7px;color:#ddd;font-size:12px}
+.lyr-acts button:hover,.pp button:hover{border-color:#1473E6}
+.pp{display:grid;gap:7px}
+.pp label{display:grid;grid-template-columns:92px 1fr 48px;gap:6px;align-items:center;font-size:12px;color:#c4c4c4}
+.pp label.wide{grid-template-columns:92px 1fr}
+.pp input[type=range]{width:100%;accent-color:#1473E6}
+.pp input[type=text],.pp select,.pp textarea{width:100%;background:#2b2b2b;border:1px solid #4d4d4d;border-radius:3px;padding:4px 6px;color:#ddd}
+.pp textarea{height:52px;resize:vertical}
+.pp h4{margin:8px 0 2px;font-size:11px;letter-spacing:.1em;color:#8CCBFF}
+.pp .val{font-family:var(--f-mono);font-size:11px;text-align:right}
+#histList{list-style:none;margin:0;padding:0;display:grid;gap:1px;background:#1d1d1d}
+#histList li{background:#3a3a3a;padding:6px 8px;cursor:pointer;display:flex;gap:8px}
+#histList li.cur{background:#5a5a5a;color:#fff}
+#histList li.fut{color:#7a7a7a}
+#histList li i{font-style:normal;color:#8CCBFF;font-family:var(--f-mono);min-width:20px}
+#mission{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+#mission li{display:flex;gap:8px;align-items:flex-start;color:#b5b5b5;line-height:1.3}
+#mission li .ok{width:20px;height:20px;border-radius:50%;border:2px solid #5a5a5a;display:grid;place-items:center;font-size:12px;flex:none}
+#mission li.done{color:#fff}
+#mission li.done .ok{background:#24B36B;border-color:#24B36B;color:#fff}
+#mission li small{display:block;color:#8a8a8a}
+#score{font-size:16px;font-weight:700;margin:6px 0 10px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:300;display:none;place-items:center;padding:16px}
+.modal.open{display:grid}
+.modal .box{background:#3a3a3a;border:1px solid #1d1d1d;border-radius:6px;max-width:920px;width:100%;max-height:90vh;overflow:auto;padding:14px 18px;color:#ddd;font-family:"Segoe UI",system-ui,sans-serif;font-size:13px}
+.modal h3{font-size:15px;margin:4px 0 8px;font-weight:600}
+.modal .mbtn{background:#2b2b2b;border:1px solid #4d4d4d;border-radius:3px;color:#ddd;padding:6px 12px}
+.modal .mbtn.primary{background:#1473E6;border-color:#1473E6;color:#fff;font-weight:600}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:6px 0 14px}
+.gal button{background:#2b2b2b;border:1px solid #4d4d4d;border-radius:4px;padding:0;overflow:hidden;color:#ccc;font-size:12px;text-align:left}
+.gal button:hover{border-color:#1473E6}
+.gal canvas{display:block;width:100%;aspect-ratio:16/9;background:repeating-conic-gradient(#cfcfcf 0 25%,#fff 0 50%) 0 0/12px 12px}
+.gal span{display:block;padding:5px 7px}
+.keys{columns:2;gap:24px;font-size:13px}
+.keys div{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #4a4a4a;padding:4px 0;break-inside:avoid}
+.keys kbd{font-family:var(--f-mono);font-size:12px;color:#fff;border:1px solid #777;border-bottom-width:2px;border-radius:3px;padding:0 4px;white-space:nowrap}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1473E6;color:#fff;padding:8px 16px;border-radius:999px;font-size:14px;z-index:400;display:none;max-width:calc(100% - 32px);text-align:center}
+@media (max-width:900px){
+  .st-main{grid-template-columns:1fr;grid-template-rows:auto minmax(300px,52vh) auto;overflow:auto}
+  .st-tools{flex-direction:row;overflow-x:auto;border:0;border-bottom:1px solid #1d1d1d;padding:4px}
+  .st-tools hr{display:none}
+  .st-side{border:0;border-top:1px solid #1d1d1d}
+}
+</style>
+</head>
+<body>
+
+<div id="viewport"><div id="stage">
+
+<!-- 1 PORTADA -->
+<section class="slide g1 cover" data-title="Portada" data-notes="Bienvenida. Hoy entramos a la Unidad VIII del prontuario: Retoque y transformación. Cinco temas: selecciones, máscaras, recorte, distorsión y transformación de objetos. Cada parte es un nivel con los colores de una generación de consolas de videojuegos. Al final, el Laboratorio 11: el banner de lanzamiento de un videojuego original, hecho en el Taller GEN.">
+  <div class="kicker" data-a="1">TESI 1104 · Diseño de Elementos para la Web</div>
+  <h1 data-a="2">Retoque y<br>transformación<span>UNIDAD VIII · LABORATORIO 11</span></h1>
+  <p class="lead" data-a="3" style="max-width:700px">Selecciones, máscaras, recorte, distorsión y transformación de objetos, en cinco niveles con los colores de cinco generaciones de consolas.</p>
+  <div class="press" data-a="4">PULSA ▶ PARA EMPEZAR</div>
+  <div id="bootBars">
+    <i style="--h:120px;background:#9C9B95"></i><i style="--h:170px;background:#1A2A6E"></i><i style="--h:220px;background:linear-gradient(#E5E7EB,#7C8089)"></i><i style="--h:270px;background:#2F8BFF"></i><i style="--h:320px;background:linear-gradient(90deg,#fff 50%,#0D0E12 50%);border:1px solid #0D0E12"></i>
+    <span><b>1994</b><b>2000</b><b>2006</b><b>2013</b><b>2020</b></span>
+  </div>
+</section>
+
+<!-- 2 NIVELES -->
+<section class="slide g1" data-title="Selecciona tu nivel" data-notes="El mapa de la unidad. Los cinco temas del prontuario, más el laboratorio. Pulsen un nivel para saltar a él. Al terminar, cada estudiante podrá aislar un objeto, ocultar partes sin borrar píxeles, recortar a la proporción que pide la web, poner una imagen en perspectiva y transformar sin perder calidad.">
+  <div class="kicker" data-a="1">Selecciona tu nivel</div>
+  <h2 data-a="1">Lo que vas a dominar hoy</h2>
+  <div class="levels" data-a="2">
+    <button class="lvl" style="background:#5C5B57" data-jump="Nivel 1 · Selecciones"><span class="n">1</span><h3>Selecciones</h3><p>Aislar exactamente los píxeles que quieres editar.</p><span class="yr">GEN 1 · 1994</span></button>
+    <button class="lvl" style="background:#122157" data-jump="Nivel 2 · Máscaras"><span class="n">2</span><h3>Máscaras</h3><p>Ocultar sin borrar: blanco revela, negro oculta.</p><span class="yr">GEN 2 · 2000</span></button>
+    <button class="lvl" style="background:linear-gradient(160deg,#3B3E46,#0B0B0D)" data-jump="Nivel 3 · Recorte y distorsión"><span class="n">3</span><h3>Recorte</h3><p>La proporción y el encuadre que pide cada pantalla.</p><span class="yr">GEN 3 · 2006</span></button>
+    <button class="lvl" style="background:linear-gradient(160deg,#3B3E46,#0B0B0D)" data-jump="4. Distorsión y perspectiva"><span class="n">4</span><h3>Distorsión</h3><p>Sesgar, deformar y poner en perspectiva.</p><span class="yr">GEN 3 · 2006</span></button>
+    <button class="lvl" style="background:#0B3A86" data-jump="Nivel 4 · Transformación de objetos"><span class="n">5</span><h3>Transformación</h3><p>Escalar y rotar sin perder calidad, y su CSS.</p><span class="yr">GEN 4 · 2013</span></button>
+    <button class="lvl" style="background:#0D0E12;box-shadow:inset 0 0 0 3px #fff" data-jump="Nivel 5 · Laboratorio 11"><span class="n">L</span><h3>Laboratorio 11</h3><p>Banner de lanzamiento de tu videojuego.</p><span class="yr">GEN 5 · 2020</span></button>
+  </div>
+  <p class="small mute" data-a="3">Prontuario TESI 1104, Unidad VIII: 1. Selecciones · 2. Máscaras · 3. Recorte · 4. Distorsión · 5. Transformación de objetos.</p>
+</section>
+
+<!-- 3 EYECATCH 1 -->
+<section class="slide g1 eyecatch" data-ch="1" data-title="Nivel 1 · Selecciones" data-notes="Nivel 1, con la paleta gris de la primera generación: las selecciones.">
+  <div class="gen" data-a="1">GEN 1 · 1994 · 32 BITS</div>
+  <div class="ring" data-a="2">1</div>
+  <h2 data-a="3">Selecciones</h2>
+  <div class="load"><i></i></div>
+</section>
+
+<!-- 4 HERRAMIENTAS DE SELECCIÓN -->
+<section class="slide g1" data-title="1. Herramientas de selección" data-notes="Una selección es el área de píxeles que se puede editar; todo lo demás queda protegido. Se ve como hormigas marchando. Cinco familias de herramientas en Photoshop CS6. Marco, M: rectángulos y elipses; con Shift sale cuadrado o círculo. Lazo, L: a mano, poligonal con clics, o magnético que se pega al borde. Selección rápida y Varita mágica, W: por color; la varita usa la tolerancia. Gama de colores, en el menú Select: todos los píxeles de un color en la imagen. Y Refine Edge, Alt+Ctrl+R, para pulir el borde del pelo o de las hojas; en las versiones CC se llama Select and Mask.">
+  <div class="kicker" data-a="1">Nivel 1 · Tema 1</div>
+  <h2 data-a="1">Seleccionar es decidir qué píxeles se pueden editar</h2>
+  <div class="grid3" data-a="2">
+    <div class="card"><h3>Marco · <kbd>M</kbd></h3><p class="small">Rectangular y elíptico. Con <kbd>Shift</kbd>: cuadrado o círculo perfecto. Con <kbd>Alt</kbd>: desde el centro.</p></div>
+    <div class="card"><h3>Lazo · <kbd>L</kbd></h3><p class="small">A mano alzada, poligonal (por clics) y magnético, que se pega a los bordes con contraste.</p></div>
+    <div class="card"><h3>Selección rápida y Varita · <kbd>W</kbd></h3><p class="small">Seleccionan por color. La varita usa la <b>tolerancia</b>: cuánto puede diferir un color del que pulsaste.</p></div>
+    <div class="card"><h3>Gama de colores</h3><p class="small"><code>Select › Color Range</code>: todos los píxeles de un color, aunque no estén juntos. Útil para cielos y fondos lisos.</p></div>
+    <div class="card"><h3>Perfeccionar borde</h3><p class="small"><code>Select › Refine Edge</code> (<kbd>Alt+Ctrl+R</kbd>) en CS6 pule pelo y bordes finos. En CC se llama <b>Select and Mask</b>.</p></div>
+    <div class="card"><h3>Comandos que siempre usarás</h3><p class="small"><kbd>Ctrl+D</kbd> deseleccionar · <kbd>Shift+Ctrl+I</kbd> invertir · <kbd>Shift+F6</kbd> calar (Feather) · <code>Select › Save Selection</code> la guarda como canal alfa.</p></div>
+  </div>
+</section>
+
+<!-- 5 DEMO VARITA -->
+<section class="slide g1" data-title="Varita mágica y operaciones" data-notes="Prueben la varita. Pulsen el cielo con tolerancia 32: se selecciona solo el área parecida y conectada. Suban la tolerancia y verán que entra más cielo. Las nubes quedan fuera: cambien el modo a Añadir, que en Photoshop es mantener Shift, y pulsen cada nube. Restar es Alt; intersectar es Shift+Alt. Desmarquen Contiguo para escoger ese color en toda la imagen. Al final, Invertir: ahora el seleccionado es el robot. Así se aísla un personaje.">
+  <div class="kicker" data-a="1">Nivel 1 · Práctica</div>
+  <h2 data-a="1">Varita mágica: tolerancia y modos</h2>
+  <div class="row fill" style="align-items:flex-start;gap:24px" data-a="2">
+    <canvas id="wandCv" class="demo" width="640" height="360" style="width:640px;height:360px;cursor:crosshair"></canvas>
+    <div style="flex:1;display:grid;gap:12px">
+      <label class="ctl">Tolerancia <input type="range" id="wandTol" min="0" max="120" value="32"> <b id="wandTolV" class="mono">32</b></label>
+      <label class="ctl"><input type="checkbox" id="wandCont" checked> Contiguo (solo píxeles conectados)</label>
+      <div class="row" id="wandMode">
+        <button class="btn on" data-m="new">Nueva</button>
+        <button class="btn" data-m="add">Añadir <kbd>Shift</kbd></button>
+        <button class="btn" data-m="sub">Restar <kbd>Alt</kbd></button>
+        <button class="btn" data-m="int">Intersectar</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="wandInv">Invertir</button>
+        <button class="btn" id="wandView">Ver como máscara</button>
+        <button class="btn" id="wandClear">Deseleccionar</button>
+      </div>
+      <div class="row"><button class="btn" id="wandU" title="Deshacer (Ctrl+Z)">↶ Deshacer</button><button class="btn" id="wandR" title="Rehacer (Shift+Ctrl+Z)">↷ Rehacer</button><button class="btn" id="wandX">Restaurar</button></div>
+      <div class="card"><p class="small" id="wandInfo">Pulsa el cielo de la imagen.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 EYECATCH 2 -->
+<section class="slide g2 eyecatch" data-ch="1" data-title="Nivel 2 · Máscaras" data-notes="Nivel 2, con el negro y el azul profundo de la segunda generación: las máscaras.">
+  <div class="gen" data-a="1">GEN 2 · 2000 · 128 BITS</div>
+  <div class="ring" data-a="2">2</div>
+  <h2 data-a="3">Máscaras</h2>
+  <div class="load"><i></i></div>
+</section>
+
+<!-- 7 MÁSCARA DE CAPA -->
+<section class="slide g2" data-title="2. Máscara de capa" data-notes="La máscara de capa es una imagen en escala de grises pegada a la capa. Blanco revela, negro oculta, gris deja ver a medias. No borra píxeles: es edición no destructiva. Si te equivocas, pintas de blanco y vuelve. Se crea con el botón Add layer mask, abajo en el panel Layers, o con Layer › Layer Mask › Reveal All. Con una selección activa, la máscara sale con la forma de la selección. Pinten sobre el atardecer para descubrir la galaxia. Alt+clic en la miniatura muestra la máscara sola; la tecla barra invertida la muestra en rojo. X intercambia blanco y negro.">
+  <div class="kicker" data-a="1">Nivel 2 · Tema 2</div>
+  <h2 data-a="1">Máscara de capa: <span style="color:#fff">blanco revela</span>, <span style="color:var(--acc2)">negro oculta</span></h2>
+  <div class="row fill" style="align-items:flex-start;gap:24px" data-a="2">
+    <canvas id="maskCv" class="demo" width="640" height="360" style="width:640px;height:360px;cursor:crosshair"></canvas>
+    <div style="flex:1;display:grid;gap:11px">
+      <div class="row"><button class="btn on" id="mkBlack">Pintar negro (oculta)</button><button class="btn" id="mkWhite">Pintar blanco (revela)</button></div>
+      <label class="ctl">Tamaño <input type="range" id="mkSize" min="6" max="90" value="38"></label>
+      <label class="ctl">Opacidad <input type="range" id="mkOp" min="10" max="100" value="100"> <span class="mono" id="mkOpV">100 %</span></label>
+      <label class="ctl">Dureza <input type="range" id="mkHard" min="0" max="100" value="40"></label>
+      <div class="row"><button class="btn" id="mkGrad">Degradado</button><button class="btn" id="mkAll">Revelar todo</button><button class="btn" id="mkNone">Ocultar todo</button></div>
+            <div class="row"><button class="btn" id="mkU" title="Deshacer (Ctrl+Z)">↶ Deshacer</button><button class="btn" id="mkR" title="Rehacer (Shift+Ctrl+Z)">↷ Rehacer</button><button class="btn" id="mkX">Restaurar</button></div>
+      <div class="row"><button class="btn" id="mkView">Ver máscara <kbd>Alt+clic</kbd></button><button class="btn" id="mkRed">Rojo <kbd>\</kbd></button></div>
+      <p class="small mute">Capa superior: atardecer. Capa inferior: galaxia.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 OTRAS MÁSCARAS -->
+<section class="slide g2" data-title="Recorte, vector y máscara rápida" data-notes="Tres máscaras más. Máscara de recorte, clipping mask, Alt+Ctrl+G o Alt+clic entre dos capas: la capa de arriba solo se ve dentro de la forma de la de abajo. Aquí, la rejilla retro dentro del texto. Máscara vectorial: una forma de pluma o de figura; bordes siempre nítidos y se escala sin perder calidad. Máscara rápida, Q: pintas la selección en rojo y al salir se vuelve selección. En la web, el CSS hace lo mismo con background-clip text, clip-path y mask-image.">
+  <div class="kicker" data-a="1">Nivel 2 · Tema 2</div>
+  <h2 data-a="1">Otras máscaras… y su CSS</h2>
+  <div class="grid2 fill" data-a="2">
+    <div class="card" style="display:grid;gap:10px">
+      <h3>Máscara de recorte · <kbd>Alt+Ctrl+G</kbd></h3>
+      <canvas id="clipCv" class="demo" width="520" height="170" style="width:520px;height:170px;background:#0A0B10"></canvas>
+      <div class="row"><button class="btn on" id="clipOn">Con máscara de recorte</button><button class="btn" id="clipOff">Sin máscara</button></div>
+      <div class="codebox">.titulo { background: url(rejilla.jpg);
+  background-clip: text; color: transparent; }</div>
+    </div>
+    <div class="card" style="display:grid;gap:10px">
+      <h3>Máscara vectorial → <code>clip-path</code></h3>
+      <div class="row" style="gap:18px;align-items:center">
+        <div id="vecShape" style="width:170px;height:170px;background:#1a1f35;transition:clip-path .5s"></div>
+        <div style="display:grid;gap:8px" id="vecBtns">
+          <button class="btn on" data-c="circle(50% at 50% 50%)">Círculo</button>
+          <button class="btn" data-c="polygon(25% 5%,75% 5%,100% 50%,75% 95%,25% 95%,0 50%)">Hexágono</button>
+          <button class="btn" data-c="polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)">Estrella</button>
+          <button class="btn" data-c="inset(0 round 28px)">Tarjeta</button>
+        </div>
+      </div>
+      <div class="codebox" id="vecCode">clip-path: circle(50% at 50% 50%);</div>
+      <p class="small"><b>Máscara rápida</b> <kbd>Q</kbd>: pintas la selección en rojo; al pulsar <kbd>Q</kbd> otra vez se convierte en selección.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 EYECATCH 3 -->
+<section class="slide g3 eyecatch" data-ch="1" data-title="Nivel 3 · Recorte y distorsión" data-notes="Nivel 3, en negro piano y plata, como la tercera generación: recorte y distorsión.">
+  <div class="gen" data-a="1">GEN 3 · 2006 · ALTA DEFINICIÓN</div>
+  <div class="ring" data-a="2">3</div>
+  <h2 data-a="3">Recorte y distorsión</h2>
+  <div class="load"><i></i></div>
+</section>
+
+<!-- 10 RECORTE -->
+<section class="slide g3" data-title="3. Recorte" data-notes="La herramienta Crop, tecla C. En la barra de opciones escogen la proporción; cada lugar de la web pide la suya: 16 a 9 para un banner o hero, 1 a 1 para un avatar, 4 a 5 o 9 a 16 para redes, 1.91 a 1 para la imagen que aparece al compartir un enlace. La cuadrícula de tercios ayuda a ubicar al protagonista en un cruce. En CS6 la casilla Delete Cropped Pixels decide si los píxeles de fuera se borran o se quedan escondidos. Y la herramienta Perspective Crop, nueva en CS6, endereza una foto tomada de lado. Arrastren el marco: abajo ven los píxeles reales del recorte en la foto original de 4000 por 3000.">
+  <div class="kicker" data-a="1">Nivel 3 · Tema 3</div>
+  <h2 data-a="1">Recorte (<kbd>C</kbd>): la proporción la decide la pantalla</h2>
+  <div class="row fill" style="align-items:flex-start;gap:24px" data-a="2">
+    <div id="cropBox" style="position:relative;width:640px;height:480px;flex:none;border-radius:8px;overflow:hidden;touch-action:none">
+      <canvas id="cropCv" width="640" height="480" style="display:block"></canvas>
+      <div id="cropFrame" style="position:absolute;box-shadow:0 0 0 2000px rgba(0,0,0,.6);border:2px solid #fff;cursor:move">
+        <div style="position:absolute;inset:0;background:linear-gradient(90deg,transparent 33.1%,rgba(255,255,255,.6) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.6) 66.6%,transparent 66.9%),linear-gradient(transparent 33.1%,rgba(255,255,255,.6) 33.3%,transparent 33.6%,transparent 66.4%,rgba(255,255,255,.6) 66.6%,transparent 66.9%);pointer-events:none"></div>
+        <i data-h="br" style="position:absolute;right:-9px;bottom:-9px;width:18px;height:18px;background:#fff;border-radius:3px;cursor:nwse-resize"></i>
+      </div>
+    </div>
+    <div style="flex:1;display:grid;gap:12px">
+      <div class="row" id="cropRatios">
+        <button class="btn on" data-r="1.7778">16:9 banner</button>
+        <button class="btn" data-r="1">1:1 avatar</button>
+        <button class="btn" data-r="0.8">4:5</button>
+        <button class="btn" data-r="0.5625">9:16 vertical</button>
+        <button class="btn" data-r="1.905">1.91:1 enlace</button>
+      </div>
+      <div class="card"><p class="small mono" id="cropInfo"></p></div>
+      <div class="row"><button class="btn" id="cropX">Restaurar</button></div>
+      <ul class="list">
+        <li>Ubica lo importante en un <b>cruce de tercios</b>.</li>
+        <li><b>Delete Cropped Pixels</b> desmarcado = recorte reversible.</li>
+        <li><b>Perspective Crop</b> (CS6) endereza fotos de lado.</li>
+        <li>En CSS: <code>aspect-ratio</code> y <code>object-fit: cover</code>.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 11 DISTORSIÓN -->
+<section class="slide g3" data-title="4. Distorsión y perspectiva" data-notes="Edit › Transform tiene los comandos de distorsión. Skew sesga: inclina la capa. Distort mueve cada esquina por separado. Perspective mueve dos esquinas a la vez, en espejo. Warp curva la capa con una malla. Además, Puppet Warp en el menú Edit dobla un personaje con alfileres, y Liquify, Shift+Ctrl+X, empuja los píxeles como pintura. El atajo profesional: dentro de Ctrl+T, Ctrl+arrastrar una esquina es Distort. Reto: arrastren las cuatro esquinas de la imagen del juego hasta que encaje en la pantalla del monitor.">
+  <div class="kicker" data-a="1">Nivel 3 · Tema 4</div>
+  <h2 data-a="1">Distorsión: coloca la captura del juego en la pantalla</h2>
+  <div class="row fill" style="align-items:flex-start;gap:24px" data-a="2">
+    <div id="distBox" style="position:relative;width:640px;height:360px;flex:none;border-radius:8px;overflow:hidden;touch-action:none">
+      <canvas id="distBg" width="640" height="360" style="display:block"></canvas>
+      <canvas id="distImg" width="320" height="180" style="position:absolute;left:0;top:0;transform-origin:0 0;opacity:.92"></canvas>
+      <div id="distHandles"></div>
+    </div>
+    <div style="flex:1;display:grid;gap:12px">
+      <div class="row" id="distMode"><button class="btn on" data-m="d">Distort (cada esquina)</button><button class="btn" data-m="p">Perspective (en espejo)</button></div>
+      <div class="row"><button class="btn" id="distReset">Restaurar</button><span class="mono" id="distOk" style="font-size:18px"></span></div>
+      <div class="card"><ul class="list" style="gap:6px">
+        <li><b>Skew</b>: inclina. <b>Distort</b>: esquinas libres.</li>
+        <li><b>Perspective</b>: dos esquinas en espejo.</li>
+        <li><b>Warp</b>: curva con malla. <b>Puppet Warp</b>: alfileres.</li>
+        <li><b>Liquify</b> <kbd>Shift+Ctrl+X</kbd>: empuja píxeles.</li>
+        <li>Dentro de <kbd>Ctrl+T</kbd>: <kbd>Ctrl</kbd>+arrastrar esquina = Distort.</li>
+      </ul></div>
+      <div class="codebox" id="distCode" style="font-size:12px">transform: matrix3d(…);</div>
+    </div>
+  </div>
+</section>
+
+<!-- 12 EYECATCH 4 -->
+<section class="slide g4 eyecatch" data-ch="1" data-title="Nivel 4 · Transformación de objetos" data-notes="Nivel 4, en el azul de la cuarta generación: transformación de objetos.">
+  <div class="gen" data-a="1">GEN 4 · 2013 · BARRA DE LUZ</div>
+  <div class="ring" data-a="2">4</div>
+  <h2 data-a="3">Transformación de objetos</h2>
+  <div class="load"><i></i></div>
+</section>
+
+<!-- 13 TRANSFORMACIÓN LIBRE -->
+<section class="slide g4" data-title="5. Transformación libre" data-notes="Ctrl+T, Free Transform: escalar, rotar y mover en un solo paso; Enter acepta y Esc cancela. En CS6, Shift mantiene la proporción al escalar. El punto de referencia del centro es el eje de giro. Edit › Transform también tiene rotar 90 y 180 y voltear horizontal o vertical. El problema: cada vez que transforman una capa normal, Photoshop recalcula los píxeles y pierde detalle. La solución es el objeto inteligente: Layer › Smart Objects › Convert to Smart Object; guarda la imagen original y cada transformación parte de ella. Muevan el control: reduzcan al 20 por ciento y regresen al 100. La capa normal queda borrosa; el objeto inteligente queda igual.">
+  <div class="kicker" data-a="1">Nivel 4 · Tema 5</div>
+  <h2 data-a="1">Transformación libre <kbd>Ctrl+T</kbd> y objetos inteligentes</h2>
+  <div class="grid2 fill" data-a="2">
+    <div class="card"><ul class="list">
+      <li><b>Escalar</b>: arrastra una esquina; en CS6 <kbd>Shift</kbd> conserva la proporción.</li>
+      <li><b>Rotar</b>: fuera del cuadro; <kbd>Shift</kbd> gira de 15° en 15°.</li>
+      <li><b>Punto de referencia</b>: el eje del giro.</li>
+      <li><code>Edit › Transform</code>: rotar 90°/180°, <b>Flip Horizontal</b> y <b>Flip Vertical</b>.</li>
+      <li><kbd>Enter</kbd> acepta · <kbd>Esc</kbd> cancela · <kbd>Shift+Ctrl+T</kbd> repite la última.</li>
+      <li><b>Content-Aware Scale</b> <kbd>Alt+Shift+Ctrl+C</kbd>: estira el fondo y protege lo importante.</li>
+    </ul></div>
+    <div class="card" style="display:grid;gap:10px">
+      <h3>Reducir y volver a agrandar</h3>
+      <label class="ctl">Reducir a <input type="range" id="smPct" min="10" max="100" value="100"> <b class="mono" id="smPctV">100 %</b> → regresar a 100 %</label>
+      <div class="row" style="gap:14px;align-items:flex-start">
+        <figure style="margin:0"><canvas id="smRaster" class="demo" width="220" height="170" style="width:220px;height:170px"></canvas><figcaption class="small">Capa normal (píxeles)</figcaption></figure>
+        <figure style="margin:0"><canvas id="smSmart" class="demo" width="220" height="170" style="width:220px;height:170px"></canvas><figcaption class="small">Objeto inteligente</figcaption></figure>
+      </div>
+      <p class="small"><code>Layer › Smart Objects › Convert to Smart Object</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- 14 CSS TRANSFORM -->
+<section class="slide g4" data-title="De Photoshop al CSS" data-notes="Todo lo que hicimos en Photoshop existe en CSS con la propiedad transform: translate mueve, rotate gira, scale escala y con un valor negativo voltea, skew sesga. transform-origin es el punto de referencia. Y como el navegador vuelve a dibujar desde el original, no pierde calidad, igual que un objeto inteligente. Muevan los controles y copien el CSS.">
+  <div class="kicker" data-a="1">Nivel 4 · Puente a la web</div>
+  <h2 data-a="1">Cada transformación tiene su CSS</h2>
+  <div class="row fill" style="gap:26px;align-items:flex-start" data-a="2">
+    <div style="width:470px;height:390px;flex:none;display:grid;place-items:center;background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 30px),repeating-linear-gradient(90deg,rgba(255,255,255,.05) 0 1px,transparent 1px 30px);border:1px solid var(--line);border-radius:10px;overflow:hidden">
+      <canvas id="cssCard" width="200" height="250" style="width:200px;height:250px;border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.45);transition:transform .15s"></canvas>
+    </div>
+    <div style="flex:1;display:grid;gap:9px">
+      <label class="ctl" style="justify-content:space-between">translateX <input type="range" id="ctX" min="-120" max="120" value="0"><b class="mono" id="ctXv">0px</b></label>
+      <label class="ctl" style="justify-content:space-between">rotate <input type="range" id="ctR" min="-180" max="180" value="0"><b class="mono" id="ctRv">0deg</b></label>
+      <label class="ctl" style="justify-content:space-between">scale <input type="range" id="ctS" min="40" max="140" value="100"><b class="mono" id="ctSv">1</b></label>
+      <label class="ctl" style="justify-content:space-between">skewX <input type="range" id="ctK" min="-40" max="40" value="0"><b class="mono" id="ctKv">0deg</b></label>
+      <div class="row"><button class="btn" id="ctFlip">Voltear (Flip H)</button><button class="btn" id="ctX0">Restaurar</button>
+        <label class="ctl">origen <select id="ctO" class="btn"><option value="center">center</option><option value="top left">top left</option><option value="bottom right">bottom right</option></select></label></div>
+      <div class="codebox" id="ctCode"></div>
+      <p class="small mute">Photoshop → CSS: Move → <code>translate</code> · Rotate → <code>rotate</code> · Scale → <code>scale</code> · Flip → <code>scaleX(-1)</code> · Skew → <code>skew</code> · Distort → <code>matrix3d</code></p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 TRUCOS -->
+<section class="slide g4" data-title="Códigos de trucos (atajos)" data-notes="La lista de atajos de la unidad, como los códigos de trucos de los juegos. Todos son de Photoshop CS6 en Windows; en Mac, Ctrl es Cmd y Alt es Option. Tómenle foto: los van a usar en el laboratorio y en el reto.">
+  <div class="kicker" data-a="1">Nivel 4 · Extra</div>
+  <h2 data-a="1">Códigos de trucos: los atajos de la unidad</h2>
+  <div class="cheats" data-a="2">
+    <div class="cheat">Marco <kbd>M</kbd></div><div class="cheat">Lazo <kbd>L</kbd></div><div class="cheat">Varita / Selección rápida <kbd>W</kbd></div>
+    <div class="cheat">Deseleccionar <kbd>Ctrl+D</kbd></div><div class="cheat">Volver a seleccionar <kbd>Shift+Ctrl+D</kbd></div><div class="cheat">Invertir selección <kbd>Shift+Ctrl+I</kbd></div>
+    <div class="cheat">Calar (Feather) <kbd>Shift+F6</kbd></div><div class="cheat">Refine Edge <kbd>Alt+Ctrl+R</kbd></div><div class="cheat">Máscara rápida <kbd>Q</kbd></div>
+    <div class="cheat">Máscara de recorte <kbd>Alt+Ctrl+G</kbd></div><div class="cheat">Ver máscara sola <kbd>Alt+clic</kbd></div><div class="cheat">Máscara en rojo <kbd>\</kbd></div>
+    <div class="cheat">Desactivar máscara <kbd>Shift+clic</kbd></div><div class="cheat">Blanco/negro <kbd>D</kbd> · <kbd>X</kbd></div><div class="cheat">Recorte <kbd>C</kbd></div>
+    <div class="cheat">Transformación libre <kbd>Ctrl+T</kbd></div><div class="cheat">Repetir transformación <kbd>Shift+Ctrl+T</kbd></div><div class="cheat">Distort en Ctrl+T <kbd>Ctrl+arrastrar</kbd></div>
+    <div class="cheat">Licuar <kbd>Shift+Ctrl+X</kbd></div><div class="cheat">Copiar a capa nueva <kbd>Ctrl+J</kbd></div><div class="cheat">Save for Web <kbd>Alt+Shift+Ctrl+S</kbd></div>
+  </div>
+  <p class="small mute" data-a="3">Photoshop CS6 en Windows. En Mac: Ctrl = ⌘ Cmd y Alt = ⌥ Option.</p>
+</section>
+
+<!-- 16 EYECATCH 5 -->
+<section class="slide g5 eyecatch" data-ch="1" data-title="Nivel 5 · Laboratorio 11" data-notes="Nivel 5, en el blanco y negro de la quinta generación: el laboratorio.">
+  <div class="gen" data-a="1">GEN 5 · 2020 · LABORATORIO</div>
+  <div class="ring" data-a="2" style="background:linear-gradient(90deg,#fff 50%,#0D0E12 50%);color:var(--acc)">L</div>
+  <h2 data-a="3">Laboratorio 11</h2>
+  <div class="load"><i></i></div>
+</section>
+
+<!-- 17 MISIÓN -->
+<section class="slide g5" data-title="La misión" data-notes="La situación: un estudio independiente va a lanzar un videojuego original y necesita el banner principal, el hero, de su página web: 1280 por 720, 16 a 9. El juego, el título y el personaje son de ustedes: nada de personajes, logotipos ni nombres con derechos de autor. Las ocho metas se marcan solas en la pestaña Misión del taller.">
+  <div class="kicker" data-a="1">Laboratorio 11 · Situación</div>
+  <h2 data-a="1">Banner de lanzamiento de un videojuego original</h2>
+  <p class="lead" data-a="2">Un estudio independiente necesita el <b>hero</b> de la página web de su nuevo juego: <b>1280 × 720 px (16:9)</b>. El juego, su título y su protagonista los inventas tú.</p>
+  <div class="grid2" data-a="3" style="gap:16px">
+    <div class="card"><ul class="list" style="gap:6px">
+      <li><b>1.</b> Usa 4 capas o más.</li>
+      <li><b>2.</b> Aísla al protagonista con la <b>varita</b>.</li>
+      <li><b>3.</b> Pinta una <b>máscara</b> (borde suave o degradado).</li>
+      <li><b>4.</b> <b>Recorta</b> una capa a la proporción que necesita.</li>
+    </ul></div>
+    <div class="card"><ul class="list" style="gap:6px">
+      <li><b>5.</b> Pon una imagen en <b>perspectiva</b> (Distort).</li>
+      <li><b>6.</b> <b>Rota o voltea</b> un objeto.</li>
+      <li><b>7.</b> Usa una <b>máscara de recorte</b>.</li>
+      <li><b>8.</b> Título de 60 px o más con contorno o sombra.</li>
+    </ul></div>
+  </div>
+  <p class="small mute" data-a="4">Personajes, títulos y logotipos originales: nada protegido por derechos de autor.</p>
+</section>
+
+<!-- 18 TALLER -->
+<section class="slide g5" data-title="Taller GEN" data-notes="Como Photoshop no está instalado en el salón, el Taller GEN imita su interfaz: menús Archivo, Edición, Imagen, Capa, Selección y Vista; barra de opciones arriba; herramientas a la izquierda con las mismas teclas de CS6; paneles Capas, Propiedades, Historia y Misión a la derecha. Lo que aprendan aquí funciona igual en Photoshop. El trabajo se guarda solo en este navegador; al final usen el botón Descargar imagen.">
+  <div class="kicker" data-a="1">Laboratorio 11 · Herramienta</div>
+  <h2 data-a="1">Taller GEN: un editor con los atajos de Photoshop CS6</h2>
+  <div class="grid2 fill" data-a="2">
+    <div class="card"><ul class="list" style="gap:6px">
+      <li class="small"><kbd>V</kbd> Mover · <kbd>M</kbd> Marco (<kbd>Shift+M</kbd> elíptico) · <kbd>L</kbd> Lazo · <kbd>W</kbd> Varita</li>
+      <li class="small"><kbd>Shift</kbd> añade · <kbd>Alt</kbd> resta · <kbd>Ctrl+D</kbd> deselecciona · <kbd>Shift+Ctrl+I</kbd> invierte</li>
+      <li class="small">Botón el botón <b>Máscara</b> del panel Capas: con selección, la máscara toma su forma; <kbd>Supr</kbd> oculta lo seleccionado</li>
+      <li class="small"><kbd>B</kbd> Pincel en la máscara · <kbd>D</kbd> negro/blanco · <kbd>X</kbd> intercambia · <kbd>[ ]</kbd> tamaño · <kbd>\</kbd> rojo</li>
+      <li class="small"><kbd>Ctrl+T</kbd> o <kbd>Alt+T</kbd> transformación libre · <kbd>Ctrl</kbd>+arrastrar esquina = Distorsionar · <kbd>Enter</kbd>/<kbd>Esc</kbd></li>
+      <li class="small"><kbd>C</kbd> Recortar capa · <kbd>T</kbd> Texto · <kbd>Ctrl+J</kbd> duplicar · <kbd>Alt+Ctrl+G</kbd> máscara de recorte</li>
+      <li class="small"><kbd>Ctrl+Z</kbd> deshacer · <kbd>Shift+Ctrl+Z</kbd> rehacer · panel <b>Historia</b> · <kbd>F1</kbd> todos los atajos</li>
+    </ul></div>
+    <div class="card" style="display:grid;gap:14px;align-content:start">
+      <p>Menús <b>Archivo · Edición · Imagen · Capa · Selección · Vista</b>, barra de opciones, panel <b>Historia</b> y botones <b>↶ Deshacer / ↷ Rehacer</b>.</p>
+      <button class="btn big" id="openStudio">Abrir el Taller GEN ▶</button>
+      <p class="small mute">Acceso directo: <code>unidad8.html?taller</code> · Se guarda en este navegador. Al terminar: <b>⬇ Descargar imagen</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 19 ENTREGA -->
+<section class="slide g5" data-title="Tiempo, entrega y rúbrica" data-notes="Distribución sugerida para una sesión de laboratorio de tres horas, y la rúbrica de 100 puntos. Entregan una carpeta comprimida por OrbundSIS con tres archivos: el PNG, el JPG y el proyecto JSON.">
+  <div class="kicker" data-a="1">Laboratorio 11 · Organización</div>
+  <h2 data-a="1">Tiempo, entrega y rúbrica</h2>
+  <div class="grid2 fill" data-a="2">
+    <div class="card"><h3>Tiempo sugerido (3 h)</h3><ul class="list" style="gap:5px;margin-top:6px">
+      <li class="small">0:00 – 0:15 · Boceto: título, protagonista, fondo</li>
+      <li class="small">0:15 – 0:50 · Aislar al protagonista (varita + máscara)</li>
+      <li class="small">0:50 – 1:30 · Fondo, recorte y máscara de recorte</li>
+      <li class="small">1:30 – 2:10 · Perspectiva y transformaciones</li>
+      <li class="small">2:10 – 2:40 · Título y botón de llamada</li>
+      <li class="small">2:40 – 3:00 · Exportar y entregar</li>
+    </ul>
+    <p class="small" style="margin-top:10px"><b>Entrega:</b> <code>Apellido_Nombre_TESI1104_Lab11.zip</code> con el <b>.png</b>, el <b>.jpg</b> y el <b>.json</b>, en OrbundSIS.</p></div>
+    <div class="card"><h3>Rúbrica (100 pts)</h3><ul class="list" style="gap:5px;margin-top:6px">
+      <li class="small">Misión: 8 metas × 5 = <b>40</b></li>
+      <li class="small">Selección y máscara limpias, sin halos = <b>15</b></li>
+      <li class="small">Recorte y perspectiva creíbles = <b>15</b></li>
+      <li class="small">Composición: tercios, contraste, título legible = <b>15</b></li>
+      <li class="small">Originalidad del juego y del personaje = <b>10</b></li>
+      <li class="small">Entrega completa y nombres correctos = <b>5</b></li>
+      <li class="small">Reto CS6 (opcional) = <b>+10</b></li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- DESCARGA FINAL -->
+<section class="slide g5" data-title="Descarga tu trabajo" data-notes="Antes de salir del laboratorio, cada estudiante escribe su Apellido_Nombre y descarga tres archivos: la imagen PNG, la imagen JPG y el proyecto .json. La vista previa muestra la última versión guardada en este navegador. Comprimen los tres en una carpeta zip y la suben a OrbundSIS.">
+  <div class="kicker" data-a="1">Laboratorio 11 · Final</div>
+  <h2 data-a="1">Descarga tu trabajo antes de salir</h2>
+  <div class="row fill" style="gap:28px;align-items:flex-start" data-a="2">
+    <canvas id="finPrev" class="demo" width="640" height="360" style="width:620px;height:349px;box-shadow:0 10px 30px rgba(13,14,18,.18)"></canvas>
+    <div style="flex:1;display:grid;gap:12px">
+      <label class="ctl" style="display:grid;gap:4px">Apellido_Nombre<input id="finName" class="btn" style="font-family:var(--f-mono);font-weight:400" placeholder="Apellido_Nombre"></label>
+      <button class="btn big" id="finPng">⬇ Descargar imagen PNG</button>
+      <button class="btn big" id="finJpg">⬇ Descargar imagen JPG</button>
+      <button class="btn" id="finJson">⬇ Descargar proyecto .json</button>
+      <button class="btn" id="finOpen">Volver al Taller GEN</button>
+      <p class="small mute" id="finInfo"></p>
+    </div>
+  </div>
+</section>
+
+<!-- 20 RETO -->
+<section class="slide g5" data-title="Reto CS6 (opcional)" data-notes="Reto opcional por diez puntos de bono: rehacer el banner en Photoshop CS6 del salón. Aislar con Quick Selection y Refine Edge, máscara de capa, objeto inteligente antes de escalar, Distort sobre la pantalla, máscara de recorte en el título, y exportar con Save for Web a JPG de 300 KB o menos. Entregan el PSD con las capas con nombre.">
+  <div class="kicker" data-a="1">Bono +10</div>
+  <h2 data-a="1">Reto CS6: el mismo banner en Photoshop</h2>
+  <div class="grid3" data-a="2">
+    <div class="card"><h3>1 · Aislar</h3><p class="small">Quick Selection <kbd>W</kbd> + Refine Edge <kbd>Alt+Ctrl+R</kbd> → salida a <b>Layer Mask</b>.</p></div>
+    <div class="card"><h3>2 · Proteger</h3><p class="small">Convierte al protagonista en <b>Smart Object</b> antes de escalarlo o rotarlo.</p></div>
+    <div class="card"><h3>3 · Perspectiva</h3><p class="small"><kbd>Ctrl+T</kbd> y <kbd>Ctrl</kbd>+arrastrar esquinas para encajar una imagen en una pantalla o cartel.</p></div>
+    <div class="card"><h3>4 · Título</h3><p class="small">Textura dentro del título con <b>máscara de recorte</b> <kbd>Alt+Ctrl+G</kbd>.</p></div>
+    <div class="card"><h3>5 · Exportar</h3><p class="small">Save for Web <kbd>Alt+Shift+Ctrl+S</kbd>: JPG de <b>300 KB o menos</b>.</p></div>
+    <div class="card"><h3>6 · Entregar</h3><p class="small">El <b>.psd</b> con cada capa con nombre, más el JPG.</p></div>
+  </div>
+</section>
+
+<!-- BONO EXAMEN FINAL -->
+<section class="slide g5" data-title="Bono del examen final (+10)" data-notes="Bono de diez puntos para el examen final. Cada estudiante toma su propia foto con estas especificaciones y la edita en el Taller GEN, en modo Bono, con lo mismo del laboratorio: recortar a 16:9, aislar al protagonista con una selección y una máscara, ponerle un fondo nuevo, transformar algo y añadir un título con efectos. Al subir la foto, el taller revisa solo el formato, el peso, la orientación, las dimensiones y la iluminación. Que la foto sea original lo reviso yo. Entregan la foto original, el PNG y el proyecto JSON.">
+  <div class="kicker" data-a="1">Bono +10 · Examen final</div>
+  <h2 data-a="1">Bono del examen final: edita tu propia foto</h2>
+  <div class="grid2 fill" data-a="2" style="gap:18px">
+    <div class="card"><h3>Especificaciones de la foto</h3><ul class="list" style="gap:5px;margin-top:8px">
+      <li class="small"><b>Tomada por ti</b>: nada de internet, IA, capturas de pantalla ni marcas de agua.</li>
+      <li class="small"><b>JPG o PNG</b>, de <b>10 MB o menos</b>.</li>
+      <li class="small"><b>Horizontal</b> y de <b>1920 × 1080 px o más</b> (la cámara de cualquier teléfono lo cumple).</li>
+      <li class="small">Un <b>protagonista claro</b> (objeto, mascota, planta, juguete…) sobre un <b>fondo liso o de color contrastante</b>.</li>
+      <li class="small"><b>Bien iluminada y enfocada</b>, sin filtros de apps ni texto encima.</li>
+      <li class="small">Si sale otra persona, <b>con su permiso</b>.</li>
+    </ul><p class="small mute" style="margin-top:8px">Al subirla, el taller revisa formato, peso, orientación, dimensiones e iluminación.</p></div>
+    <div class="card" style="display:grid;gap:8px;align-content:start"><h3>Qué hacer · 5 metas × 2 pts</h3><ul class="list" style="gap:5px">
+      <li class="small">Sube la foto que cumple las especificaciones.</li>
+      <li class="small">Recórtala a <b>16:9</b> (<kbd>C</kbd>).</li>
+      <li class="small">Aísla al protagonista: selección (<kbd>W</kbd> <kbd>L</kbd> <kbd>M</kbd>) → el botón <b>Máscara</b>.</li>
+      <li class="small">Ponle un <b>fondo nuevo</b> y <b>transforma</b> algo (<kbd>Alt+T</kbd>).</li>
+      <li class="small"><b>Título</b> de 60 px o más con trazo o sombra.</li>
+    </ul>
+    <p class="small"><b>Entrega:</b> <code>Apellido_Nombre_TESI1104_BonoFinal.zip</code> con la <b>foto original</b>, el <b>.png</b> y el <b>.json</b>, antes del examen final.</p>
+    <button class="btn big" id="openBono">Abrir el Taller en modo Bono ▶</button></div>
+  </div>
+</section>
+
+<!-- 21 REPASO -->
+<section class="slide g5" data-title="Repaso" data-notes="Cuatro preguntas de repaso. Den tiempo para pensar antes de revelar cada respuesta con un clic.">
+  <div class="kicker" data-a="1">Fin de la partida</div>
+  <h2 data-a="1">Repaso: pulsa cada pregunta para ver la respuesta</h2>
+  <div class="grid2" data-a="2">
+    <button class="card qa"><b>1. En una máscara de capa, ¿qué pasa si pintas con negro?</b><span class="a">Esa parte de la capa se oculta sin borrar píxeles. Con blanco vuelve a verse; con gris, a medias.</span></button>
+    <button class="card qa"><b>2. ¿Cómo haces que una textura se vea solo dentro de un texto?</b><span class="a">Con una máscara de recorte: la textura encima del texto y <kbd>Alt+Ctrl+G</kbd>. En CSS: <code>background-clip: text</code>.</span></button>
+    <button class="card qa"><b>3. ¿Por qué convertir a objeto inteligente antes de transformar?</b><span class="a">Guarda la imagen original: puedes escalar y rotar muchas veces sin perder calidad.</span></button>
+    <button class="card qa"><b>4. Tienes una foto de 4000 × 3000 y necesitas un banner de 1920 × 1080. ¿Qué haces?</b><span class="a">Recortas a 16:9 (4000 × 2250) y luego reduces a 1920 × 1080. Reducir sí; agrandar no.</span></button>
+  </div>
+</section>
+
+<!-- 22 REFERENCIAS -->
+<section class="slide g5" data-title="Referencias" data-notes="Referencias del prontuario y documentación de las propiedades CSS mencionadas.">
+  <div class="kicker" data-a="1">Créditos</div>
+  <h2 data-a="1">Referencias</h2>
+  <div class="card" data-a="2" style="display:grid;gap:8px">
+    <p class="small">Chavez, C. (2024). <i>Adobe Photoshop classroom in a book (2025 release)</i> (1.ª ed.). Adobe Press.</p>
+    <p class="small">Beaird, J., &amp; George, J. (2023). <i>The principles of beautiful web design</i> (5th ed.). SitePoint.</p>
+    <p class="small">Williams, R., &amp; Tollett, J. (2022). <i>The non-designer's web book</i> (5th ed.). Peachpit Press.</p>
+    <p class="small">Duckett, J. (2022). <i>HTML &amp; CSS: Design and build websites</i> (2nd ed.). Wiley.</p>
+    <p class="small">Mozilla. (s.f.). <i>MDN Web Docs</i>: <code>transform</code>, <code>clip-path</code>, <code>mask-image</code>, <code>background-clip</code>, <code>aspect-ratio</code>, <code>object-fit</code>.</p>
+  </div>
+  <p class="small mute" data-a="3">Imágenes de la presentación y del Taller GEN generadas por computadora. Paletas inspiradas en los colores de cinco generaciones de consolas; no se usan logotipos ni marcas. Fuentes de Google Fonts (SIL Open Font License).</p>
+</section>
+
+<div id="osd"><span><span class="dot"></span><span id="osdGen">GEN 1 · 1994</span></span><span id="osdSlot">01 / 22</span></div>
+</div></div>
+
+<nav id="bar" aria-label="Navegación de la presentación">
+  <button id="prev" aria-label="Lámina anterior">◀</button>
+  <span id="count">1 / 22</span>
+  <button id="next" aria-label="Lámina siguiente">▶</button>
+  <div id="map"></div>
+  <button id="btnIdx">Índice (I)</button>
+  <button id="btnNotes">Notas (N)</button>
+  <button id="btnFs">Pantalla (F)</button>
+</nav>
+<div class="overlay" id="index"><ol id="idxList"></ol></div>
+<div id="notes"></div>
+
+<!-- ===================== TALLER GEN ===================== -->
+<div id="studio" role="dialog" aria-label="Taller GEN">
+  <div class="ps-menu" id="psMenu">
+    <span class="ps-logo">Tg</span>
+    <span class="sp"></span>
+    <input id="stName" placeholder="Apellido_Nombre" aria-label="Apellido y nombre">
+    <button id="psUndo" title="Deshacer (Ctrl+Z)">↶ Deshacer</button>
+    <button id="psRedo" title="Rehacer (Shift+Ctrl+Z)">↷ Rehacer</button>
+    <button id="psDl" class="primary" title="Descargar la imagen del banner">⬇ Descargar imagen</button>
+    <button id="psClose">Cerrar ✕</button>
+  </div>
+  <div class="ps-opts" id="stBar"></div>
+  <div class="st-main">
+    <aside class="st-tools" id="stTools">
+      <button data-t="move" title="Mover (V)"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M12 3 9 6M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/></svg><span class="k">V</span></button>
+      <button data-t="marquee" title="Marco rectangular / elíptico (M · Shift+M)"><svg viewBox="0 0 24 24" id="icoMarq"><rect x="4" y="5" width="16" height="14" stroke-dasharray="3 2.5"/></svg><span class="k">M</span></button>
+      <button data-t="lasso" title="Lazo (L)"><svg viewBox="0 0 24 24"><path d="M6 13c-2-1-2.5-3.5-1-5.5C7 5 11 4 15 4.5s6 3 5 5.5-5 4.5-9 4.5c-2 0-3.5-.3-5-1.5z" stroke-dasharray="3 2"/><path d="M7 14c-.5 2 .5 4 2.5 5"/></svg><span class="k">L</span></button>
+      <button data-t="wand" title="Varita mágica (W)"><svg viewBox="0 0 24 24"><path d="M4 20 14 10"/><path d="M16 3v3M16 10v3M19.5 8H22M10.5 8H13M18.5 5.5 20 4M13.5 5.5 12 4M18.5 10.5 20 12"/></svg><span class="k">W</span></button>
+      <button data-t="crop" title="Recortar capa (C)"><svg viewBox="0 0 24 24"><path d="M6 2v16h16"/><path d="M2 6h16v16"/></svg><span class="k">C</span></button>
+      <button data-t="brush" title="Pincel sobre la máscara (B)"><svg viewBox="0 0 24 24"><path d="M18.5 3.5l2 2-8.5 8.5-2-2z"/><path d="M9.5 12.5c-3 0-4.5 2-4.5 4.5 0 1-1 2-2 2 2.5 2 7 1.7 8.5-.5 1.2-1.8.8-4-2-6z"/></svg><span class="k">B</span></button>
+      <button data-t="text" title="Texto horizontal (T)"><svg viewBox="0 0 24 24"><path d="M5 5h14M12 5v15M9 20h6"/></svg><span class="k">T</span></button>
+      <hr>
+      <button data-t="xf" title="Transformación libre (Ctrl+T o Alt+T)"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" stroke-dasharray="2 2"/><rect x="3.5" y="3.5" width="4" height="4"/><rect x="16.5" y="3.5" width="4" height="4"/><rect x="3.5" y="16.5" width="4" height="4"/><rect x="16.5" y="16.5" width="4" height="4"/></svg><span class="k">⌃T</span></button>
+      <hr>
+      <div class="swatch" title="Colores frontal y de fondo (D: predeterminados · X: intercambiar)"><i class="fg" id="swFg"></i><i class="bgs" id="swBg"></i><b id="swX">⇄</b></div>
+    </aside>
+    <div id="stWrap">
+      <div class="ps-tab" id="psTab">banner.psd @ 100% (RGB/8)</div>
+      <div id="stStage"><canvas id="stCv" width="1280" height="720"></canvas></div>
+      <div class="ps-status" id="psStatus"></div>
+    </div>
+    <aside class="st-side">
+      <div class="st-tabs"><button data-p="lay" class="on">Capas</button><button data-p="prop">Propiedades</button><button data-p="hist">Historia</button><button data-p="mis">Misión</button></div>
+      <div class="st-pane" id="pLay">
+        <div class="lay-top"><select id="layBlend" title="Modo de fusión"></select><label>Opac. <input type="range" id="layOp" min="0" max="100"></label></div>
+        <ul id="layers"></ul>
+        <div class="lyr-acts">
+          <button data-la="clip" title="Crear máscara de recorte (Alt+Ctrl+G)">↳ Recorte</button>
+          <button data-la="mask" title="Añadir máscara de capa. Con selección: toma su forma. Alt+clic: oculta">◐ Máscara</button>
+          <button data-la="text" title="Nueva capa de texto (T)">T</button>
+          <button data-la="dup" title="Duplicar capa (Ctrl+J)">⧉</button>
+          <button data-la="up" title="Traer adelante (Ctrl+])">▲</button>
+          <button data-la="down" title="Enviar atrás (Ctrl+[)">▼</button>
+          <button data-la="del" title="Eliminar capa">🗑</button>
+        </div>
+        <p style="color:#8a8a8a;font-size:11px;margin-top:8px">Igual que en Photoshop: la capa de arriba en la lista se dibuja encima. Doble clic en el nombre para cambiarlo. La miniatura negra es la máscara.</p>
+      </div>
+      <div class="st-pane pp" id="pProp" hidden></div>
+      <div class="st-pane" id="pHist" hidden><ul id="histList"></ul><p style="color:#8a8a8a;font-size:11px;margin-top:8px">Pulsa un paso para volver a ese momento, como en el panel History de Photoshop.</p></div>
+      <div class="st-pane" id="pMis" hidden>
+        <div id="score">0 / 8 metas</div>
+        <ul id="mission"></ul>
+        <p id="misNote" style="color:#8a8a8a;font-size:12px;margin-top:12px"></p>
+      </div>
+    </aside>
+  </div>
+  <input type="file" id="stFile" accept="image/*" hidden>
+  <input type="file" id="stJson" accept=".json,application/json" hidden>
+</div>
+<div id="psDrop"></div>
+<div class="modal" id="libModal"><div class="box">
+  <div class="row" style="justify-content:space-between"><h3>Colocar imagen (File › Place)</h3><button class="mbtn" id="libClose">Cerrar</button></div>
+  <h3 style="font-size:12px;color:#8CCBFF">Fondos (1280 × 720)</h3><div class="gal" id="galBg"></div>
+  <h3 style="font-size:12px;color:#8CCBFF">Fotos para aislar o recortar</h3><div class="gal" id="galPh"></div>
+  <h3 style="font-size:12px;color:#8CCBFF">Objetos con transparencia</h3><div class="gal" id="galOb"></div>
+</div></div>
+<div class="modal" id="dlModal"><div class="box" style="max-width:720px">
+  <div class="row" style="justify-content:space-between"><h3>Descargar mi trabajo</h3><button class="mbtn" id="dlClose">Cerrar</button></div>
+  <canvas id="dlPrev" width="640" height="360" style="width:100%;max-width:640px;display:block;margin:6px auto;background:#000;border:1px solid #1d1d1d"></canvas>
+  <p>Archivo: <b id="dlName" style="font-family:var(--f-mono)"></b></p>
+  <div class="row" style="gap:8px;margin:8px 0">
+    <button class="mbtn primary" id="dlPng">⬇ Imagen PNG</button>
+    <button class="mbtn primary" id="dlJpg">⬇ Imagen JPG</button>
+    <button class="mbtn" id="dlJson">⬇ Proyecto .json</button>
+  </div>
+  <p style="color:#a8a8a8" id="dlNote">Entrega los tres archivos en <b>Apellido_Nombre_TESI1104_Lab11.zip</b> por OrbundSIS. Con el .json puedes abrir tu trabajo otra vez desde Archivo › Abrir proyecto.</p>
+</div></div>
+<div class="modal" id="keyModal"><div class="box">
+  <div class="row" style="justify-content:space-between"><h3>Atajos del Taller (los mismos de Photoshop CS6)</h3><button class="mbtn" id="keyClose">Cerrar</button></div>
+  <div class="keys">
+    <div>Mover <kbd>V</kbd></div><div>Marco rectangular / elíptico <kbd>M · Shift+M</kbd></div><div>Lazo <kbd>L</kbd></div><div>Varita mágica <kbd>W</kbd></div>
+    <div>Recortar capa <kbd>C</kbd></div><div>Pincel (máscara) <kbd>B</kbd></div><div>Texto <kbd>T</kbd></div><div>Transformación libre <kbd>Ctrl+T · Alt+T</kbd></div>
+    <div>Distorsionar una esquina <kbd>Ctrl+arrastrar</kbd></div><div>Aplicar / cancelar <kbd>Enter · Esc</kbd></div><div>Añadir a la selección <kbd>Shift</kbd></div><div>Restar de la selección <kbd>Alt</kbd></div>
+    <div>Intersectar <kbd>Shift+Alt</kbd></div><div>Seleccionar todo <kbd>Ctrl+A</kbd></div><div>Deseleccionar <kbd>Ctrl+D</kbd></div><div>Volver a seleccionar <kbd>Shift+Ctrl+D</kbd></div>
+    <div>Invertir selección <kbd>Shift+Ctrl+I</kbd></div><div>Calar <kbd>Shift+F6</kbd></div><div>Ocultar lo seleccionado <kbd>Supr</kbd></div><div>Invertir máscara <kbd>Ctrl+I</kbd></div>
+    <div>Colores negro/blanco <kbd>D</kbd></div><div>Intercambiar colores <kbd>X</kbd></div><div>Tamaño del pincel <kbd>[ ]</kbd></div><div>Máscara en rojo <kbd>\</kbd></div>
+    <div>Duplicar capa <kbd>Ctrl+J</kbd></div><div>Máscara de recorte <kbd>Alt+Ctrl+G</kbd></div><div>Traer adelante / atrás <kbd>Ctrl+] · Ctrl+[</kbd></div><div>Guías de tercios <kbd>Ctrl+;</kbd></div>
+    <div>Deshacer <kbd>Ctrl+Z</kbd></div><div>Rehacer <kbd>Shift+Ctrl+Z</kbd></div><div>Paso atrás <kbd>Alt+Ctrl+Z</kbd></div><div>Guardar proyecto <kbd>Ctrl+S</kbd></div>
+    <div>Guardar para Web (PNG) <kbd>Alt+Shift+Ctrl+S</kbd></div><div>Mover 1 px / 10 px <kbd>Flechas · Shift</kbd></div>
+  </div>
+  <p style="color:#a8a8a8;margin-top:10px">El navegador reserva algunos atajos (Ctrl+T, Ctrl+N, Ctrl+W). Si Ctrl+T abre una pestaña nueva, usa <b>Alt+T</b> o el botón de transformación de la barra de herramientas.</p>
+</div></div>
+<div class="modal" id="specModal"><div class="box" style="max-width:620px">
+  <div class="row" style="justify-content:space-between"><h3>Revisión de la foto (bono del examen final)</h3><button class="mbtn" onclick="this.closest('.modal').classList.remove('open')">Continuar</button></div>
+  <ul id="specList" style="list-style:none;margin:0;padding:0"></ul><p id="specMsg" style="margin-top:10px"></p>
+</div></div>
+<div class="modal" id="bonoInfo"><div class="box" style="max-width:680px">
+  <div class="row" style="justify-content:space-between"><h3>Bono del examen final (+10): tu propia foto</h3><button class="mbtn" onclick="this.closest('.modal').classList.remove('open')">Cerrar</button></div>
+  <p><b>Especificaciones de la foto</b></p>
+  <ul style="margin:4px 0 10px;padding-left:18px;line-height:1.6">
+    <li>Tomada por ti: nada de internet, IA, capturas de pantalla ni marcas de agua.</li>
+    <li>JPG o PNG, <b>10 MB o menos</b>, <b>horizontal</b> y de <b>1920 × 1080 px o más</b>.</li>
+    <li>Un <b>protagonista claro</b> (objeto, mascota, planta, juguete…) sobre un <b>fondo liso o de color contrastante</b>.</li>
+    <li>Bien iluminada y enfocada, sin filtros de apps ni texto encima.</li>
+    <li>Si sale otra persona, debe darte permiso.</li>
+  </ul>
+  <p><b>Qué hacer (5 metas × 2 pts):</b> recortar a 16:9 · aislar al protagonista con una selección y una máscara · ponerle un fondo nuevo y transformar algo · título de 60 px o más con fx · descargar.</p>
+  <div class="row" style="gap:8px;margin-top:10px"><button class="mbtn primary" onclick="this.closest('.modal').classList.remove('open');document.getElementById('stFile').click()">Subir mi foto</button></div>
+</div></div>
+<div id="toast"></div>
+
+
+<script>
+/* ======================= UTILIDADES E IMÁGENES ======================= */
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+function mk(w,h){const c=document.createElement('canvas');c.width=Math.max(1,Math.round(w));c.height=Math.max(1,Math.round(h));return c}
+function rnd(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>(s=(s*16807)%2147483647)/2147483647}
+function rr(x,X,Y,W,H,R){x.beginPath();x.moveTo(X+R,Y);x.arcTo(X+W,Y,X+W,Y+H,R);x.arcTo(X+W,Y+H,X,Y+H,R);x.arcTo(X,Y+H,X,Y,R);x.arcTo(X,Y,X+W,Y,R);x.closePath()}
+function lg(x,x0,y0,x1,y1,stops){const g=x.createLinearGradient(x0,y0,x1,y1);stops.forEach(s=>g.addColorStop(s[0],s[1]));return g}
+function toast(t){const e=$('#toast');e.textContent=t;e.style.display='block';clearTimeout(toast.t);toast.t=setTimeout(()=>e.style.display='none',2600)}
+function mountains(x,W,H,base,amp,col,seed){const r=rnd(seed);x.fillStyle=col;x.beginPath();x.moveTo(0,H);x.lineTo(0,base-r()*amp);let px=0;while(px<W){px+=50+r()*110;x.lineTo(px,base-r()*amp)}x.lineTo(W,H);x.closePath();x.fill()}
+function stars(x,W,H,n,seed){const r=rnd(seed);for(let i=0;i<n;i++){x.globalAlpha=.3+r()*.7;x.fillStyle='#fff';const s=r()<.08?2.5:1.3;x.fillRect(r()*W,r()*H,s,s)}x.globalAlpha=1}
+function cloud(x,cx,cy,s,col){x.fillStyle=col;[[0,0,1],[-.9,.2,.7],[.9,.25,.75],[-.4,-.45,.75],[.45,-.35,.7]].forEach(([dx,dy,r])=>{x.beginPath();x.arc(cx+dx*60*s,cy+dy*50*s,60*r*s,0,7);x.fill()});x.fillRect(cx-110*s,cy,220*s,55*s)}
+function drawRobot(x,cx,cy,s){x.lineJoin='round';x.lineWidth=6*s;x.strokeStyle='#1F2433';
+  x.fillStyle='#8F98AC';rr(x,cx-80*s,cy+170*s,55*s,90*s,14*s);x.fill();x.stroke();rr(x,cx+25*s,cy+170*s,55*s,90*s,14*s);x.fill();x.stroke();
+  x.fillStyle='#E4572E';rr(x,cx-95*s,cy+245*s,80*s,32*s,12*s);x.fill();x.stroke();rr(x,cx+15*s,cy+245*s,80*s,32*s,12*s);x.fill();x.stroke();
+  x.fillStyle='#B9C2D3';rr(x,cx-170*s,cy-10*s,55*s,160*s,24*s);x.fill();x.stroke();rr(x,cx+115*s,cy-10*s,55*s,160*s,24*s);x.fill();x.stroke();
+  x.fillStyle='#D3DAE6';rr(x,cx-115*s,cy-40*s,230*s,230*s,34*s);x.fill();x.stroke();
+  x.fillStyle='#2D64F0';rr(x,cx-60*s,cy+20*s,120*s,70*s,16*s);x.fill();x.stroke();
+  x.fillStyle='#FFC531';x.beginPath();x.arc(cx,cy+55*s,18*s,0,7);x.fill();x.stroke();
+  x.beginPath();x.moveTo(cx,cy-205*s);x.lineTo(cx,cy-250*s);x.stroke();x.fillStyle='#E4572E';x.beginPath();x.arc(cx,cy-258*s,16*s,0,7);x.fill();x.stroke();
+  x.fillStyle='#EEF2F8';rr(x,cx-100*s,cy-210*s,200*s,160*s,44*s);x.fill();x.stroke();
+  x.fillStyle='#121B33';rr(x,cx-75*s,cy-175*s,150*s,70*s,30*s);x.fill();x.stroke();
+  x.fillStyle='#45E0F5';x.beginPath();x.arc(cx-30*s,cy-140*s,13*s,0,7);x.arc(cx+30*s,cy-140*s,13*s,0,7);x.fill()}
+function drawShip(x,cx,cy,s){x.lineJoin='round';x.lineWidth=5*s;x.strokeStyle='#1A1D29';
+  const fl=x.createLinearGradient(cx-250*s,0,cx-150*s,0);fl.addColorStop(0,'rgba(255,120,40,0)');fl.addColorStop(1,'#FFD25A');x.fillStyle=fl;x.beginPath();x.moveTo(cx-150*s,cy-28*s);x.lineTo(cx-270*s,cy);x.lineTo(cx-150*s,cy+28*s);x.fill();
+  x.fillStyle='#2D64F0';x.beginPath();x.moveTo(cx-60*s,cy-30*s);x.lineTo(cx-130*s,cy-130*s);x.lineTo(cx-40*s,cy-130*s);x.lineTo(cx+40*s,cy-30*s);x.closePath();x.fill();x.stroke();
+  x.beginPath();x.moveTo(cx-60*s,cy+30*s);x.lineTo(cx-130*s,cy+130*s);x.lineTo(cx-40*s,cy+130*s);x.lineTo(cx+40*s,cy+30*s);x.closePath();x.fill();x.stroke();
+  x.fillStyle='#E9EDF4';x.beginPath();x.moveTo(cx-160*s,cy-40*s);x.lineTo(cx+120*s,cy-40*s);x.quadraticCurveTo(cx+230*s,cy,cx+120*s,cy+40*s);x.lineTo(cx-160*s,cy+40*s);x.closePath();x.fill();x.stroke();
+  x.fillStyle='#E4572E';x.fillRect(cx-150*s,cy-8*s,200*s,16*s);
+  x.fillStyle='#45E0F5';x.beginPath();x.ellipse(cx+90*s,cy-14*s,48*s,20*s,0,0,7);x.fill();x.stroke()}
+const LIB={
+  bg_atardecer:['Atardecer','bg',()=>{const c=mk(1280,720),x=c.getContext('2d');x.fillStyle=lg(x,0,0,0,720,[[0,'#1B1446'],[.45,'#A8386B'],[.68,'#FF8F4D'],[1,'#FFD27A']]);x.fillRect(0,0,1280,720);x.fillStyle='#FFE9A8';x.beginPath();x.arc(880,430,110,0,7);x.fill();mountains(x,1280,720,470,150,'#3A1F4F',7);mountains(x,1280,720,560,120,'#24123A',11);x.fillStyle='#160B26';x.fillRect(0,640,1280,80);return c}],
+  bg_ciudad:['Ciudad de noche','bg',()=>{const c=mk(1280,720),x=c.getContext('2d'),r=rnd(21);x.fillStyle=lg(x,0,0,0,720,[[0,'#05060F'],[.6,'#1A1240'],[1,'#3A1555']]);x.fillRect(0,0,1280,720);stars(x,1280,380,120,5);let px=-10;while(px<1280){const w=60+r()*90,h=170+r()*360;x.fillStyle=r()<.5?'#0E0C22':'#14112E';x.fillRect(px,720-h,w,h);for(let wy=720-h+16;wy<700;wy+=22)for(let wx=px+10;wx<px+w-10;wx+=16)if(r()<.35){x.fillStyle=['#45E0F5','#FF4FA3','#FFC531','#B9C2FF'][Math.floor(r()*4)];x.globalAlpha=.55+r()*.45;x.fillRect(wx,wy,7,10);x.globalAlpha=1}px+=w+4}x.fillStyle=lg(x,0,640,0,720,[[0,'rgba(255,79,163,0)'],[1,'rgba(255,79,163,.45)']]);x.fillRect(0,640,1280,80);return c}],
+  bg_galaxia:['Galaxia','bg',()=>{const c=mk(1280,720),x=c.getContext('2d');x.fillStyle='#03030A';x.fillRect(0,0,1280,720);x.globalCompositeOperation='lighter';[[380,300,420,'rgba(90,60,220,.55)'],[820,420,380,'rgba(220,60,150,.45)'],[640,250,300,'rgba(40,160,255,.35)'],[1020,180,220,'rgba(120,255,220,.18)']].forEach(([X,Y,R,C])=>{const g=x.createRadialGradient(X,Y,0,X,Y,R);g.addColorStop(0,C);g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,1280,720)});x.globalCompositeOperation='source-over';stars(x,1280,720,520,9);return c}],
+  bg_rejilla:['Rejilla retro','bg',()=>{const c=mk(1280,720),x=c.getContext('2d');x.fillStyle=lg(x,0,0,0,430,[[0,'#0B0630'],[.7,'#5B1C7A'],[1,'#FF4F8B']]);x.fillRect(0,0,1280,430);stars(x,1280,260,90,3);x.save();x.beginPath();x.arc(640,400,170,0,7);x.clip();x.fillStyle=lg(x,0,230,0,570,[[0,'#FFE26B'],[1,'#FF3D7F']]);x.fillRect(470,230,340,340);x.fillStyle='#5B1C7A';for(let i=0;i<7;i++){x.fillRect(470,330+i*15,340,3+i*1.6)}x.restore();x.fillStyle='#12062A';x.fillRect(0,430,1280,290);x.strokeStyle='#FF3DD8';x.lineWidth=2;x.shadowColor='#FF3DD8';x.shadowBlur=8;for(let i=-24;i<=24;i++){x.beginPath();x.moveTo(640+i*14,430);x.lineTo(640+i*110,720);x.stroke()}for(let k=0;k<12;k++){const y=430+Math.pow(k/11,2.2)*290;x.beginPath();x.moveTo(0,y);x.lineTo(1280,y);x.stroke()}x.shadowBlur=0;return c}],
+  bg_sala:['Sala con monitor','bg',()=>{const c=mk(1280,720),x=c.getContext('2d');x.fillStyle=lg(x,0,0,0,720,[[0,'#2A2F45'],[1,'#141725']]);x.fillRect(0,0,1280,720);x.fillStyle='rgba(255,197,49,.12)';x.beginPath();x.arc(200,120,260,0,7);x.fill();x.fillStyle='#4A3428';x.fillRect(0,560,1280,160);x.fillStyle='#5D4334';x.fillRect(0,560,1280,18);
+    const Q=LIB_SALA_Q;x.fillStyle='#C9CDD6';x.strokeStyle='#1A1D29';x.lineWidth=6;x.beginPath();x.moveTo(Q[0][0]-40,Q[0][1]-40);x.lineTo(Q[1][0]+40,Q[1][1]-28);x.lineTo(Q[2][0]+38,Q[2][1]+42);x.lineTo(Q[3][0]-40,Q[3][1]+50);x.closePath();x.fill();x.stroke();
+    x.fillStyle='#9EA3AE';x.beginPath();x.moveTo(600,Q[3][1]+50);x.lineTo(720,Q[2][1]+42);x.lineTo(740,560);x.lineTo(580,560);x.closePath();x.fill();x.stroke();
+    x.fillStyle='#0B0F18';x.beginPath();Q.forEach((p,i)=>i?x.lineTo(p[0],p[1]):x.moveTo(p[0],p[1]));x.closePath();x.fill();
+    x.fillStyle='rgba(255,255,255,.08)';x.beginPath();x.moveTo(Q[0][0]+10,Q[0][1]+8);x.lineTo(Q[1][0]-60,Q[1][1]+10);x.lineTo(Q[0][0]+30,Q[3][1]-60);x.closePath();x.fill();
+    x.fillStyle='#2D64F0';x.beginPath();x.arc(Q[2][0]+12,Q[2][1]+26,6,0,7);x.fill();return c}],
+  ph_robot:['Robot en el cielo','ph',()=>{const c=mk(1280,720),x=c.getContext('2d');x.fillStyle=lg(x,0,0,0,720,[[0,'#6BB0EA'],[1,'#92CBF2']]);x.fillRect(0,0,1280,720);cloud(x,230,170,1,'#F4F9FF');cloud(x,1060,250,.8,'#F4F9FF');cloud(x,900,600,.7,'#EAF4FF');drawRobot(x,640,390,1.05);return c}],
+  ph_nave:['Nave entre nubes','ph',()=>{const c=mk(1280,720),x=c.getContext('2d');x.fillStyle=lg(x,0,0,0,720,[[0,'#FF9A62'],[1,'#FFD9A0']]);x.fillRect(0,0,1280,720);cloud(x,220,560,1.2,'#FFF1DE');cloud(x,1080,150,.9,'#FFF1DE');drawShip(x,660,360,1.4);return c}],
+  ob_robot:['Robot (PNG)','ob',()=>{const c=mk(420,600),x=c.getContext('2d');drawRobot(x,210,300,1);return c}],
+  ob_nave:['Nave (PNG)','ob',()=>{const c=mk(560,300),x=c.getContext('2d');drawShip(x,300,150,1);return c}],
+  ob_planeta:['Planeta (PNG)','ob',()=>{const c=mk(460,300),x=c.getContext('2d');x.save();x.translate(230,150);x.rotate(-.25);x.strokeStyle='rgba(255,210,120,.8)';x.lineWidth=14;x.beginPath();x.ellipse(0,0,210,52,0,Math.PI,2*Math.PI);x.stroke();const g=x.createRadialGradient(-40,-40,10,0,0,120);g.addColorStop(0,'#FFB36B');g.addColorStop(1,'#B2357A');x.fillStyle=g;x.beginPath();x.arc(0,0,115,0,7);x.fill();x.beginPath();x.ellipse(0,0,210,52,0,0,Math.PI);x.stroke();x.restore();return c}],
+  ob_gema:['Gema (PNG)','ob',()=>{const c=mk(300,320),x=c.getContext('2d');const P=[[150,20],[260,110],[150,300],[40,110]];x.fillStyle=lg(x,40,20,260,300,[[0,'#7CF2FF'],[1,'#2D64F0']]);x.beginPath();P.forEach((p,i)=>i?x.lineTo(...p):x.moveTo(...p));x.closePath();x.fill();x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=4;x.beginPath();x.moveTo(40,110);x.lineTo(260,110);x.moveTo(150,20);x.lineTo(110,110);x.lineTo(150,300);x.lineTo(190,110);x.lineTo(150,20);x.stroke();return c}],
+  ob_estallido:['Estallido (PNG)','ob',()=>{const c=mk(420,420),x=c.getContext('2d');x.translate(210,210);x.fillStyle='#FFC531';x.strokeStyle='#1A1D29';x.lineWidth=6;x.beginPath();for(let i=0;i<32;i++){const a=i*Math.PI/16,r=i%2?110:200;x.lineTo(Math.cos(a)*r,Math.sin(a)*r)}x.closePath();x.fill();x.stroke();x.fillStyle='#E4572E';x.beginPath();for(let i=0;i<24;i++){const a=i*Math.PI/12+.1,r=i%2?60:120;x.lineTo(Math.cos(a)*r,Math.sin(a)*r)}x.closePath();x.fill();return c}]
+};
+const LIB_SALA_Q=[[470,190],[820,215],[805,450],[462,440]];
+const SRC={};function getSrc(k){if(!SRC[k]&&LIB[k])SRC[k]=LIB[k][2]();return SRC[k]}
+
+/* Homografía: cuadrado unidad/rect → cuadrilátero */
+function adj(m){return[m[4]*m[8]-m[5]*m[7],m[2]*m[7]-m[1]*m[8],m[1]*m[5]-m[2]*m[4],m[5]*m[6]-m[3]*m[8],m[0]*m[8]-m[2]*m[6],m[2]*m[3]-m[0]*m[5],m[3]*m[7]-m[4]*m[6],m[1]*m[6]-m[0]*m[7],m[0]*m[4]-m[1]*m[3]]}
+function mmul(a,b){const c=[];for(let i=0;i<3;i++)for(let j=0;j<3;j++){let s=0;for(let k=0;k<3;k++)s+=a[3*i+k]*b[3*k+j];c[3*i+j]=s}return c}
+function mvec(m,v){return[m[0]*v[0]+m[1]*v[1]+m[2]*v[2],m[3]*v[0]+m[4]*v[1]+m[5]*v[2],m[6]*v[0]+m[7]*v[1]+m[8]*v[2]]}
+function basis(p){const m=[p[0][0],p[1][0],p[2][0],p[0][1],p[1][1],p[2][1],1,1,1];const v=mvec(adj(m),[p[3][0],p[3][1],1]);return mmul(m,[v[0],0,0,0,v[1],0,0,0,v[2]])}
+function homog(src,dst){return mmul(basis(dst),adj(basis(src)))}
+function hApply(H,x,y){const v=mvec(H,[x,y,1]);return[v[0]/v[2],v[1]/v[2]]}
+/* quad = [tl,tr,br,bl] */
+function quadH(w,h,q){return homog([[0,0],[w,0],[0,h],[w,h]],[q[0],q[1],q[3],q[2]])}
+function matrix3d(w,h,q){const t=quadH(w,h,q).map((v,i,a)=>v/a[8]);return[t[0],t[3],0,t[6],t[1],t[4],0,t[7],0,0,1,0,t[2],t[5],0,t[8]]}
+function drawTri(x,img,s0,s1,s2,d0,d1,d2){const den=(s1[0]-s0[0])*(s2[1]-s0[1])-(s2[0]-s0[0])*(s1[1]-s0[1]);if(Math.abs(den)<1e-9)return;
+  const a=((d1[0]-d0[0])*(s2[1]-s0[1])-(d2[0]-d0[0])*(s1[1]-s0[1]))/den,c=((d2[0]-d0[0])*(s1[0]-s0[0])-(d1[0]-d0[0])*(s2[0]-s0[0]))/den,
+  b=((d1[1]-d0[1])*(s2[1]-s0[1])-(d2[1]-d0[1])*(s1[1]-s0[1]))/den,d=((d2[1]-d0[1])*(s1[0]-s0[0])-(d1[1]-d0[1])*(s2[0]-s0[0]))/den,
+  e=d0[0]-a*s0[0]-c*s0[1],f=d0[1]-b*s0[0]-d*s0[1];
+  const cx=(d0[0]+d1[0]+d2[0])/3,cy=(d0[1]+d1[1]+d2[1])/3,ex=p=>{const dx=p[0]-cx,dy=p[1]-cy,L=Math.hypot(dx,dy)||1;return[p[0]+dx/L*.8,p[1]+dy/L*.8]};
+  const D0=ex(d0),D1=ex(d1),D2=ex(d2);x.save();x.beginPath();x.moveTo(D0[0],D0[1]);x.lineTo(D1[0],D1[1]);x.lineTo(D2[0],D2[1]);x.closePath();x.clip();x.transform(a,b,c,d,e,f);x.drawImage(img,0,0);x.restore()}
+function drawQuad(x,img,q,N){N=N||10;const w=img.width,h=img.height,H=quadH(w,h,q);const P=[];for(let j=0;j<=N;j++){P[j]=[];for(let i=0;i<=N;i++)P[j][i]=hApply(H,i/N*w,j/N*h)}
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){const sx0=i/N*w,sx1=(i+1)/N*w,sy0=j/N*h,sy1=(j+1)/N*h;
+    drawTri(x,img,[sx0,sy0],[sx1,sy0],[sx0,sy1],P[j][i],P[j][i+1],P[j+1][i]);drawTri(x,img,[sx1,sy0],[sx1,sy1],[sx0,sy1],P[j][i+1],P[j+1][i+1],P[j+1][i])}}
+
+/* Varita: selección por inundación */
+function floodSel(data,w,h,sx,sy,tol,cont){const d=data,i0=(sy*w+sx)*4,r0=d[i0],g0=d[i0+1],b0=d[i0+2],a0=d[i0+3],sel=new Uint8Array(w*h);
+  const ok=i=>{const p=i*4;return Math.abs(d[p]-r0)<=tol&&Math.abs(d[p+1]-g0)<=tol&&Math.abs(d[p+2]-b0)<=tol&&Math.abs(d[p+3]-a0)<=tol};
+  if(!cont){for(let i=0;i<w*h;i++)if(ok(i))sel[i]=1;return sel}
+  const st=[sy*w+sx],seen=new Uint8Array(w*h);seen[st[0]]=1;
+  while(st.length){const i=st.pop();if(!ok(i))continue;sel[i]=1;const x=i%w,y=(i-x)/w;
+    if(x>0&&!seen[i-1]){seen[i-1]=1;st.push(i-1)}if(x<w-1&&!seen[i+1]){seen[i+1]=1;st.push(i+1)}if(y>0&&!seen[i-w]){seen[i-w]=1;st.push(i-w)}if(y<h-1&&!seen[i+w]){seen[i+w]=1;st.push(i+w)}}
+  return sel}
+function combineSel(a,b,m){if(m==='new'||(!a&&m==='add'))return b;if(!a)return m==='sub'?new Uint8Array(b.length):b;const o=new Uint8Array(b.length);for(let i=0;i<b.length;i++)o[i]=m==='add'?(a[i]|b[i]):m==='sub'?(a[i]&&!b[i]?1:0):(a[i]&&b[i]?1:0);return o}
+function selEdges(sel,w,h){const e=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++){const i=y*w+x;if(!sel[i])continue;if(x===0||y===0||x===w-1||y===h-1||!sel[i-1]||!sel[i+1]||!sel[i-w]||!sel[i+w])e.push(i)}return e}
+function boxBlurAlpha(a,w,h,r){if(r<1)return a;r=Math.round(r);const t=new Float32Array(w*h),o=new Float32Array(w*h);
+  for(let y=0;y<h;y++){let s=0;const row=y*w;for(let x=-r;x<=r;x++)s+=a[row+Math.min(w-1,Math.max(0,x))];for(let x=0;x<w;x++){t[row+x]=s/(2*r+1);s+=a[row+Math.min(w-1,x+r+1)]-a[row+Math.max(0,x-r)]}}
+  for(let x=0;x<w;x++){let s=0;for(let y=-r;y<=r;y++)s+=t[Math.min(h-1,Math.max(0,y))*w+x];for(let y=0;y<h;y++){o[y*w+x]=s/(2*r+1);s+=t[Math.min(h-1,y+r+1)*w+x]-t[Math.max(0,y-r)*w+x]}}
+  return o}
+function selCanvas(sel,w,h,feather){let a=new Float32Array(w*h);for(let i=0;i<w*h;i++)a[i]=sel[i]?255:0;if(feather>0){a=boxBlurAlpha(a,w,h,feather);a=boxBlurAlpha(a,w,h,feather)}
+  const c=mk(w,h),x=c.getContext('2d'),id=x.createImageData(w,h);for(let i=0;i<w*h;i++){id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=255;id.data[i*4+3]=a[i]}x.putImageData(id,0,0);return c}
+function antsDraw(x,edges,w,sc,ox,oy,t){x.save();for(const i of edges){const px=i%w,py=(i-px)/w;x.fillStyle=((px+py+t)>>2)&1?'#fff':'#000';x.fillRect(ox+px*sc,oy+py*sc,Math.max(1,sc),Math.max(1,sc))}x.restore()}
+</script>
+
+<script>
+/* ======================= PRESENTACIÓN ======================= */
+(function(){
+const stage=$('#stage'),vp=$('#viewport'),slides=$$('.slide');let cur=0;
+const GEN={g1:['GEN 1 · 1994','#3E4596','#9C9B95'],g2:['GEN 2 · 2000','#8AAEFF','#1A2A6E'],g3:['GEN 3 · 2006','#C9CED6','#7C8089'],g4:['GEN 4 · 2013','#8CCBFF','#2F8BFF'],g5:['GEN 5 · 2020','#2D64F0','#E6E8EC']};
+const genOf=s=>['g1','g2','g3','g4','g5'].find(g=>s.classList.contains(g));
+function fit(){const s=Math.min(vp.clientWidth/1280,vp.clientHeight/720);stage.style.transform='scale('+s+')'}
+addEventListener('resize',fit);fit();
+const map=$('#map'),idx=$('#idxList');
+slides.forEach((s,i)=>{const b=document.createElement('i');b.style.background=GEN[genOf(s)][2];b.title=(i+1)+'. '+s.dataset.title;b.onclick=()=>go(i);map.appendChild(b);
+  const li=document.createElement('li');li.innerHTML='<button><span>'+(i+1)+'</span>'+s.dataset.title+'</button>';li.firstChild.onclick=()=>{go(i);toggleIdx(false)};idx.appendChild(li)});
+const hooks={};window.slideHook=(t,f)=>hooks[t]=f;
+function go(n){n=Math.max(0,Math.min(slides.length-1,n));slides[cur].classList.remove('on');cur=n;const s=slides[cur];s.classList.add('on');
+  [...map.children].forEach((b,i)=>{b.classList.toggle('cur',i===cur);b.classList.toggle('done',i<cur)});
+  $('#count').textContent=(cur+1)+' / '+slides.length;
+  const g=GEN[genOf(s)];$('#osdGen').textContent=g[0];$('#osd').style.color=g[1];$('#osdSlot').textContent=String(cur+1).padStart(2,'0')+' / '+slides.length;
+  $('#notes').textContent=s.dataset.notes||'';
+  try{history.replaceState(null,'',location.pathname+location.search+'#'+(cur+1))}catch(e){}
+  if(hooks[s.dataset.title])hooks[s.dataset.title]()}
+window.goTitle=t=>{const i=slides.findIndex(s=>s.dataset.title===t);if(i>=0)go(i)};
+function toggleIdx(v){$('#index').classList.toggle('open',v)}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+$('#btnIdx').onclick=()=>toggleIdx();$('#btnNotes').onclick=()=>$('#notes').classList.toggle('open');
+function fs(){try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}catch(e){}}
+$('#btnFs').onclick=fs;
+$$('[data-jump]').forEach(b=>b.onclick=()=>goTitle(b.dataset.jump));
+$$('.qa').forEach(b=>b.onclick=()=>b.classList.toggle('open'));
+addEventListener('keydown',e=>{
+  if($('#studio').classList.contains('open'))return;
+  const tg=e.target;if(tg.matches&&tg.matches('input,textarea,select'))return;
+  const du=window.demoUndo&&demoUndo[slides[cur].dataset.title];if(du&&(e.ctrlKey||e.metaKey)&&(e.key.toLowerCase()==='z'||e.key.toLowerCase()==='y')){e.preventDefault();(e.key.toLowerCase()==='y'||e.shiftKey)?du.r():du.u();return}
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='i'||e.key==='I')toggleIdx();
+  else if(e.key==='f'||e.key==='F')fs();
+  else if(e.key==='n'||e.key==='N')$('#notes').classList.toggle('open');
+  else if(e.key==='Escape'){toggleIdx(false);$('#notes').classList.remove('open')}
+});
+let tx=null;vp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+vp.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>70&&!e.target.closest('canvas,input,button,#cropBox,#distBox'))go(cur+(dx<0?1:-1));tx=null});
+{const h=parseInt((location.hash||'').slice(1));go(isNaN(h)?0:h-1)}
+addEventListener('hashchange',()=>{const h=parseInt((location.hash||'').slice(1));if(!isNaN(h)&&h-1!==cur)go(h-1)});
+})();
+
+/* ---------- Demo: varita ---------- */
+window.demoUndo={};
+(function(){const cv=$('#wandCv'),x=cv.getContext('2d'),W=640,H=360;const img=mk(W,H);img.getContext('2d').drawImage(getSrc('ph_robot'),0,0,W,H);
+  const data=img.getContext('2d').getImageData(0,0,W,H).data;let sel=null,edges=[],mode='new',view=false,t=0,hs=[null],hp=0;
+  function info(){if(!sel){$('#wandInfo').textContent='Pulsa el cielo de la imagen.';return}let n=0;for(const v of sel)n+=v;$('#wandInfo').textContent='Seleccionado: '+Math.round(n/(W*H)*100)+' % de la imagen ('+n.toLocaleString('es-PR')+' píxeles).'}
+  function draw(){x.drawImage(img,0,0);if(sel&&view){const id=x.createImageData(W,H);for(let i=0;i<W*H;i++){const v=sel[i]?255:0;id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=v;id.data[i*4+3]=255}x.putImageData(id,0,0)}else if(sel)antsDraw(x,edges,W,1,0,0,t)}
+  function set(v){sel=v;edges=sel?selEdges(sel,W,H):[];draw();info()}
+  function push(){hs=hs.slice(0,hp+1);hs.push(sel?sel.slice():null);hp=hs.length-1}
+  const U=()=>{if(hp>0){hp--;set(hs[hp]?hs[hp].slice():null)}},R=()=>{if(hp<hs.length-1){hp++;set(hs[hp]?hs[hp].slice():null)}};
+  function loop(){t++;if(cv.closest('.slide').classList.contains('on')&&sel&&!view)draw();requestAnimationFrame(loop)}loop();
+  cv.addEventListener('pointerdown',e=>{const r=cv.getBoundingClientRect(),px=Math.floor((e.clientX-r.left)/r.width*W),py=Math.floor((e.clientY-r.top)/r.height*H);
+    let m=mode;if(e.shiftKey&&e.altKey)m='int';else if(e.shiftKey)m='add';else if(e.altKey)m='sub';
+    set(combineSel(sel,floodSel(data,W,H,Math.min(W-1,Math.max(0,px)),Math.min(H-1,Math.max(0,py)),+$('#wandTol').value,$('#wandCont').checked),m));push()});
+  $('#wandTol').oninput=e=>$('#wandTolV').textContent=e.target.value;
+  $$('#wandMode .btn').forEach(b=>b.onclick=()=>{mode=b.dataset.m;$$('#wandMode .btn').forEach(o=>o.classList.toggle('on',o===b))});
+  $('#wandInv').onclick=()=>{if(!sel)return;const n=sel.map(v=>v?0:1);set(n);push()};
+  $('#wandView').onclick=()=>{view=!view;$('#wandView').classList.toggle('on',view);draw()};
+  $('#wandClear').onclick=()=>{if(!sel)return;set(null);push()};
+  $('#wandU').onclick=U;$('#wandR').onclick=R;$('#wandX').onclick=()=>{hs=[null];hp=0;set(null);$('#wandTol').value=32;$('#wandTolV').textContent='32'};
+  demoUndo['Varita mágica y operaciones']={u:U,r:R};
+  draw();
+})();
+
+/* ---------- Demo: máscara de capa ---------- */
+(function(){const cv=$('#maskCv'),x=cv.getContext('2d'),W=640,H=360;const top=mk(W,H),bot=mk(W,H);top.getContext('2d').drawImage(getSrc('bg_atardecer'),0,0,W,H);bot.getContext('2d').drawImage(getSrc('bg_galaxia'),0,0,W,H);
+  const mask=mk(W,H),mx=mask.getContext('2d');mx.fillStyle='#fff';mx.fillRect(0,0,W,H);const tmp=mk(W,H),tx=tmp.getContext('2d');
+  let col='black',viewM=false,red=false,down=false,last=null,hs=[mx.getImageData(0,0,W,H)],hp=0;
+  function push(){hs=hs.slice(0,hp+1);hs.push(mx.getImageData(0,0,W,H));if(hs.length>30)hs.shift();hp=hs.length-1}
+  const U=()=>{if(hp>0){hp--;mx.putImageData(hs[hp],0,0);draw()}},R=()=>{if(hp<hs.length-1){hp++;mx.putImageData(hs[hp],0,0);draw()}};
+  function draw(){x.globalCompositeOperation='source-over';
+    if(viewM){x.fillStyle='#000';x.fillRect(0,0,W,H);x.drawImage(mask,0,0);return}
+    x.drawImage(bot,0,0);tx.globalCompositeOperation='source-over';tx.clearRect(0,0,W,H);tx.drawImage(top,0,0);tx.globalCompositeOperation='destination-in';tx.drawImage(mask,0,0);x.drawImage(tmp,0,0);
+    if(red){tx.globalCompositeOperation='source-over';tx.clearRect(0,0,W,H);tx.fillStyle='rgba(255,0,0,.5)';tx.fillRect(0,0,W,H);tx.globalCompositeOperation='destination-out';tx.drawImage(mask,0,0);x.drawImage(tmp,0,0)}}
+  function dab(px,py){const r=+$('#mkSize').value/2,op=+$('#mkOp').value/100,hd=+$('#mkHard').value/100;const g=mx.createRadialGradient(px,py,r*hd,px,py,r);g.addColorStop(0,'rgba(255,255,255,'+op+')');g.addColorStop(1,'rgba(255,255,255,0)');
+    mx.globalCompositeOperation=col==='white'?'source-over':'destination-out';mx.fillStyle=g;mx.beginPath();mx.arc(px,py,r,0,7);mx.fill();mx.globalCompositeOperation='source-over'}
+  const pos=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]};
+  cv.addEventListener('pointerdown',e=>{down=true;cv.setPointerCapture(e.pointerId);last=pos(e);dab(...last);draw()});
+  cv.addEventListener('pointermove',e=>{if(!down)return;const p=pos(e),d=Math.hypot(p[0]-last[0],p[1]-last[1]),st=Math.max(1,+$('#mkSize').value/6);for(let k=st;k<=d;k+=st)dab(last[0]+(p[0]-last[0])*k/d,last[1]+(p[1]-last[1])*k/d);last=p;draw()});
+  cv.addEventListener('pointerup',()=>{if(down){down=false;push()}});
+  const setCol=c=>{col=c;$('#mkBlack').classList.toggle('on',c==='black');$('#mkWhite').classList.toggle('on',c==='white')};
+  $('#mkBlack').onclick=()=>setCol('black');$('#mkWhite').onclick=()=>setCol('white');
+  $('#mkOp').oninput=e=>$('#mkOpV').textContent=e.target.value+' %';
+  const fillAll=()=>{mx.globalCompositeOperation='source-over';mx.clearRect(0,0,W,H);mx.fillStyle='#fff';mx.fillRect(0,0,W,H)};
+  $('#mkAll').onclick=()=>{fillAll();draw();push()};
+  $('#mkNone').onclick=()=>{mx.clearRect(0,0,W,H);draw();push()};
+  $('#mkGrad').onclick=()=>{mx.clearRect(0,0,W,H);mx.fillStyle=lg(mx,0,0,0,H,[[0,'rgba(255,255,255,0)'],[.65,'rgba(255,255,255,1)']]);mx.fillRect(0,0,W,H);draw();push()};
+  $('#mkView').onclick=()=>{viewM=!viewM;$('#mkView').classList.toggle('on',viewM);draw()};
+  $('#mkRed').onclick=()=>{red=!red;$('#mkRed').classList.toggle('on',red);draw()};
+  $('#mkU').onclick=U;$('#mkR').onclick=R;$('#mkX').onclick=()=>{fillAll();hs=[mx.getImageData(0,0,W,H)];hp=0;draw()};
+  demoUndo['2. Máscara de capa']={u:U,r:R};
+  addEventListener('keydown',e=>{if(!cv.closest('.slide').classList.contains('on')||$('#studio').classList.contains('open')||e.ctrlKey||e.metaKey)return;if(e.key==='x'||e.key==='X')setCol(col==='black'?'white':'black');if(e.key==='\\'){red=!red;$('#mkRed').classList.toggle('on',red);draw()}});
+  draw();
+})();
+
+/* ---------- Demo: máscara de recorte y clip-path ---------- */
+(function(){const cv=$('#clipCv'),x=cv.getContext('2d');let on=true;
+  function draw(){x.clearRect(0,0,520,170);x.font='900 104px Orbitron, Arial Black, sans-serif';x.textAlign='center';x.textBaseline='middle';
+    if(on){x.fillStyle='#fff';x.fillText('NIVEL 8',260,90);x.globalCompositeOperation='source-in';x.drawImage(getSrc('bg_rejilla'),0,-60,520,292);x.globalCompositeOperation='source-over'}
+    else{x.globalAlpha=.85;x.drawImage(getSrc('bg_rejilla'),0,-60,520,292);x.globalAlpha=1;x.fillStyle='#E8ECF6';x.fillText('NIVEL 8',260,90)}}
+  $('#clipOn').onclick=()=>{on=true;$('#clipOn').classList.add('on');$('#clipOff').classList.remove('on');draw()};
+  $('#clipOff').onclick=()=>{on=false;$('#clipOff').classList.add('on');$('#clipOn').classList.remove('on');draw()};
+  const vs=$('#vecShape');const g=mk(340,340);g.getContext('2d').drawImage(getSrc('bg_rejilla'),-300,-60,1280*.75,720*.75);vs.style.background='url('+g.toDataURL()+') center/cover';
+  const setC=c=>{vs.style.clipPath=c;$('#vecCode').textContent='clip-path: '+c+';'};setC('circle(50% at 50% 50%)');
+  $$('#vecBtns .btn').forEach(b=>b.onclick=()=>{$$('#vecBtns .btn').forEach(o=>o.classList.toggle('on',o===b));setC(b.dataset.c)});
+  draw();if(document.fonts)document.fonts.ready.then(draw);
+})();
+
+/* ---------- Demo: recorte ---------- */
+(function(){const box=$('#cropBox'),cv=$('#cropCv'),fr=$('#cropFrame'),W=640,H=480,OW=4000,OH=3000;
+  const x=cv.getContext('2d');const s=getSrc('ph_nave');x.drawImage(s,-107,0,854,480);
+  let ratio=16/9,f={x:40,y:60,w:480,h:270};
+  function clamp(){f.w=Math.min(f.w,W);f.h=f.w/ratio;if(f.h>H){f.h=H;f.w=H*ratio}f.x=Math.max(0,Math.min(W-f.w,f.x));f.y=Math.max(0,Math.min(H-f.h,f.y))}
+  function show(){clamp();Object.assign(fr.style,{left:f.x+'px',top:f.y+'px',width:f.w+'px',height:f.h+'px'});const k=OW/W;
+    $('#cropInfo').innerHTML='Recorte en la foto original (4000 × 3000):<br><b>'+Math.round(f.w*k)+' × '+Math.round(f.h*k)+' px</b> · desde x '+Math.round(f.x*k)+', y '+Math.round(f.y*k)+'<br>'+(f.w*k>=1920&&ratio>1.7&&ratio<1.8?'Alcanza para un banner de 1920 × 1080 sin agrandar.':ratio>1.7&&ratio<1.8?'Muy pequeño para 1920 × 1080: habría que agrandar.':'')}
+  let drag=null;
+  fr.addEventListener('pointerdown',e=>{e.preventDefault();fr.setPointerCapture(e.pointerId);drag={mode:e.target.dataset.h?'r':'m',sx:e.clientX,sy:e.clientY,f:{...f}}});
+  fr.addEventListener('pointermove',e=>{if(!drag)return;const sc=box.getBoundingClientRect().width/W,dx=(e.clientX-drag.sx)/sc,dy=(e.clientY-drag.sy)/sc;
+    if(drag.mode==='m'){f.x=drag.f.x+dx;f.y=drag.f.y+dy}else{f.w=Math.max(60,drag.f.w+Math.max(dx,dy*ratio));f.x=drag.f.x;f.y=drag.f.y;if(f.x+f.w>W)f.w=W-f.x;if(f.y+f.w/ratio>H)f.w=(H-f.y)*ratio}show()});
+  fr.addEventListener('pointerup',()=>drag=null);
+  $('#cropX').onclick=()=>{ratio=16/9;$$('#cropRatios .btn').forEach((o,i)=>o.classList.toggle('on',i===0));f={x:40,y:60,w:480,h:270};show()};
+  $$('#cropRatios .btn').forEach(b=>b.onclick=()=>{ratio=+b.dataset.r;$$('#cropRatios .btn').forEach(o=>o.classList.toggle('on',o===b));f.w=Math.min(f.w,ratio<1?220:480);show()});
+  show();
+})();
+
+/* ---------- Demo: distorsión ---------- */
+(function(){const box=$('#distBox'),bg=$('#distBg'),im=$('#distImg'),hd=$('#distHandles'),W=640,H=360,k=.5;
+  bg.getContext('2d').drawImage(getSrc('bg_sala'),0,0,W,H);im.getContext('2d').drawImage(getSrc('bg_rejilla'),0,0,320,180);
+  const T=LIB_SALA_Q.map(p=>[p[0]*k,p[1]*k]);let q,mode='d';
+  function reset(){q=[[60,60],[300,60],[300,195],[60,195]];upd()}
+  const hs=[0,1,2,3].map(i=>{const h=document.createElement('i');Object.assign(h.style,{position:'absolute',width:'20px',height:'20px',margin:'-10px 0 0 -10px',background:'#fff',border:'3px solid #2D64F0',borderRadius:'50%',cursor:'grab',touchAction:'none'});hd.appendChild(h);
+    let d=null;h.addEventListener('pointerdown',e=>{e.preventDefault();h.setPointerCapture(e.pointerId);d={sx:e.clientX,sy:e.clientY,q:q.map(p=>[...p])}});
+    h.addEventListener('pointermove',e=>{if(!d)return;const sc=box.getBoundingClientRect().width/W,dx=(e.clientX-d.sx)/sc,dy=(e.clientY-d.sy)/sc;
+      q[i]=[d.q[i][0]+dx,d.q[i][1]+dy];if(mode==='p'){const m={0:1,1:0,2:3,3:2}[i];q[m]=[d.q[m][0]-dx,d.q[m][1]+dy]}upd()});
+    h.addEventListener('pointerup',()=>d=null);return h});
+  function upd(){const M=matrix3d(320,180,q);im.style.transform='matrix3d('+M.map(v=>+v.toFixed(6)).join(',')+')';q.forEach((p,i)=>{hs[i].style.left=p[0]+'px';hs[i].style.top=p[1]+'px'});
+    $('#distCode').textContent='transform: matrix3d('+M.map(v=>+v.toFixed(3)).join(', ')+');';
+    const err=Math.max(...q.map((p,i)=>Math.hypot(p[0]-T[i][0],p[1]-T[i][1])));$('#distOk').textContent=err<10?'✔ ¡Encaja en la pantalla!':'Faltan: '+Math.round(err)+' px'}
+  $$('#distMode .btn').forEach(b=>b.onclick=()=>{mode=b.dataset.m;$$('#distMode .btn').forEach(o=>o.classList.toggle('on',o===b))});
+  $('#distReset').onclick=reset;reset();
+})();
+
+/* ---------- Demo: objeto inteligente ---------- */
+(function(){const W=220,H=170;const orig=mk(W*2,H*2),o=orig.getContext('2d');o.fillStyle='#BFE3FA';o.fillRect(0,0,W*2,H*2);drawRobot(o,W,H+40,.62);o.fillStyle='#1F2433';o.font='800 34px "Exo 2", sans-serif';o.textAlign='center';o.fillText('TESI 1104',W,48);
+  function draw(){const p=+$('#smPct').value/100;$('#smPctV').textContent=Math.round(p*100)+' %';const r=$('#smRaster').getContext('2d'),s=$('#smSmart').getContext('2d');
+    const small=mk(W*p,H*p);small.getContext('2d').drawImage(orig,0,0,small.width,small.height);r.imageSmoothingEnabled=true;r.clearRect(0,0,W,H);r.drawImage(small,0,0,W,H);s.clearRect(0,0,W,H);s.drawImage(orig,0,0,W,H)}
+  $('#smPct').oninput=draw;draw();if(document.fonts)document.fonts.ready.then(draw);
+})();
+
+/* ---------- Demo: CSS transform ---------- */
+(function(){const c=$('#cssCard'),x=c.getContext('2d');x.drawImage(getSrc('bg_rejilla'),-340,0,1280*.35*2.2,720*.35*2.2);x.fillStyle='rgba(0,0,0,.35)';x.fillRect(0,170,200,80);x.fillStyle='#fff';x.font='900 22px Orbitron, sans-serif';x.fillText('NIVEL 8',14,214);x.font='600 13px "Exo 2", sans-serif';x.fillText('Un juego original',14,236);
+  let flip=false;function upd(){const tX=+$('#ctX').value,r=+$('#ctR').value,s=+$('#ctS').value/100,k=+$('#ctK').value,o=$('#ctO').value;
+    $('#ctXv').textContent=tX+'px';$('#ctRv').textContent=r+'deg';$('#ctSv').textContent=s.toFixed(2);$('#ctKv').textContent=k+'deg';
+    const sx=(flip?-1:1)*s;const t='translateX('+tX+'px) rotate('+r+'deg) scale('+sx.toFixed(2)+', '+s.toFixed(2)+') skewX('+k+'deg)';
+    c.style.transformOrigin=o;c.style.transform=t;$('#ctCode').textContent='.portada {\n  transform-origin: '+o+';\n  transform: '+t+';\n}'}
+  ['#ctX','#ctR','#ctS','#ctK','#ctO'].forEach(s=>$(s).oninput=upd);$('#ctX0').onclick=()=>{$('#ctX').value=0;$('#ctR').value=0;$('#ctS').value=100;$('#ctK').value=0;$('#ctO').value='center';flip=false;$('#ctFlip').classList.remove('on');upd()};$('#ctFlip').onclick=()=>{flip=!flip;$('#ctFlip').classList.toggle('on',flip);upd()};upd();
+})();
+</script>
+
+<script>
+/* ======================= TALLER GEN (al estilo Photoshop CS6) ======================= */
+(function(){
+const S=$('#studio'),cv=$('#stCv'),X=cv.getContext('2d'),W=1280,H=720,KEYS={lab:'tesi1104-lab11-v1',bono:'tesi1104-bono-v1'};let MODE='lab';const K=()=>KEYS[MODE];
+let L=[],sel=-1,tool='move',guides=false,hist=[],hi=-1,uid=1,ups={},upN=1,started=false;
+let fg='#000000',bgc='#FFFFFF',redView=false,distortMode=false,modeStart=-1,prevTool='move';
+let brush={size:60,op:100,hard:30},wand={tol:32,cont:true,all:false},selOpt={mode:'new',feather:0,shape:'rect'},cropRatio=0;
+const selCv=mk(W,H),selX=selCv.getContext('2d');let selOn=false,antsE=[],selWand=false,lastSel=null;
+let ant=0,need=true,drag=null;
+const FONTS=['Orbitron','Russo One','Audiowide','Press Start 2P','Exo 2','Rajdhani'];
+const BLENDS=[['source-over','Normal'],['multiply','Multiplicar'],['screen','Trama'],['overlay','Superponer'],['soft-light','Luz suave'],['hard-light','Luz fuerte'],['color-dodge','Sobreexponer color'],['lighten','Aclarar'],['darken','Oscurecer'],['difference','Diferencia'],['hue','Tono'],['color','Color'],['luminosity','Luminosidad']];
+const TOOLNAMES={move:'Mover (V)',marquee:'Marco (M)',lasso:'Lazo (L)',wand:'Varita mágica (W)',crop:'Recortar capa (C)',brush:'Pincel en máscara (B)',text:'Texto (T)',xf:'Transformación libre (Ctrl+T)'};
+
+/* ---------- capas ---------- */
+function srcOf(l){if(l.type==='text')return l.src||(l.src=renderText(l));return l.srcKey.startsWith('up')?ups[l.srcKey].c:getSrc(l.srcKey)}
+function newImg(key,name){const s=key.startsWith('up')?ups[key].c:getSrc(key);const big=s.width>=1200;
+  return{id:uid++,type:'img',name,srcKey:key,crop:{x:0,y:0,w:s.width,h:s.height},mask:null,x:W/2,y:H/2,sc:big?Math.max(W/s.width,H/s.height):Math.min(1,520/Math.max(s.width,s.height)),rot:0,skx:0,fh:false,fv:false,op:100,blend:'source-over',vis:true,clip:false,quad:null,maskPaint:false,wandUsed:false}}
+function newText(x,y){return{id:uid++,type:'text',name:'Texto',txt:'TÍTULO DEL JUEGO',font:'Orbitron',size:48,color:'#FFFFFF',strokeC:'#2D64F0',strokeW:0,shadow:false,bgOn:false,bgC:'#2D64F0',x:x==null?W/2:x,y:y==null?140:y,sc:1,rot:0,skx:0,fh:false,fv:false,op:100,blend:'source-over',vis:true,clip:false,quad:null}}
+function renderText(l){const lines=String(l.txt||' ').split('\n'),f=(l.font==='Press Start 2P'?'400 ':'900 ')+l.size+'px "'+l.font+'", sans-serif';const m=mk(10,10).getContext('2d');m.font=f;
+  const lw=Math.max(...lines.map(t=>m.measureText(t).width),10),lh=l.size*1.18,pad=Math.ceil(l.strokeW+(l.shadow?l.size*.12:0)+(l.bgOn?l.size*.45:0)+8);
+  const c=mk(lw+pad*2,lh*lines.length+pad*2),x=c.getContext('2d');
+  if(l.bgOn){x.fillStyle=l.bgC;rr(x,pad-l.size*.4,pad-l.size*.25,lw+l.size*.8,lh*lines.length+l.size*.4,Math.min(40,l.size*.5));x.fill()}
+  x.font=f;x.textAlign='center';x.textBaseline='middle';x.lineJoin='round';
+  lines.forEach((t,i)=>{const yy=pad+lh*i+lh/2,xx=c.width/2;
+    if(l.shadow){x.save();x.shadowColor='rgba(0,0,0,.55)';x.shadowBlur=l.size*.12;x.shadowOffsetX=l.size*.05;x.shadowOffsetY=l.size*.07;x.fillStyle=l.color;x.fillText(t,xx,yy);x.restore()}
+    if(l.strokeW>0){x.strokeStyle=l.strokeC;x.lineWidth=l.strokeW*2;x.strokeText(t,xx,yy)}x.fillStyle=l.color;x.fillText(t,xx,yy)});
+  return c}
+function contentRaw(l){if(l.type==='text')return srcOf(l);if(l._raw)return l._raw;const c=l.crop,o=mk(c.w,c.h);o.getContext('2d').drawImage(srcOf(l),-c.x,-c.y);l._raw=o;return o}
+function content(l){if(l.cache)return l.cache;const r=contentRaw(l);if(l.type==='text'||!l.mask){l.cache=r;return r}
+  const c=l.crop,o=mk(c.w,c.h),x=o.getContext('2d');x.drawImage(r,0,0);x.globalCompositeOperation='destination-in';x.drawImage(l.mask,-c.x,-c.y);l.cache=o;return o}
+function dirty(l,raw){l.cache=null;if(raw||l.type==='text'){l._raw=null}if(l.type==='text')l.src=null;need=true}
+function affine(l){const c=contentRaw(l),w=c.width,h=c.height,rad=l.rot*Math.PI/180,k=Math.tan(l.skx*Math.PI/180),sx=l.sc*(l.fh?-1:1),sy=l.sc*(l.fv?-1:1),cs=Math.cos(rad),sn=Math.sin(rad);
+  return{a:cs*sx,b:sn*sx,c:(cs*k-sn)*sy,d:(sn*k+cs)*sy,e:l.x,f:l.y,w,h}}
+function corners(l){if(l.quad)return l.quad.map(p=>[...p]);const m=affine(l),P=(u,v)=>[m.a*u+m.c*v+m.e,m.b*u+m.d*v+m.f];return[P(-m.w/2,-m.h/2),P(m.w/2,-m.h/2),P(m.w/2,m.h/2),P(-m.w/2,m.h/2)]}
+function drawLayerC(x,l,c){x.save();x.globalAlpha=l.op/100;if(l.quad)drawQuad(x,c,l.quad,12);else{const m=affine(l);x.setTransform(m.a,m.b,m.c,m.d,m.e,m.f);x.drawImage(c,-m.w/2,-m.h/2)}x.restore()}
+const drawLayer=(x,l)=>drawLayerC(x,l,content(l));
+const tA=mk(W,H),tB=mk(W,H);
+function compose(x,forExport){x.save();x.setTransform(1,0,0,1,0,0);x.globalCompositeOperation='source-over';x.clearRect(0,0,W,H);if(forExport==='jpg'){x.fillStyle='#000';x.fillRect(0,0,W,H)}
+  L.forEach((l,i)=>{if(!l.vis)return;let base=-1;if(l.clip)for(let j=i-1;j>=0;j--)if(!L[j].clip){base=j;break}
+    x.globalCompositeOperation=l.blend;
+    if(l.clip&&base>=0){if(!L[base].vis)return;const a=tA.getContext('2d'),b=tB.getContext('2d');a.globalCompositeOperation='source-over';a.clearRect(0,0,W,H);drawLayer(a,l);b.clearRect(0,0,W,H);drawLayer(b,L[base]);a.globalCompositeOperation='destination-in';a.drawImage(tB,0,0);a.globalCompositeOperation='source-over';x.drawImage(tA,0,0)}
+    else drawLayer(x,l)});
+  x.restore()}
+
+/* ---------- selección del documento ---------- */
+function updSel(){const d=selX.getImageData(0,0,W,H).data,a=new Uint8Array(W*H);let any=false;for(let i=0;i<W*H;i++)if(d[i*4+3]>127){a[i]=1;any=true}selOn=any;antsE=any?selEdges(a,W,H):[];if(!any)selWand=false;need=true;status()}
+function featherCv(t,f){const x=t.getContext('2d'),d=x.getImageData(0,0,W,H).data;let a=new Float32Array(W*H);for(let i=0;i<W*H;i++)a[i]=d[i*4+3];a=boxBlurAlpha(boxBlurAlpha(a,W,H,f),W,H,f);
+  const o=mk(W,H),ox=o.getContext('2d'),id=ox.createImageData(W,H);for(let i=0;i<W*H;i++){id.data[i*4]=id.data[i*4+1]=id.data[i*4+2]=255;id.data[i*4+3]=a[i]}ox.putImageData(id,0,0);return o}
+function selApply(t,mode){if(selOpt.feather>0)t=featherCv(t,selOpt.feather);selX.save();
+  if(mode==='new'){selX.clearRect(0,0,W,H);selX.drawImage(t,0,0)}else{selX.globalCompositeOperation=mode==='add'?'source-over':mode==='sub'?'destination-out':'destination-in';selX.drawImage(t,0,0)}
+  selX.restore();updSel();if(selOn){lastSel=mk(W,H);lastSel.getContext('2d').drawImage(selCv,0,0)}}
+function modeFrom(e){if(e.shiftKey&&e.altKey)return'int';if(e.shiftKey)return'add';if(e.altKey)return'sub';return selOpt.mode}
+function deselect(){if(!selOn)return;selX.clearRect(0,0,W,H);updSel();commit('Deseleccionar')}
+function selectAll(){selX.clearRect(0,0,W,H);selX.fillStyle='#fff';selX.fillRect(0,0,W,H);selWand=false;updSel();commit('Seleccionar todo')}
+function reselect(){if(!lastSel)return;selX.clearRect(0,0,W,H);selX.drawImage(lastSel,0,0);updSel();commit('Volver a seleccionar')}
+function invertSel(){const t=mk(W,H),x=t.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,W,H);x.globalCompositeOperation='destination-out';x.drawImage(selCv,0,0);selX.clearRect(0,0,W,H);selX.drawImage(t,0,0);updSel();commit('Invertir selección')}
+function featherSel(){const v=prompt('Calar selección · Radio (píxeles):',selOpt.feather||4);if(v===null)return;const f=Math.max(0,Math.min(60,parseInt(v)||0));selOpt.feather=f;if(selOn&&f>0){const t=featherCv(selCv,f);selX.clearRect(0,0,W,H);selX.drawImage(t,0,0);updSel();commit('Calar')}renderBar()}
+function wandAt(p,mode){const t=mk(W,H),tx=t.getContext('2d');if(wand.all)compose(tx,false);else if(L[sel])drawLayer(tx,L[sel]);else return;
+  const d=tx.getImageData(0,0,W,H).data,s=floodSel(d,W,H,Math.max(0,Math.min(W-1,Math.floor(p[0]))),Math.max(0,Math.min(H-1,Math.floor(p[1]))),wand.tol,wand.cont);
+  selApply(selCanvas(s,W,H,0),mode);if(selOn)selWand=true;commit('Varita mágica')}
+
+/* ---------- máscaras desde el documento ---------- */
+function srcRectQ(l){const c=l.crop;return[[c.x,c.y],[c.x+c.w,c.y],[c.x+c.w,c.y+c.h],[c.x,c.y+c.h]]}
+function meshMap(x,img,sQ,dQ,N){const U=[[0,0],[1,0],[0,1],[1,1]],Hs=homog(U,[sQ[0],sQ[1],sQ[3],sQ[2]]),Hd=homog(U,[dQ[0],dQ[1],dQ[3],dQ[2]]),P=[],Q=[];
+  for(let j=0;j<=N;j++){P[j]=[];Q[j]=[];for(let i=0;i<=N;i++){P[j][i]=hApply(Hs,i/N,j/N);Q[j][i]=hApply(Hd,i/N,j/N)}}
+  for(let j=0;j<N;j++)for(let i=0;i<N;i++){drawTri(x,img,P[j][i],P[j][i+1],P[j+1][i],Q[j][i],Q[j][i+1],Q[j+1][i]);drawTri(x,img,P[j][i+1],P[j+1][i+1],P[j+1][i],Q[j][i+1],Q[j+1][i+1],Q[j+1][i])}}
+function selToSrc(l){const s=srcOf(l),m=mk(s.width,s.height);meshMap(m.getContext('2d'),selCv,corners(l),srcRectQ(l),16);return m}
+function whiteMask(l){const s=srcOf(l),m=mk(s.width,s.height),x=m.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,m.width,m.height);return m}
+function needImg(){const l=L[sel];if(!l||l.type!=='img'){toast('Selecciona una capa de imagen en el panel Capas.');return null}return l}
+function maskReveal(){const l=needImg();if(!l)return;if(selOn){l.mask=selToSrc(l);l.selUsed=true;if(selWand)l.wandUsed=true;selX.clearRect(0,0,W,H);updSel();dirty(l);commit('Máscara: mostrar selección');toast('Máscara creada: solo se ve lo seleccionado.')}else{l.mask=whiteMask(l);dirty(l);commit('Máscara: mostrar todo')}}
+function maskHide(){const l=needImg();if(!l)return;const m=whiteMask(l),x=m.getContext('2d');if(selOn){x.globalCompositeOperation='destination-out';x.drawImage(selToSrc(l),0,0);l.selUsed=true;if(selWand)l.wandUsed=true;selX.clearRect(0,0,W,H);updSel()}else x.clearRect(0,0,m.width,m.height);l.mask=m;dirty(l);commit('Máscara: ocultar selección')}
+function deleteSel(){const l=needImg();if(!l)return;if(!l.mask)l.mask=whiteMask(l);const x=l.mask.getContext('2d');x.globalCompositeOperation='destination-out';x.drawImage(selToSrc(l),0,0);x.globalCompositeOperation='source-over';l.selUsed=true;if(selWand)l.wandUsed=true;dirty(l);commit('Borrar (ocultar) selección');toast('Oculto con la máscara: los píxeles siguen ahí (edición no destructiva).')}
+function invertMask(){const l=needImg();if(!l)return;if(!l.mask){toast('Esta capa no tiene máscara.');return}const m=l.mask,t=whiteMask(l),tx=t.getContext('2d');tx.globalCompositeOperation='destination-out';tx.drawImage(m,0,0);l.mask=t;l.maskPaint=true;dirty(l);commit('Invertir máscara')}
+function gradMask(){const l=needImg();if(!l)return;const s=srcOf(l),m=mk(s.width,s.height),x=m.getContext('2d'),c=l.crop;x.fillStyle=lg(x,0,c.y,0,c.y+c.h,[[0,'#fff'],[.55,'#fff'],[1,'rgba(255,255,255,0)']]);x.fillRect(0,0,m.width,m.height);l.mask=m;l.maskPaint=true;dirty(l);commit('Máscara: degradado')}
+function delMask(){const l=L[sel];if(!l||!l.mask)return;l.mask=null;l.maskPaint=false;l.wandUsed=false;dirty(l);commit('Eliminar máscara')}
+function docToSrcH(l){const C=corners(l),R=srcRectQ(l);return homog([C[0],C[1],C[3],C[2]],[R[0],R[1],R[3],R[2]])}
+function dabDoc(l,Hm,p){const a=hApply(Hm,p[0],p[1]),b=hApply(Hm,p[0]+10,p[1]),k=Math.hypot(b[0]-a[0],b[1]-a[1])/10,r=Math.max(1,brush.size/2*k),m=l.mask.getContext('2d');
+  const g=m.createRadialGradient(a[0],a[1],r*brush.hard/100,a[0],a[1],r);g.addColorStop(0,'rgba(255,255,255,'+brush.op/100+')');g.addColorStop(1,'rgba(255,255,255,0)');
+  m.globalCompositeOperation=fg==='#000000'?'destination-out':'source-over';m.fillStyle=g;m.beginPath();m.arc(a[0],a[1],r,0,7);m.fill();m.globalCompositeOperation='source-over'}
+
+/* ---------- dibujo ---------- */
+function edGeom(){const s=srcOf(L[sel]),k=Math.min((W-80)/s.width,(H-80)/s.height);return{s,k,ox:(W-s.width*k)/2,oy:(H-s.height*k)/2}}
+const inCrop=()=>tool==='crop'&&L[sel]&&L[sel].type==='img';
+function drawCrop(){const l=L[sel],{s,k,ox,oy}=edGeom(),c=l.crop;X.setTransform(1,0,0,1,0,0);X.globalCompositeOperation='source-over';X.fillStyle='#1d1d1d';X.fillRect(0,0,W,H);
+  X.globalAlpha=.35;X.drawImage(s,ox,oy,s.width*k,s.height*k);X.globalAlpha=1;X.drawImage(s,c.x,c.y,c.w,c.h,ox+c.x*k,oy+c.y*k,c.w*k,c.h*k);
+  X.strokeStyle='#fff';X.lineWidth=2;X.strokeRect(ox+c.x*k,oy+c.y*k,c.w*k,c.h*k);X.strokeStyle='rgba(255,255,255,.55)';X.lineWidth=1;
+  for(let i=1;i<3;i++){X.beginPath();X.moveTo(ox+(c.x+c.w*i/3)*k,oy+c.y*k);X.lineTo(ox+(c.x+c.w*i/3)*k,oy+(c.y+c.h)*k);X.moveTo(ox+c.x*k,oy+(c.y+c.h*i/3)*k);X.lineTo(ox+(c.x+c.w)*k,oy+(c.y+c.h*i/3)*k);X.stroke()}
+  X.fillStyle='#fff';[[c.x,c.y],[c.x+c.w,c.y],[c.x+c.w,c.y+c.h],[c.x,c.y+c.h]].forEach(p=>X.fillRect(ox+p[0]*k-7,oy+p[1]*k-7,14,14));
+  X.font='600 18px "Segoe UI",sans-serif';X.fillText(Math.round(c.w)+' × '+Math.round(c.h)+' px',ox+c.x*k+8,oy+c.y*k-10)}
+function rotHandle(l){const C=corners(l),mx=(C[0][0]+C[1][0])/2,my=(C[0][1]+C[1][1])/2,cx=(C[0][0]+C[2][0])/2,cy=(C[0][1]+C[2][1])/2,dx=mx-cx,dy=my-cy,n=Math.hypot(dx,dy)||1;return[mx+dx/n*48,my+dy/n*48]}
+function render(){if(!S.classList.contains('open'))return;if(inCrop()){drawCrop();return}
+  compose(X,false);X.setTransform(1,0,0,1,0,0);X.globalCompositeOperation='source-over';const l=L[sel];
+  if(redView&&l&&l.type==='img'&&l.mask&&l.vis){const a=tA.getContext('2d');a.globalCompositeOperation='source-over';a.clearRect(0,0,W,H);drawLayerC(a,l,contentRaw(l));a.globalCompositeOperation='destination-out';drawLayer(a,l);a.globalCompositeOperation='source-in';a.fillStyle='rgba(255,0,0,.55)';a.fillRect(0,0,W,H);a.globalCompositeOperation='source-over';X.drawImage(tA,0,0)}
+  if(guides){X.strokeStyle='rgba(0,255,255,.8)';X.lineWidth=1.5;for(let i=1;i<3;i++){X.beginPath();X.moveTo(W*i/3,0);X.lineTo(W*i/3,H);X.moveTo(0,H*i/3);X.lineTo(W,H*i/3);X.stroke()}}
+  if(selOn)antsDraw(X,antsE,W,1,0,0,ant);
+  if(drag&&drag.m==='marq'){X.save();X.setLineDash([6,4]);X.strokeStyle='#fff';X.lineWidth=1.5;const r=drag.r;X.beginPath();if(selOpt.shape==='ellipse')X.ellipse(r.x+r.w/2,r.y+r.h/2,Math.abs(r.w/2),Math.abs(r.h/2),0,0,7);else X.rect(r.x,r.y,r.w,r.h);X.stroke();X.strokeStyle='#000';X.lineDashOffset=6;X.stroke();X.restore()}
+  if(drag&&drag.m==='lasso'){X.save();X.setLineDash([5,4]);X.strokeStyle='#fff';X.lineWidth=1.5;X.beginPath();drag.pts.forEach((p,i)=>i?X.lineTo(p[0],p[1]):X.moveTo(p[0],p[1]));X.stroke();X.restore()}
+  if(!l||!l.vis)return;
+  if(tool==='xf'){const C=corners(l);X.strokeStyle='#1473E6';X.lineWidth=1.5;X.beginPath();C.forEach((p,i)=>i?X.lineTo(...p):X.moveTo(...p));X.closePath();X.stroke();
+    C.forEach(p=>{X.fillStyle='#fff';X.fillRect(p[0]-7,p[1]-7,14,14);X.strokeRect(p[0]-7,p[1]-7,14,14)});
+    if(!l.quad&&!distortMode){const r=rotHandle(l);X.beginPath();X.moveTo((C[0][0]+C[1][0])/2,(C[0][1]+C[1][1])/2);X.lineTo(r[0],r[1]);X.stroke();X.fillStyle='#1473E6';X.beginPath();X.arc(r[0],r[1],9,0,7);X.fill()}
+    X.fillStyle='#fff';X.strokeStyle='#1473E6';const cx=(C[0][0]+C[2][0])/2,cy=(C[0][1]+C[2][1])/2;X.beginPath();X.arc(cx,cy,5,0,7);X.fill();X.stroke()}
+  else if(tool==='move'){const C=corners(l);X.save();X.setLineDash([4,4]);X.strokeStyle='rgba(20,115,230,.8)';X.lineWidth=1;X.beginPath();C.forEach((p,i)=>i?X.lineTo(...p):X.moveTo(...p));X.closePath();X.stroke();X.restore()}
+  if(tool==='brush'&&hover){X.save();X.strokeStyle='#fff';X.lineWidth=1;X.beginPath();X.arc(hover[0],hover[1],brush.size/2,0,7);X.stroke();X.strokeStyle='#000';X.beginPath();X.arc(hover[0],hover[1],brush.size/2+1,0,7);X.stroke();X.restore()}}
+let hover=null;
+function loop(){ant++;if(S.classList.contains('open')&&(need||(selOn&&ant%5===0))){need=false;render()}requestAnimationFrame(loop)}requestAnimationFrame(loop);
+
+/* ---------- historia ---------- */
+function cloneCv(c){const m=mk(c.width,c.height);m.getContext('2d').drawImage(c,0,0);return m}
+function cloneLayer(l){const o={...l};delete o.cache;delete o.src;delete o._raw;delete o._data;if(l.mask)o.mask=cloneCv(l.mask);o.crop=l.crop?{...l.crop}:null;o.quad=l.quad?l.quad.map(p=>[...p]):null;return o}
+function snap(label){return{label,L:L.map(cloneLayer),sel,selImg:selOn?cloneCv(selCv):null,selWand}}
+function restore(s){L=s.L.map(cloneLayer);sel=Math.min(s.sel,L.length-1);selX.clearRect(0,0,W,H);if(s.selImg)selX.drawImage(s.selImg,0,0);updSel();selWand=s.selWand&&selOn;need=true;ui()}
+function commit(label){hist=hist.slice(0,hi+1);hist.push(snap(label||'Editar'));if(hist.length>40)hist.shift();hi=hist.length-1;save();ui()}
+function undo(){if(hi<=0){toast('No hay más pasos para deshacer.');return}hi--;restore(hist[hi]);save();toast('Deshacer: '+hist[hi+1].label)}
+function redo(){if(hi>=hist.length-1)return;hi++;restore(hist[hi]);save();toast('Rehacer: '+hist[hi].label)}
+function goHist(i){hi=i;restore(hist[i]);save()}
+
+/* ---------- guardar / abrir ---------- */
+function serialize(withUps){return JSON.stringify({v:2,curso:'TESI 1104',lab:MODE==='bono'?'Bono examen final':11,nombre:$('#stName').value,ancho:W,alto:H,ups:withUps?Object.fromEntries(Object.entries(ups).map(([k,u])=>[k,u.url])):{},
+  capas:L.map(l=>{const o=cloneLayer(l);o.mask=l.mask?l.mask.toDataURL():null;return o})})}
+let saveWarned=false;
+function save(){try{localStorage.setItem(K(),serialize(true))}catch(e){try{localStorage.setItem(K(),serialize(false))}catch(e2){}if(!saveWarned){saveWarned=true;toast('El navegador no pudo autoguardar todo: descarga el proyecto .json.')}}}
+function loadImg(url){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=url})}
+async function load(json){const d=JSON.parse(json);if(!d||!Array.isArray(d.capas))throw new Error('formato');ups={};
+  for(const [k,u] of Object.entries(d.ups||{})){const i=await loadImg(u);if(i){const c=mk(i.width,i.height);c.getContext('2d').drawImage(i,0,0);ups[k]={c,url:u};upN=Math.max(upN,+k.slice(2)+1)}}
+  const out=[];for(const o of d.capas){if(o.type==='img'&&(o.srcKey.startsWith('up')?!ups[o.srcKey]:!LIB[o.srcKey]))continue;const l={...o};
+    if(o.mask){const i=await loadImg(o.mask);if(i){const m=mk(i.width,i.height);m.getContext('2d').drawImage(i,0,0);l.mask=m}else l.mask=null}l.id=uid++;out.push(l)}
+  L=out;sel=L.length-1;if(d.nombre)$('#stName').value=d.nombre;selX.clearRect(0,0,W,H);updSel();hist=[];hi=-1;commit('Abrir proyecto')}
+function fresh(){if(MODE==='bono'){L=[];sel=-1}else{L=[newImg('bg_rejilla','Fondo: rejilla retro'),newText()];sel=1}selX.clearRect(0,0,W,H);updSel();hist=[];hi=-1;commit('Nuevo documento')}
+async function ensure(){if(started)return;started=true;let ok=false;try{const s=localStorage.getItem(K());if(s){await load(s);ok=true}}catch(e){}if(!ok)fresh()}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+const fname=()=>(($('#stName').value.trim()||'Apellido_Nombre').replace(/[^\wÁÉÍÓÚÑáéíóúñ-]+/g,'_'))+(MODE==='bono'?'_TESI1104_BonoFinal':'_TESI1104_Lab11');
+function exportPNG(){const c=mk(W,H);compose(c.getContext('2d'),'png');c.toBlob(b=>{dl(b,fname()+'.png');toast('Imagen PNG descargada: '+fname()+'.png')},'image/png')}
+function exportJPG(){const c=mk(W,H);compose(c.getContext('2d'),'jpg');c.toBlob(b=>{dl(b,fname()+'.jpg');toast('Imagen JPG descargada ('+Math.round(b.size/1024)+' KB)')},'image/jpeg',.85)}
+function exportJSON(){dl(new Blob([serialize(true)],{type:'application/json'}),fname()+'.json');toast('Proyecto descargado: '+fname()+'.json')}
+function preview(c){const x=c.getContext('2d'),t=mk(W,H);compose(t.getContext('2d'),'jpg');x.drawImage(t,0,0,c.width,c.height)}
+function openDl(){preview($('#dlPrev'));$('#dlNote').innerHTML=MODE==='bono'?'Bono del examen final: entrega <b>Apellido_Nombre_TESI1104_BonoFinal.zip</b> con tu <b>foto original</b>, el PNG y el .json por OrbundSIS.':'Entrega los tres archivos en <b>Apellido_Nombre_TESI1104_Lab11.zip</b> por OrbundSIS. Con el .json puedes abrir tu trabajo otra vez desde Archivo › Abrir proyecto.';$('#dlName').textContent=fname()+' (.png · .jpg · .json)';$('#dlModal').classList.add('open')}
+
+/* ---------- interfaz ---------- */
+function status(){const l=L[sel];const z=Math.round(cv.getBoundingClientRect().width/W*100)||100;$('#psTab').textContent=(MODE==='bono'?'bono-examen-final.psd @ ':'banner.psd @ ')+z+'% ('+(l?l.name:'—')+', RGB/8)';
+  $('#psStatus').innerHTML=(MODE==='bono'?'<span style="color:#FFC531">MODO BONO · examen final</span>':'<span>Laboratorio 11</span>')+'<span>Doc: 1280 × 720 px · 72 ppi</span><span>Zoom: '+z+' %</span><span>Herramienta: '+TOOLNAMES[tool]+'</span><span>'+(selOn?'Selección activa · Ctrl+D para deseleccionar':'Sin selección')+'</span><span>Historia: '+(hi+1)+' / '+hist.length+'</span>';
+  $('#psUndo').disabled=hi<=0;$('#psRedo').disabled=hi>=hist.length-1}
+function ui(){renderLayers();renderProps();renderBar();renderMission();renderHist();
+  $$('#stTools button').forEach(b=>b.classList.toggle('on',b.dataset.t===tool));
+  $('#icoMarq').innerHTML=selOpt.shape==='ellipse'?'<ellipse cx="12" cy="12" rx="8" ry="7" stroke-dasharray="3 2.5"/>':'<rect x="4" y="5" width="16" height="14" stroke-dasharray="3 2.5"/>';
+  $('#swFg').style.background=fg;$('#swBg').style.background=bgc;cv.style.cursor={move:'move',text:'text',xf:'default'}[tool]||'crosshair';need=true;status()}
+function thumb(c0,w,h){const c=mk(w,h),x=c.getContext('2d'),k=Math.min(w/c0.width,h/c0.height);x.drawImage(c0,(w-c0.width*k)/2,(h-c0.height*k)/2,c0.width*k,c0.height*k);return c}
+function renderLayers(){const ul=$('#layers');ul.innerHTML='';const l0=L[sel];
+  const bs=$('#layBlend');if(!bs.options.length)BLENDS.forEach(([v,t])=>{const o=document.createElement('option');o.value=v;o.textContent=t;bs.appendChild(o)});
+  bs.value=l0?l0.blend:'source-over';bs.disabled=!l0;$('#layOp').value=l0?l0.op:100;
+  for(let i=L.length-1;i>=0;i--){const l=L[i],li=document.createElement('li');li.className=(i===sel?'sel ':'')+(l.clip?'clip':'');
+    const eye=document.createElement('button');eye.textContent=l.vis?'👁':'·';eye.title='Mostrar u ocultar';eye.onclick=e=>{e.stopPropagation();l.vis=!l.vis;commit(l.vis?'Mostrar capa':'Ocultar capa')};
+    const tc=thumb(l.type==='img'?contentRaw(l):content(l),88,52);li.append(eye,tc);
+    if(l.mask){const mc=mk(52,52),mx=mc.getContext('2d');mx.fillStyle='#000';mx.fillRect(0,0,52,52);mx.drawImage(thumb(l.mask,52,52),0,0);mc.className='mk';mc.title='Máscara de capa';li.appendChild(mc)}
+    const nm=document.createElement('span');nm.className='nm';nm.textContent=(l.clip?'↳ ':'')+(l.type==='text'?'T  ':'')+l.name;
+    const bd=document.createElement('span');bd.className='bd';bd.textContent=(l.type==='img'&&(l.crop.w<srcOf(l).width||l.crop.h<srcOf(l).height)?'✂':'')+(l.quad?'◇':'');
+    li.append(nm,bd);li.onclick=()=>{sel=i;ui()};nm.ondblclick=()=>{const n=prompt('Nombre de la capa',l.name);if(n){l.name=n.slice(0,40);commit('Cambiar nombre')}};ul.appendChild(li)}}
+$('#layBlend').onchange=e=>{const l=L[sel];if(!l)return;l.blend=e.target.value;commit('Modo de fusión')};
+$('#layOp').oninput=e=>{const l=L[sel];if(!l)return;l.op=+e.target.value;need=true};$('#layOp').onchange=()=>commit('Opacidad');
+function rngC(lbl,key,min,max,step,fmt){const lab=document.createElement('label'),v=document.createElement('span'),inp=document.createElement('input'),l=L[sel];v.className='val';inp.type='range';inp.min=min;inp.max=max;inp.step=step||1;
+  const get=()=>key==='sc'?Math.round(l.sc*100):l[key];inp.value=get();v.textContent=(fmt||(a=>a))(get());
+  inp.oninput=()=>{const n=+inp.value;if(key==='sc')l.sc=n/100;else l[key]=n;if(l.type==='text'&&['size','strokeW'].includes(key))dirty(l);v.textContent=(fmt||(a=>a))(n);need=true};inp.onchange=()=>commit(lbl);lab.append(lbl,inp,v);return lab}
+function renderProps(){const p=$('#pProp');p.innerHTML='';const l=L[sel];if(!l){p.innerHTML='<p style="color:#8a8a8a">Selecciona una capa.</p>';return}
+  const h=t=>{const e=document.createElement('h4');e.textContent=t;p.appendChild(e)};const wide=(t,el)=>{const lb=document.createElement('label');lb.className='wide';lb.append(t,el);p.appendChild(lb)};
+  const ni=document.createElement('input');ni.type='text';ni.value=l.name;ni.onchange=()=>{l.name=ni.value.slice(0,40)||l.name;commit('Cambiar nombre')};wide('Nombre',ni);
+  if(l.type==='text'){h('CARÁCTER');const ta=document.createElement('textarea');ta.id='taText';ta.value=l.txt;ta.oninput=()=>{l.txt=ta.value;dirty(l)};ta.onchange=()=>commit('Editar texto');wide('Contenido',ta);
+    const fs=document.createElement('select');FONTS.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;o.selected=f===l.font;fs.appendChild(o)});fs.onchange=()=>{l.font=fs.value;dirty(l);document.fonts&&document.fonts.load('900 40px "'+l.font+'"').then(()=>dirty(l));commit('Fuente')};wide('Fuente',fs);
+    p.appendChild(rngC('Tamaño','size',14,200,1,a=>a+' px'));
+    const col=key=>{const i=document.createElement('input');i.type='color';i.value=l[key];i.oninput=()=>{l[key]=i.value;dirty(l)};i.onchange=()=>commit('Color');return i};
+    wide('Color',col('color'));h('ESTILO DE CAPA (fx)');p.appendChild(rngC('Trazo (Stroke)','strokeW',0,16,1,a=>a+' px'));wide('Color del trazo',col('strokeC'));
+    const chk=(lbl,key)=>{const i=document.createElement('input');i.type='checkbox';i.checked=l[key];i.onchange=()=>{l[key]=i.checked;dirty(l);commit(lbl)};wide(lbl,i)};
+    chk('Sombra paralela','shadow');chk('Fondo (botón)','bgOn');wide('Color del fondo',col('bgC'))}
+  h('TRANSFORMAR');
+  if(l.quad){const d=document.createElement('p');d.style.cssText='color:#c4c4c4;font-size:12px;margin:0';d.textContent='Capa distorsionada (◇). Con Ctrl+T arrastra sus esquinas.';p.appendChild(d);const b=document.createElement('button');b.textContent='Quitar distorsión';b.onclick=()=>{l.quad=null;commit('Quitar distorsión')};p.appendChild(b)}
+  else{p.appendChild(rngC('X','x',-200,W+200,1,a=>Math.round(a)));p.appendChild(rngC('Y','y',-200,H+200,1,a=>Math.round(a)));p.appendChild(rngC('Escala','sc',5,400,1,a=>a+' %'));p.appendChild(rngC('Rotar','rot',-180,180,1,a=>a+'°'));p.appendChild(rngC('Sesgar','skx',-45,45,1,a=>a+'°'));
+    const fl=document.createElement('div');fl.className='row';fl.style.gap='4px';[['↔ Voltear H',()=>flip('h')],['↕ Voltear V',()=>flip('v')],['Ajustar al lienzo',fitCanvas]].forEach(([t,f])=>{const b=document.createElement('button');b.textContent=t;b.onclick=f;fl.appendChild(b)});p.appendChild(fl)}
+  const cl=document.createElement('input');cl.type='checkbox';cl.checked=l.clip;cl.disabled=sel===0;cl.onchange=()=>{l.clip=cl.checked;commit('Máscara de recorte')};h('CAPA');wide('Máscara de recorte',cl);
+  if(l.type==='img'){h('MÁSCARA DE CAPA');const r=document.createElement('div');r.className='row';r.style.gap='4px';
+    [[l.mask?'Eliminar máscara':'Añadir máscara',()=>l.mask?delMask():maskReveal()],['Invertir (Ctrl+I)',invertMask],['Degradado',gradMask],['Pincel (B)',()=>setTool('brush')]].forEach(([t,f])=>{const b=document.createElement('button');b.textContent=t;b.onclick=f;r.appendChild(b)});p.appendChild(r)}}
+function flip(d){const l=L[sel];if(!l)return;if(l.quad){toast('Quita la distorsión para voltear.');return}if(d==='h')l.fh=!l.fh;else l.fv=!l.fv;commit(d==='h'?'Voltear horizontal':'Voltear vertical')}
+function rot90(a){const l=L[sel];if(!l||l.quad)return;l.rot=((l.rot+a+540)%360)-180;commit('Rotar '+a+'°')}
+function fitCanvas(){const l=L[sel];if(!l)return;const c=contentRaw(l);l.quad=null;l.sc=Math.max(W/c.width,H/c.height);l.x=W/2;l.y=H/2;l.rot=0;l.skx=0;commit('Ajustar al lienzo')}
+function renderHist(){const ul=$('#histList');ul.innerHTML='';hist.forEach((s,i)=>{const li=document.createElement('li');li.className=i===hi?'cur':i>hi?'fut':'';li.innerHTML='<i>'+(i+1)+'</i>'+s.label;li.onclick=()=>goHist(i);ul.appendChild(li)});const c=ul.querySelector('.cur');if(c&&!$('#pHist').hidden)c.scrollIntoView({block:'nearest'})}
+function renderBar(){const b=$('#stBar');b.innerHTML='';const l=L[sel];
+  const add=e=>{b.appendChild(e);return e},el=(t,h)=>{const e=document.createElement(t);if(h!=null)e.innerHTML=h;return e};
+  const btn=(t,f,cls,title)=>{const e=el('button',t);e.onclick=f;if(cls)e.className=cls;if(title)e.title=title;return add(e)};
+  const range=(t,min,max,val,f,fmt)=>{const lb=el('label'),i=el('input'),v=el('span');i.type='range';i.min=min;i.max=max;i.value=val;v.textContent=fmt?fmt(val):val;i.oninput=()=>{f(+i.value);v.textContent=fmt?fmt(+i.value):i.value};lb.append(t,i,v);add(lb)};
+  const hint=t=>add(el('span',t)).className='hint';
+  add(el('span',TOOLNAMES[tool])).className='tname';
+  const selModes=()=>{const g=add(el('span'));g.className='grp';[['new','Nueva'],['add','Añadir'],['sub','Restar'],['int','Intersectar']].forEach(([m,t])=>{const e=el('button',t);e.className=selOpt.mode===m?'on':'';e.onclick=()=>{selOpt.mode=m;renderBar()};g.appendChild(e)})};
+  if(tool==='move'){hint('Clic en una capa para seleccionarla y arrastrar. Flechas: 1 px · Shift: 10 px.');btn('Mostrar controles de transformación',()=>enterXf(false));btn('Alinear al centro',()=>{if(!l||l.quad)return;l.x=W/2;l.y=H/2;commit('Alinear al centro')})}
+  if(tool==='marquee'){const g=add(el('span'));g.className='grp';[['rect','▭ Rectangular'],['ellipse','◯ Elíptico']].forEach(([s,t])=>{const e=el('button',t);e.className=selOpt.shape===s?'on':'';e.onclick=()=>{selOpt.shape=s;ui()};g.appendChild(e)});selModes();range('Calar',0,40,selOpt.feather,v=>selOpt.feather=v,v=>v+' px');hint('Shift añade · Alt resta · clic sin arrastrar deselecciona.')}
+  if(tool==='lasso'){selModes();range('Calar',0,40,selOpt.feather,v=>selOpt.feather=v,v=>v+' px');hint('Arrastra alrededor del objeto; al soltar se cierra la selección.')}
+  if(tool==='wand'){selModes();range('Tolerancia',0,120,wand.tol,v=>wand.tol=v);[['Contiguo','cont'],['Muestrear todas las capas','all']].forEach(([t,k])=>{const lb=el('label'),c=el('input');c.type='checkbox';c.checked=wand[k];c.onchange=()=>wand[k]=c.checked;lb.append(c,t);add(lb)});hint('Muestrea la capa activa.')}
+  if(['marquee','lasso','wand'].includes(tool)&&selOn){btn('Invertir',invertSel);btn('Deseleccionar',deselect);btn('◐ Máscara con la selección',maskReveal,'on','Capa › Máscara de capa › Mostrar selección');btn('Ocultar selección (Supr)',deleteSel)}
+  if(tool==='brush'){hint('Pinta la máscara de la capa:');const e=btn(fg==='#000000'?'■ Negro oculta':'□ Blanco revela',()=>{[fg,bgc]=[bgc,fg];ui()},'on','X intercambia');range('Tamaño',2,300,brush.size,v=>brush.size=v,v=>v+' px');range('Opacidad',5,100,brush.op,v=>brush.op=v,v=>v+' %');range('Dureza',0,100,brush.hard,v=>brush.hard=v,v=>v+' %');
+    const r=el('button',redView?'Ocultar rojo':'Ver máscara en rojo (\\)');r.onclick=()=>{redView=!redView;renderBar();need=true};add(r)}
+  if(tool==='text')hint('Haz clic en el lienzo para crear una capa de texto. Escribe en Propiedades › Carácter.');
+  if(tool==='xf'){if(l&&!l.quad&&!distortMode){[['X','x',1],['Y','y',1],['E %','sc',100],['Rot °','rot',1],['Sesgo °','skx',1]].forEach(([t,k,f])=>{const lb=el('label'),i=el('input');i.type='number';i.value=Math.round(l[k]*f);i.onchange=()=>{l[k]=(+i.value||0)/f;need=true;commit('Transformación libre')};lb.append(t,i);add(lb)})}
+    const lb=el('label'),c=el('input');c.type='checkbox';c.checked=distortMode||!!(l&&l.quad);c.onchange=()=>{distortMode=c.checked;if(l&&!c.checked&&l.quad){l.quad=null;commit('Quitar distorsión')}else{renderBar();need=true}};lb.append(c,'Distorsionar (Ctrl+arrastrar esquina)');add(lb);
+    btn('↔',()=>flip('h'),'','Voltear horizontal');btn('↕',()=>flip('v'),'','Voltear vertical');btn('⟳ 90°',()=>rot90(90));btn('✓ Aplicar (Enter)',applyMode,'ok');btn('✕ Cancelar (Esc)',cancelMode,'no')}
+  if(tool==='crop'){if(!l||l.type!=='img'){hint('Selecciona una capa de imagen.');return}const s=el('select');[['0','Sin restricción'],[String(16/9),'16 : 9'],['1','1 : 1 (cuadrado)'],['0.8','4 : 5'],[String(9/16),'9 : 16'],['1.905','1.91 : 1']].forEach(([v,t])=>{const o=el('option',t);o.value=v;o.selected=+v===cropRatio;s.appendChild(o)});
+    s.onchange=()=>{cropRatio=+s.value;if(cropRatio){const c=l.crop,src=srcOf(l);let w=c.w,h=w/cropRatio;if(h>src.height){h=src.height;w=h*cropRatio}if(w>src.width){w=src.width;h=w/cropRatio}c.w=Math.round(w);c.h=Math.round(h);c.x=Math.min(c.x,src.width-c.w);c.y=Math.min(c.y,src.height-c.h);dirty(l,true);need=true}};add(s);
+    btn('Restablecer',()=>{const s2=srcOf(l);l.crop={x:0,y:0,w:s2.width,h:s2.height};dirty(l,true);need=true});btn('✓ Aplicar (Enter)',applyMode,'ok');btn('✕ Cancelar (Esc)',cancelMode,'no');hint('Vista aislada de la capa. Arrastra el marco o sus esquinas.')}}
+const MIS=[['Usa 4 capas o más','Fondo, protagonista, objetos y título.',()=>L.filter(l=>l.vis).length>=4],
+  ['Aísla con la varita','Varita (W) → ◐ Máscara con la selección, o Supr.',()=>L.some(l=>l.wandUsed&&l.mask)],
+  ['Pinta una máscara','Pincel (B) sobre la máscara, o Degradado.',()=>L.some(l=>l.maskPaint&&l.mask)],
+  ['Recorta una capa','Recortar (C): quita al menos el 10 % de la imagen.',()=>L.some(l=>{if(l.type!=='img')return false;const s=srcOf(l);return l.crop.w*l.crop.h<.9*s.width*s.height})],
+  ['Pon una capa en perspectiva','Ctrl+T y Ctrl+arrastrar una esquina (Distorsionar).',()=>L.some(l=>l.quad&&l.vis)],
+  ['Rota o voltea un objeto','Ctrl+T, o Edición › Transformar › Voltear.',()=>L.some(l=>(l.rot%360!==0)||l.fh||l.fv)],
+  ['Usa una máscara de recorte','Alt+Ctrl+G sobre otra capa.',()=>L.some((l,i)=>l.clip&&i>0&&l.vis)],
+  ['Título de 60 px o más','Con trazo o sombra paralela (fx).',()=>L.some(l=>l.type==='text'&&l.size*l.sc>=60&&(l.strokeW>0||l.shadow)&&l.vis)]];
+const MIS_B=[['Sube tu foto con las especificaciones','JPG/PNG · ≤ 10 MB · horizontal · ≥ 1920 × 1080 · bien iluminada.',()=>L.some(l=>l.orig&&l.orig.ok)],
+  ['Recorta tu foto a 16:9','Recortar (C) con la proporción 16 : 9.',()=>L.some(l=>l.orig&&l.orig.ok&&Math.abs(l.crop.w/l.crop.h-16/9)<.03)],
+  ['Aísla al protagonista','Selección (W, L o M) → ◐ Máscara o Supr.',()=>L.some(l=>l.orig&&l.orig.ok&&l.mask&&l.selUsed)],
+  ['Fondo nuevo y una transformación','Una capa visible debajo de tu foto, y rota, voltea o distorsiona algo.',()=>L.some((l,i)=>l.orig&&l.orig.ok&&L.slice(0,i).some(b=>b.vis))&&L.some(l=>(l.rot%360!==0)||l.fh||l.fv||l.quad)],
+  ['Título de 60 px o más con fx','Trazo o sombra paralela.',()=>L.some(l=>l.type==='text'&&l.size*l.sc>=60&&(l.strokeW>0||l.shadow)&&l.vis)]];
+function renderMission(){const ul=$('#mission');ul.innerHTML='';let n=0;const BM=MODE==='bono',M=BM?MIS_B:MIS;M.forEach(([t,d,f],i)=>{let ok=false;try{ok=f()}catch(e){}if(ok)n++;const li=document.createElement('li');if(ok)li.className='done';li.innerHTML='<span class="ok">'+(ok?'✓':i+1)+'</span><span>'+t+'<small>'+d+'</small></span>';ul.appendChild(li)});$('#score').textContent=BM?('BONO EXAMEN FINAL · '+n+' / 5 metas · '+n*2+' / 10 pts'):(n+' / 8 metas · '+n*5+' / 40 pts');$('#misNote').innerHTML=BM?'Al terminar pulsa <b>⬇ Descargar imagen</b>: PNG y proyecto .json. Entrega <b>Apellido_Nombre_TESI1104_BonoFinal.zip</b> con tu <b>foto original</b>, el PNG y el .json.':'Al terminar pulsa <b>⬇ Descargar imagen</b> y descarga el PNG, el JPG y el proyecto .json. Comprime los tres como <b>Apellido_Nombre_TESI1104_Lab11.zip</b>.';$('.st-tabs button[data-p=mis]').textContent=BM?'Bono':'Misión'}
+
+/* ---------- herramientas ---------- */
+function setTool(t){if(['crop','xf'].includes(tool)&&t!==tool)applyMode(true);
+  if(t==='crop'&&!needImg())return;if(t==='xf'){enterXf(false);return}
+  if(t==='crop'){modeStart=hi;prevTool=tool}tool=t;ui()}
+function enterXf(dist){const l=L[sel];if(!l){toast('Selecciona una capa.');return}if(tool!=='xf'&&tool!=='crop')prevTool=tool;if(tool!=='xf')modeStart=hi;tool='xf';distortMode=!!dist;ui()}
+function applyMode(silent){if(tool==='crop'){const l=L[sel];if(l&&hi===modeStart&&hist[hi])commit('Recortar');else if(l)commit('Recortar')}
+  if(tool==='xf'||tool==='crop'){tool=['xf','crop'].includes(prevTool)?'move':prevTool;distortMode=false;if(silent!==true)ui()}}
+function cancelMode(){if(modeStart>=0&&hist[modeStart]){hist=hist.slice(0,modeStart+1);hi=modeStart;restore(hist[hi]);save()}tool=['xf','crop'].includes(prevTool)?'move':prevTool;distortMode=false;ui()}
+$$('#stTools [data-t]').forEach(b=>b.onclick=()=>{if(b.dataset.t==='marquee'&&tool==='marquee'){selOpt.shape=selOpt.shape==='rect'?'ellipse':'rect';ui();return}setTool(b.dataset.t)});
+$('#swX').onclick=()=>{[fg,bgc]=[bgc,fg];ui()};$('#swFg').onclick=$('#swBg').onclick=()=>{fg='#000000';bgc='#FFFFFF';ui()};
+function cpos(e){const r=cv.getBoundingClientRect();return[(e.clientX-r.left)/r.width*W,(e.clientY-r.top)/r.height*H]}
+function inPoly(p,P){let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){if(((P[i][1]>p[1])!==(P[j][1]>p[1]))&&(p[0]<(P[j][0]-P[i][0])*(p[1]-P[i][1])/(P[j][1]-P[i][1])+P[i][0]))c=!c}return c}
+function hit(p){for(let i=L.length-1;i>=0;i--)if(L[i].vis&&inPoly(p,corners(L[i])))return i;return -1}
+const tol=()=>14*W/cv.getBoundingClientRect().width;
+cv.addEventListener('pointerdown',e=>{if(e.button!==0)return;const p=cpos(e);cv.setPointerCapture(e.pointerId);const l=L[sel];
+  if(inCrop()){const g=edGeom(),sx=(p[0]-g.ox)/g.k,sy=(p[1]-g.oy)/g.k,c=l.crop,cs=[[c.x,c.y],[c.x+c.w,c.y],[c.x+c.w,c.y+c.h],[c.x,c.y+c.h]],ci=cs.findIndex(q=>Math.hypot(q[0]-sx,q[1]-sy)<tol()/g.k);
+    if(ci>=0)drag={m:'cropR',ci,c0:{...c}};else if(sx>c.x&&sx<c.x+c.w&&sy>c.y&&sy<c.y+c.h)drag={m:'cropM',sx,sy,c0:{...c}};return}
+  if(tool==='marquee'){drag={m:'marq',p0:p,mode:modeFrom(e),r:{x:p[0],y:p[1],w:0,h:0}};return}
+  if(tool==='lasso'){drag={m:'lasso',mode:modeFrom(e),pts:[p]};return}
+  if(tool==='wand'){if(!L[sel]&&!wand.all){toast('Selecciona una capa.');return}wandAt(p,modeFrom(e));return}
+  if(tool==='text'){const t=newText(p[0],p[1]);L.splice(sel+1,0,t);sel=sel+1;tool='move';commit('Capa de texto');showPane('prop');setTimeout(()=>{const ta=$('#taText');if(ta){ta.focus();ta.select()}},30);return}
+  if(tool==='brush'){if(!l||l.type!=='img'){toast('Selecciona una capa de imagen para pintar su máscara.');return}if(!l.mask)l.mask=whiteMask(l);const Hm=docToSrcH(l);drag={m:'paint',Hm,last:p};dabDoc(l,Hm,p);dirty(l);return}
+  if(tool==='xf'&&l){const C=corners(l),ci=C.findIndex(q=>Math.hypot(q[0]-p[0],q[1]-p[1])<tol());
+    if(ci>=0&&(e.ctrlKey||e.metaKey||distortMode||l.quad)){if(!l.quad)l.quad=C;drag={m:'corner',ci};return}
+    if(!l.quad){const r=rotHandle(l);if(Math.hypot(p[0]-r[0],p[1]-r[1])<tol()){drag={m:'rot',a0:Math.atan2(p[1]-l.y,p[0]-l.x),r0:l.rot};return}
+      if(ci>=0){drag={m:'scale',d0:Math.hypot(p[0]-l.x,p[1]-l.y),s0:l.sc};return}
+      if(!inPoly(p,C)){drag={m:'rot',a0:Math.atan2(p[1]-l.y,p[0]-l.x),r0:l.rot};return}}
+    drag=l.quad?{m:'qmove',p0:p,q0:l.quad.map(q=>[...q])}:{m:'move',p0:p,x0:l.x,y0:l.y};return}
+  const h=hit(p);if(h>=0){if(h!==sel){sel=h;ui()}const ll=L[sel];drag=ll.quad?{m:'qmove',p0:p,q0:ll.quad.map(q=>[...q])}:{m:'move',p0:p,x0:ll.x,y0:ll.y}}});
+cv.addEventListener('pointermove',e=>{const p=cpos(e);if(tool==='brush'){hover=p;need=true}if(!drag)return;const l=L[sel];
+  if(drag.m==='marq'){let w=p[0]-drag.p0[0],h=p[1]-drag.p0[1];if(e.shiftKey&&drag.mode==='new'){const s=Math.max(Math.abs(w),Math.abs(h));w=Math.sign(w||1)*s;h=Math.sign(h||1)*s}drag.r={x:Math.min(drag.p0[0],drag.p0[0]+w),y:Math.min(drag.p0[1],drag.p0[1]+h),w:Math.abs(w),h:Math.abs(h)};need=true;return}
+  if(drag.m==='lasso'){const q=drag.pts[drag.pts.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])>3)drag.pts.push(p);need=true;return}
+  if(!l)return;
+  if(drag.m==='move'){l.x=drag.x0+p[0]-drag.p0[0];l.y=drag.y0+p[1]-drag.p0[1]}
+  else if(drag.m==='qmove'){const dx=p[0]-drag.p0[0],dy=p[1]-drag.p0[1];l.quad=drag.q0.map(q=>[q[0]+dx,q[1]+dy])}
+  else if(drag.m==='corner'){l.quad[drag.ci]=p}
+  else if(drag.m==='rot'){let r=drag.r0+(Math.atan2(p[1]-l.y,p[0]-l.x)-drag.a0)*180/Math.PI;r=((r+540)%360)-180;if(e.shiftKey)r=Math.round(r/15)*15;l.rot=Math.round(r)}
+  else if(drag.m==='scale'){l.sc=Math.max(.03,drag.s0*Math.hypot(p[0]-l.x,p[1]-l.y)/drag.d0)}
+  else if(drag.m==='paint'){const d=Math.hypot(p[0]-drag.last[0],p[1]-drag.last[1]),st=Math.max(1,brush.size/6);for(let k=st;k<=d;k+=st)dabDoc(l,drag.Hm,[drag.last[0]+(p[0]-drag.last[0])*k/d,drag.last[1]+(p[1]-drag.last[1])*k/d]);drag.last=p;dirty(l)}
+  else{const g=edGeom(),sx=(p[0]-g.ox)/g.k,sy=(p[1]-g.oy)/g.k,s=g.s,c=l.crop;
+    if(drag.m==='cropM'){c.x=Math.round(Math.max(0,Math.min(s.width-c.w,drag.c0.x+sx-drag.sx)));c.y=Math.round(Math.max(0,Math.min(s.height-c.h,drag.c0.y+sy-drag.sy)))}
+    if(drag.m==='cropR'){const c0=drag.c0,left=drag.ci===0||drag.ci===3,top=drag.ci<2,ax=left?c0.x+c0.w:c0.x,ay=top?c0.y+c0.h:c0.y,nx=Math.max(0,Math.min(s.width,sx)),ny=Math.max(0,Math.min(s.height,sy));let w=Math.max(20,Math.abs(nx-ax)),h=Math.max(20,Math.abs(ny-ay));const maxW=left?ax:s.width-ax,maxH=top?ay:s.height-ay;
+      if(cropRatio){h=w/cropRatio;if(h>maxH){h=maxH;w=h*cropRatio}if(w>maxW){w=maxW;h=w/cropRatio}}else{w=Math.min(w,maxW);h=Math.min(h,maxH)}
+      c.w=Math.round(w);c.h=Math.round(h);c.x=Math.round(left?ax-w:ax);c.y=Math.round(top?ay-h:ay)}
+    dirty(l,true)}
+  need=true});
+cv.addEventListener('pointerleave',()=>{hover=null;need=true});
+cv.addEventListener('pointerup',()=>{if(!drag)return;const d=drag,l=L[sel];drag=null;
+  if(d.m==='marq'){if(d.r.w<3||d.r.h<3){if(d.mode==='new'&&selOn)deselect();need=true;return}const t=mk(W,H),x=t.getContext('2d');x.fillStyle='#fff';x.beginPath();if(selOpt.shape==='ellipse')x.ellipse(d.r.x+d.r.w/2,d.r.y+d.r.h/2,d.r.w/2,d.r.h/2,0,0,7);else x.rect(d.r.x,d.r.y,d.r.w,d.r.h);x.fill();selApply(t,d.mode);if(d.mode==='new')selWand=false;commit(selOpt.shape==='ellipse'?'Marco elíptico':'Marco rectangular');return}
+  if(d.m==='lasso'){if(d.pts.length<3){need=true;return}const t=mk(W,H),x=t.getContext('2d');x.fillStyle='#fff';x.beginPath();d.pts.forEach((q,i)=>i?x.lineTo(q[0],q[1]):x.moveTo(q[0],q[1]));x.closePath();x.fill();selApply(t,d.mode);if(d.mode==='new')selWand=false;commit('Lazo');return}
+  if(d.m==='paint'&&l){l.maskPaint=true;commit('Pincel en máscara');return}
+  if(d.m==='cropM'||d.m==='cropR'){need=true;return}
+  commit({move:'Mover',qmove:'Mover',corner:'Distorsionar',rot:'Rotar',scale:'Escalar'}[d.m]||'Editar')});
+cv.addEventListener('wheel',e=>{const l=L[sel];if(!l||inCrop()||l.quad)return;if(tool==='brush'){e.preventDefault();brush.size=Math.max(2,Math.min(300,brush.size+(e.deltaY<0?6:-6)));renderBar();need=true;return}if(tool!=='xf')return;e.preventDefault();l.sc=Math.max(.03,l.sc*(e.deltaY<0?1.05:1/1.05));need=true;clearTimeout(cv._w);cv._w=setTimeout(()=>commit('Escalar'),300)},{passive:false});
+
+/* ---------- capas: acciones ---------- */
+function dup(){const l=L[sel];if(!l)return;const n=cloneLayer(l);n.id=uid++;n.name=l.name+' copia';n.x+=24;n.y+=24;if(n.quad)n.quad=n.quad.map(p=>[p[0]+24,p[1]+24]);L.splice(sel+1,0,n);sel++;commit('Duplicar capa')}
+function delLayer(){if(!L[sel])return;L.splice(sel,1);sel=Math.min(sel,L.length-1);if(L[0])L[0].clip=false;commit('Eliminar capa')}
+function order(d){if(d>0&&sel<L.length-1){[L[sel],L[sel+1]]=[L[sel+1],L[sel]];sel++;commit('Traer adelante')}else if(d<0&&sel>0){[L[sel],L[sel-1]]=[L[sel-1],L[sel]];sel--;if(L[0])L[0].clip=false;commit('Enviar atrás')}}
+function toggleClip(){const l=L[sel];if(!l)return;if(sel===0){toast('La capa de abajo no puede ser máscara de recorte.');return}l.clip=!l.clip;commit(l.clip?'Crear máscara de recorte':'Soltar máscara de recorte')}
+function addTextLayer(){const t=newText(W/2,H/2);L.splice(sel+1,0,t);sel++;commit('Capa de texto');showPane('prop')}
+$$('[data-la]').forEach(b=>b.onclick=e=>{const a=b.dataset.la;if(a==='clip')toggleClip();if(a==='mask')(e.altKey?maskHide:maskReveal)();if(a==='text')addTextLayer();if(a==='dup')dup();if(a==='up')order(1);if(a==='down')order(-1);if(a==='del')delLayer()});
+function showPane(p){$$('.st-tabs button').forEach(o=>o.classList.toggle('on',o.dataset.p===p));$('#pLay').hidden=p!=='lay';$('#pProp').hidden=p!=='prop';$('#pHist').hidden=p!=='hist';$('#pMis').hidden=p!=='mis';if(p==='hist')renderHist()}
+$$('.st-tabs button').forEach(b=>b.onclick=()=>showPane(b.dataset.p));
+
+/* ---------- menús ---------- */
+const placeLib=()=>$('#libModal').classList.add('open');
+const MENUS={
+ 'Archivo':[['Nuevo…','',()=>{if(confirm('¿Empezar un banner nuevo? Se perderá lo que no hayas descargado.'))fresh()}],['Abrir proyecto (.json)…','',()=>$('#stJson').click()],'-',['Colocar imagen de la biblioteca…','',placeLib],['Colocar mi foto o dibujo…','',()=>$('#stFile').click()],'-',['Guardar proyecto (.json)','Ctrl+S',exportJSON],['Guardar para Web: PNG','Alt+Shift+Ctrl+S',exportPNG],['Guardar para Web: JPG','',exportJPG],'-',['⬇ Descargar mi trabajo…','',openDl],'-',['Cambiar a: Laboratorio 11 / Bono del examen final','',()=>open(MODE==='bono'?'lab':'bono')],['Cerrar el taller','',()=>closeStudio()]],
+ 'Edición':[['Deshacer','Ctrl+Z',undo],['Rehacer','Shift+Ctrl+Z',redo],['Paso atrás','Alt+Ctrl+Z',undo],'-',['Transformación libre','Ctrl+T · Alt+T',()=>enterXf(false)],['Transformar › Distorsionar','',()=>enterXf(true)],['Transformar › Rotar 180°','',()=>rot90(180)],['Transformar › Rotar 90° horario','',()=>rot90(90)],['Transformar › Rotar 90° antihorario','',()=>rot90(-90)],['Transformar › Voltear horizontal','',()=>flip('h')],['Transformar › Voltear vertical','',()=>flip('v')],['Quitar distorsión','',()=>{const l=L[sel];if(l&&l.quad){l.quad=null;commit('Quitar distorsión')}}]],
+ 'Imagen':[['Recortar capa','C',()=>setTool('crop')],['Ajustar capa al lienzo','',fitCanvas]],
+ 'Capa':[['Nueva capa de texto','T',addTextLayer],['Duplicar capa','Ctrl+J',dup],['Eliminar capa','',delLayer],'-',['Máscara de capa › Mostrar todo','',()=>{const l=needImg();if(l){l.mask=whiteMask(l);dirty(l);commit('Máscara: mostrar todo')}}],['Máscara de capa › Ocultar todo','',()=>{const s=selOn;if(s){selX.clearRect(0,0,W,H);updSel()}maskHide()}],['Máscara de capa › Mostrar selección','',maskReveal],['Máscara de capa › Ocultar selección','',maskHide],['Máscara de capa › Degradado','',gradMask],['Invertir máscara','Ctrl+I',invertMask],['Eliminar máscara','',delMask],'-',['Crear máscara de recorte','Alt+Ctrl+G',toggleClip],'-',['Organizar › Traer adelante','Ctrl+]',()=>order(1)],['Organizar › Enviar atrás','Ctrl+[',()=>order(-1)]],
+ 'Selección':[['Todo','Ctrl+A',selectAll],['Deseleccionar','Ctrl+D',deselect],['Volver a seleccionar','Shift+Ctrl+D',reselect],['Invertir','Shift+Ctrl+I',invertSel],'-',['Modificar › Calar…','Shift+F6',featherSel]],
+ 'Vista':[['Guías de tercios','Ctrl+;',()=>{guides=!guides;need=true}],['Máscara en rojo','\\',()=>{redView=!redView;need=true;renderBar()}]],
+ 'Ayuda':[['Atajos de teclado','F1',()=>$('#keyModal').classList.add('open')],['Especificaciones de la foto del bono','',()=>{const u=L.find(l=>l.orig);if(u)toast('Tu foto: '+u.orig.w+' × '+u.orig.h+' px · '+u.orig.kb+' KB · '+(u.orig.ok?'cumple':'no cumple'));$('#bonoInfo').classList.add('open')}]]};
+const drop=$('#psDrop');let openMi=null;
+Object.keys(MENUS).forEach(name=>{const mi=document.createElement('div');mi.className='mi';mi.textContent=name;$('#psMenu').insertBefore(mi,$('#psMenu .sp'));
+  const show=()=>{openMi&&openMi.classList.remove('open');openMi=mi;mi.classList.add('open');drop.innerHTML='';MENUS[name].forEach(it=>{if(it==='-'){drop.appendChild(document.createElement('hr'));return}const b=document.createElement('button');b.innerHTML=it[0]+'<span>'+it[1]+'</span>';b.onclick=()=>{closeMenu();it[2]()};drop.appendChild(b)});
+    const r=mi.getBoundingClientRect();drop.style.left=Math.min(r.left,innerWidth-310)+'px';drop.style.top=r.bottom+'px';drop.classList.add('open')};
+  mi.onclick=e=>{e.stopPropagation();if(openMi===mi)closeMenu();else show()};mi.onmouseenter=()=>{if(openMi&&openMi!==mi)show()}});
+function closeMenu(){drop.classList.remove('open');if(openMi)openMi.classList.remove('open');openMi=null}
+addEventListener('pointerdown',e=>{if(openMi&&!e.target.closest('#psDrop,.mi'))closeMenu()});
+$('#psUndo').onclick=undo;$('#psRedo').onclick=redo;$('#psDl').onclick=openDl;$('#psClose').onclick=()=>closeStudio();
+$('#dlClose').onclick=()=>$('#dlModal').classList.remove('open');$('#dlPng').onclick=exportPNG;$('#dlJpg').onclick=exportJPG;$('#dlJson').onclick=exportJSON;
+$('#keyClose').onclick=()=>$('#keyModal').classList.remove('open');$('#libClose').onclick=()=>$('#libModal').classList.remove('open');
+$('#stFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();rd.onload=async()=>{const i=await loadImg(rd.result);if(!i){toast('No se pudo abrir esa imagen.');return}
+  const rep=specCheck(f,i),ok=rep.every(r=>r[1]);const lim=MODE==='bono'?2400:1600,k=Math.min(1,lim/Math.max(i.width,i.height)),c=mk(i.width*k,i.height*k);c.getContext('2d').drawImage(i,0,0,c.width,c.height);const key='up'+(upN++);ups[key]={c,url:c.toDataURL('image/jpeg',.88)};
+  const l=newImg(key,f.name.replace(/\.[^.]+$/,'').slice(0,30)||'Mi foto');l.orig={w:i.width,h:i.height,kb:Math.round(f.size/1024),tipo:f.type,ok,archivo:f.name.slice(0,60)};
+  L.splice(sel+1,0,l);sel++;tool='move';commit('Colocar foto');if(MODE==='bono')showSpec(rep,ok)};rd.readAsDataURL(f);e.target.value=''};
+function specCheck(f,i){const t=mk(64,64),x=t.getContext('2d');x.drawImage(i,0,0,64,64);const d=x.getImageData(0,0,64,64).data;let s=0;for(let p=0;p<d.length;p+=4)s+=.2126*d[p]+.7152*d[p+1]+.0722*d[p+2];const lum=Math.round(s/(64*64));
+  return[['Formato JPG o PNG',/image\/(jpeg|png)/.test(f.type),f.type||'desconocido'],['10 MB o menos',f.size<=10*1024*1024,(f.size/1048576).toFixed(1)+' MB'],
+    ['Horizontal (más ancha que alta)',i.width>i.height,i.width+' × '+i.height+' px'],['Mínimo 1920 × 1080 px',i.width>=1920&&i.height>=1080,i.width+' × '+i.height+' px'],
+    ['Bien iluminada (ni muy oscura ni quemada)',lum>=55&&lum<=215,'brillo promedio '+lum+' de 255']]}
+function showSpec(rep,ok){$('#specList').innerHTML=rep.map(r=>'<li style="display:flex;gap:8px;padding:5px 0;border-bottom:1px solid #4a4a4a"><b style="color:'+(r[1]?'#4cd486':'#ff6b6b')+';width:18px">'+(r[1]?'✓':'✗')+'</b><span style="flex:1">'+r[0]+'</span><span style="color:#a8a8a8;font-family:var(--f-mono)">'+r[2]+'</span></li>').join('');
+  $('#specMsg').innerHTML=ok?'<b style="color:#4cd486">La foto cumple las especificaciones automáticas.</b> El profesor revisará además que sea original y tuya.':'<b style="color:#ff6b6b">La foto no cumple todas las especificaciones.</b> Puedes practicar con ella, pero para el bono toma o escoge otra foto y súbela de nuevo.';$('#specModal').classList.add('open')}
+$('#stJson').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>load(t).then(()=>toast('Proyecto abierto')).catch(()=>toast('Ese archivo no es un proyecto del Taller GEN.')));e.target.value=''};
+$('#stName').addEventListener('change',save);
+function gal(id,kind){const g=$(id);Object.entries(LIB).filter(([k,v])=>v[1]===kind).forEach(([k,v])=>{const b=document.createElement('button'),c=thumb(getSrc(k),240,135),sp=document.createElement('span');sp.textContent=v[0];b.append(c,sp);
+  b.onclick=()=>{L.splice(sel+1,0,newImg(k,v[0]));sel++;$('#libModal').classList.remove('open');tool='move';commit('Colocar: '+v[0])};g.appendChild(b)})}
+
+/* ---------- teclado (atajos de Photoshop CS6) ---------- */
+addEventListener('keydown',e=>{if(!S.classList.contains('open'))return;const tg=e.target;
+  if(tg.matches&&tg.matches('input[type=text],input[type=number],textarea,select,input:not([type])')){if(e.key==='Escape')tg.blur();return}
+  const k=e.key.toLowerCase(),c=e.ctrlKey||e.metaKey,a=e.altKey,sh=e.shiftKey,l=L[sel];
+  const stop=()=>{e.preventDefault();e.stopPropagation()};
+  if(e.key==='F1'){stop();$('#keyModal').classList.add('open');return}
+  if(sh&&e.key==='F6'){stop();featherSel();return}
+  if(c&&k==='z'){stop();sh?redo():undo();return}
+  if(c&&k==='y'){stop();redo();return}
+  if((c||a)&&k==='t'){stop();enterXf(false);return}
+  if(c&&k==='s'){stop();(a&&sh)?exportPNG():exportJSON();return}
+  if(c&&k==='j'){stop();dup();return}
+  if(c&&k==='a'){stop();selectAll();return}
+  if(c&&k==='d'){stop();sh?reselect():deselect();return}
+  if(c&&k==='i'){stop();sh?invertSel():invertMask();return}
+  if(c&&a&&k==='g'){stop();toggleClip();return}
+  if(c&&(e.key===']'||e.code==='BracketRight')){stop();order(1);return}
+  if(c&&(e.key==='['||e.code==='BracketLeft')){stop();order(-1);return}
+  if(c&&(e.key===';'||e.code==='Semicolon')){stop();guides=!guides;need=true;return}
+  if(c||a)return;
+  if(e.key==='Escape'){if(openMi){closeMenu();return}const m=$$('.modal.open');if(m.length){m.forEach(x=>x.classList.remove('open'));return}if(tool==='xf'||tool==='crop'){cancelMode();return}if(drag){drag=null;need=true}return}
+  if(e.key==='Enter'){if(tool==='xf'||tool==='crop'){stop();applyMode()}return}
+  if(e.key==='Delete'||e.key==='Backspace'){stop();if(selOn&&l&&l.type==='img')deleteSel();else if(selOn)toast('Selecciona una capa de imagen para ocultar lo seleccionado.');else delLayer();return}
+  const map={v:'move',m:'marquee',l:'lasso',w:'wand',c:'crop',b:'brush',t:'text'};
+  if(k==='m'&&sh){selOpt.shape=selOpt.shape==='rect'?'ellipse':'rect';tool='marquee';ui();return}
+  if(map[k]&&!sh){if(tool==='xf'||tool==='crop')applyMode(true);setTool(map[k]);return}
+  if(k==='d'){fg='#000000';bgc='#FFFFFF';ui();return}
+  if(k==='x'){[fg,bgc]=[bgc,fg];ui();return}
+  if(e.key==='\\'){redView=!redView;need=true;renderBar();return}
+  if(e.key==='['){brush.size=Math.max(2,brush.size-10);renderBar();need=true;return}if(e.key===']'){brush.size=Math.min(300,brush.size+10);renderBar();need=true;return}
+  if(l&&!inCrop()&&e.key.startsWith('Arrow')){stop();const s=sh?10:1,dx=e.key==='ArrowLeft'?-s:e.key==='ArrowRight'?s:0,dy=e.key==='ArrowUp'?-s:e.key==='ArrowDown'?s:0;
+    if(l.quad)l.quad=l.quad.map(q=>[q[0]+dx,q[1]+dy]);else{l.x+=dx;l.y+=dy}need=true;clearTimeout(cv._k);cv._k=setTimeout(()=>commit('Desplazar'),400)}},true);
+
+/* ---------- abrir / cerrar ---------- */
+let galDone=false;
+async function switchMode(m){if(m===MODE)return;if(started)save();MODE=m;started=false;L=[];sel=-1;hist=[];hi=-1;ups={};upN=1;tool='move';selX.clearRect(0,0,W,H);updSel()}
+async function open(m){if(typeof m!=='string')m='lab';await switchMode(m);S.classList.add('open');if(!galDone){galDone=true;gal('#galBg','bg');gal('#galPh','ph');gal('#galOb','ob')}
+  const was=started;await ensure();if(!was&&hist.length>1)toast('Se recuperó tu trabajo guardado en este navegador.');if(MODE==='bono'&&!L.some(l=>l.orig))$('#bonoInfo').classList.add('open');
+  if(document.fonts)document.fonts.ready.then(()=>{L.forEach(l=>{if(l.type==='text')dirty(l)});ui()});
+  try{history.replaceState(null,'',location.pathname+(MODE==='bono'?'?bono':'?taller')+location.hash)}catch(e){}ui()}
+function closeStudio(){S.classList.remove('open');closeMenu();try{history.replaceState(null,'',location.pathname+location.hash)}catch(e){}if(window.onStudioClose)window.onStudioClose()}
+addEventListener('resize',()=>{if(S.classList.contains('open'))status()});
+window.openStudio=open;
+window.TG={ensure:async()=>{if(MODE!=='lab'){await switchMode('lab')}return ensure()},png:exportPNG,jpg:exportJPG,json:exportJSON,preview,fname,has:()=>{try{return !!localStorage.getItem(KEYS.lab)}catch(e){return false}},setName:n=>{$('#stName').value=n;save()},getName:()=>$('#stName').value};
+$('#openStudio').onclick=()=>open('lab');$('#openBono').onclick=()=>open('bono');
+if(/[?&]taller\b/.test(location.search)||location.hash==='#taller')setTimeout(()=>open('lab'),60);
+else if(/[?&]bono\b/.test(location.search))setTimeout(()=>open('bono'),60);
+})();
+</script>
+
+<script>
+/* ---------- Lámina de descarga final ---------- */
+(function(){const c=$('#finPrev'),nm=$('#finName');
+  async function show(){if(!window.TG)return;await TG.ensure();TG.preview(c);nm.value=TG.getName();$('#finInfo').textContent=TG.has()?'Esta es la versión guardada en este navegador. Archivo: '+TG.fname():'Aún no hay trabajo guardado en este navegador: abre el Taller GEN primero.'}
+  slideHook('Descarga tu trabajo',show);window.onStudioClose=()=>{if(c.closest('.slide').classList.contains('on'))show()};
+  nm.addEventListener('change',()=>{TG.setName(nm.value);show()});
+  $('#finPng').onclick=async()=>{await TG.ensure();TG.setName(nm.value);TG.png()};$('#finJpg').onclick=async()=>{await TG.ensure();TG.setName(nm.value);TG.jpg()};$('#finJson').onclick=async()=>{await TG.ensure();TG.setName(nm.value);TG.json()};
+  $('#finOpen').onclick=()=>openStudio('lab');
+  if(c.closest('.slide').classList.contains('on'))show();
+})();
+</script>
+</body>
+</html>
