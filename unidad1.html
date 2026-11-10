@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Unidad I: Conceptos generales</title>
+<meta name="description" content="TESI 1104 – Diseño de Elementos para la Web · Unidad I: Conceptos generales de la imagen digital (píxel, resolución, profundidad de bit, fuentes de imágenes, color y formatos)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+
+:root{--fh:"Space Grotesk",Arial,sans-serif;--fb:"Atkinson Hyperlegible",Calibri,sans-serif;--fm:"JetBrains Mono","Courier New",monospace;--fk:"Press Start 2P","Courier New",monospace;
+--page:#060B1C;--bg:#F4F7FB;--fg:#0B1530;--title:#0B1530;--dark:#0B1530;--darkfg:#fff;--darkmute:#8C98BC;--mute:#5B6684;--acc:#E63946;--acc2:#3A86FF;--onacc:#fff;
+--card:#fff;--cardb:2px solid #0B1530;--r:0px;--sh:5px 5px 0 #0B1530;--icor:0px;--iconbg:#E3ECFF;--iconfg:#1D3A8A;--panel:#0B1530;--panelfg:#fff;--th:#1D3A8A;--thfg:#fff;--zebra:#EEF3FB;--line:#D5DEEE;
+--kbg:#0B1530;--kfg:#fff;--ansc:#C62828;--dot:0px;--btnb:2px solid #0B1530;--br:0px;--barbg:#0B1530;--barfg:#fff;--barline:#2B3A66}
+
+*{box-sizing:border-box}[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--page);color:var(--fg);font-family:var(--fb);overflow:hidden}
+button,input,select{font:inherit;color:inherit}button{cursor:pointer}
+:focus-visible{outline:3px solid var(--acc2);outline-offset:2px}
+#viewport{position:fixed;inset:0 0 56px 0;display:grid;place-items:center;overflow:hidden;background:var(--page)}
+#stage{width:1280px;height:720px;position:relative;flex:none;overflow:hidden;transform-origin:center center}
+.slide{position:absolute;inset:0;padding:48px 72px 60px;display:flex;flex-direction:column;gap:16px;visibility:hidden;opacity:0;transition:opacity .35s,visibility 0s .35s;background:var(--bg);color:var(--fg);overflow:hidden}
+.slide.on{visibility:visible;opacity:1;transition:opacity .35s}
+.slide>*{position:relative;z-index:1}
+.slide [data-a]{opacity:0;transform:translateY(14px)}
+.slide.on [data-a]{opacity:1;transform:none;transition:opacity .45s,transform .45s cubic-bezier(.2,.8,.2,1)}
+.slide.on [data-a="2"]{transition-delay:.08s}.slide.on [data-a="3"]{transition-delay:.16s}.slide.on [data-a="4"]{transition-delay:.24s}
+@media (prefers-reduced-motion:reduce){.slide,.slide [data-a]{transition:none!important;transform:none!important}}
+.dark{background:var(--dark);color:var(--darkfg)}
+.kicker{font-family:var(--fk);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc);margin:0}
+h1,h2,h3{font-family:var(--fh);margin:0;line-height:1.12}
+h2{font-size:38px;color:var(--title)}
+.dark h2{color:var(--darkfg)}
+b{font-weight:700}
+.bul{margin:0;padding:0;list-style:none;display:grid;gap:10px}
+.bul li{font-size:20.5px;line-height:1.42;padding-left:26px;position:relative}
+.bul li::before{content:"";position:absolute;left:2px;top:.55em;width:10px;height:10px;background:var(--acc);border-radius:var(--dot)}
+.foot{font-size:15px;color:var(--mute);margin:auto 0 0}
+.pg{position:absolute;left:72px;right:72px;bottom:18px;display:flex;justify-content:space-between;font-size:13px;color:var(--mute);z-index:2}
+.dark .pg{color:var(--darkmute)}
+.grid{display:grid;gap:16px}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--card);border:var(--cardb);border-radius:var(--r);box-shadow:var(--sh);padding:16px 20px;color:var(--fg)}
+.card h3{font-size:22px;margin:12px 0 8px}
+.card p{font-size:18px;line-height:1.42;margin:0}
+.slide>.grid,.slide>.keys,.slide>.objs,.slide>.map{flex:1;grid-auto-rows:1fr;min-height:0}
+.ico{width:44px;height:44px;border-radius:var(--icor);display:grid;place-items:center;background:var(--iconbg);color:var(--iconfg);flex:none}
+.ico svg{width:25px;height:25px}
+.cmph{display:flex;align-items:center;gap:12px;margin-bottom:12px}.cmph h3{margin:0}
+.cmp .bul li{font-size:19.5px}
+.split{display:grid;grid-template-columns:1.25fr 1fr;gap:28px;flex:1;min-height:0}
+.panel{background:var(--panel);color:var(--panelfg);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:12px;justify-content:center;box-shadow:var(--sh)}
+.panel pre{font-family:var(--fm);font-size:16px;line-height:1.5;margin:0;white-space:pre-wrap}
+.panel .cap{font-size:16px;opacity:.9;margin:0}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:18px;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh);border:var(--cardb)}
+.tbl th{background:var(--th);color:var(--thfg);text-align:left;padding:12px 14px;font-family:var(--fh);font-size:17px}
+.tbl td{padding:12px 14px;border-top:1px solid var(--line);vertical-align:top}
+.tbl tr:nth-child(even) td{background:var(--zebra)}
+.lead{font-size:19px;margin:0}
+.steps{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:14px;counter-reset:s}
+.steps li{background:var(--card);border:var(--cardb);border-radius:var(--r);box-shadow:var(--sh);padding:16px}
+.steps .n{display:grid;place-items:center;width:38px;height:38px;border-radius:var(--icor);background:var(--acc);color:var(--onacc);font-family:var(--fk);font-weight:700}
+.steps h3{font-size:19px;margin:10px 0 6px}.steps p{font-size:16.5px;margin:0;line-height:1.38}
+.keys{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.key{display:flex;flex-direction:column;gap:8px;background:var(--card);border:var(--cardb);border-radius:var(--r);box-shadow:var(--sh);padding:14px 16px;font-size:18px;justify-content:center}
+.kk{display:flex;flex-wrap:wrap;gap:4px;align-items:center}.key kbd{font-size:18px}.kk i{font-style:normal;opacity:.6}
+kbd{font-family:var(--fm);font-size:15px;background:var(--kbg);color:var(--kfg);border-radius:5px;padding:2px 8px;border-bottom:3px solid rgba(0,0,0,.28);white-space:nowrap}
+.objs{display:grid;gap:10px}
+.obj{display:grid;grid-template-columns:250px 1fr;gap:16px;align-items:center;background:var(--card);border:var(--cardb);border-radius:var(--r);box-shadow:var(--sh);padding:12px 20px;font-size:20px}
+.obj b{color:var(--acc);font-family:var(--fh);font-size:21px}
+.map{display:grid;gap:10px}.map.m3{grid-template-columns:repeat(3,1fr)}.map.m2{grid-template-columns:repeat(2,1fr)}
+.tile{display:flex;align-items:center;gap:12px;text-align:left;background:var(--card);border:var(--cardb);border-radius:var(--r);box-shadow:var(--sh);padding:12px 16px;font-size:19px;color:var(--fg);transition:transform .15s}
+.tile:hover{transform:translateY(-2px)}
+.tile span{display:grid;place-items:center;min-width:34px;height:34px;background:var(--acc);color:var(--onacc);border-radius:var(--icor);font-family:var(--fk);font-size:14px;font-weight:700}
+.qa{display:flex;flex-direction:column;gap:10px;text-align:left;font-size:20px;position:relative;padding-left:58px;min-height:120px}
+.qa .qn{position:absolute;left:16px;top:16px;width:30px;height:30px;display:grid;place-items:center;background:var(--acc);color:var(--onacc);border-radius:var(--icor);font-family:var(--fk);font-size:14px}
+.qa .ans{display:none;color:var(--ansc);font-weight:700}
+.qa.open .ans{display:block}
+.refs{display:grid;gap:8px}.refs p{font-size:17px;margin:0;padding-left:28px;text-indent:-28px}
+.cover{justify-content:center}
+.cov-txt{max-width:640px;display:flex;flex-direction:column;gap:14px}
+.cover .unit{font-size:22px;margin:0;opacity:.9}
+.cover h1{font-size:54px}
+.cover .sub,.divider .sub{font-size:20px;margin:0;opacity:.88;max-width:620px}
+.cover .by{font-size:14px;margin:24px 0 0;opacity:.75}
+.divider{justify-content:center;gap:10px}
+.dv-num{font-family:var(--fk);font-size:120px;line-height:1;color:var(--acc)}
+.divider h2{font-size:52px;max-width:760px}
+/* demo widgets */
+.demo{display:grid;gap:18px;flex:1;min-height:0}
+.ctrl{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:16px}
+.btn{background:var(--card);border:var(--btnb);border-radius:var(--br);padding:6px 14px;font-size:16px;color:var(--fg)}
+.btn:hover{border-color:var(--acc)}
+.btn.on,.btn.pri{background:var(--acc);color:var(--onacc);border-color:var(--acc)}
+.btn.ok{background:#1F9D55;color:#fff;border-color:#1F9D55}.btn.bad{background:#C62828;color:#fff;border-color:#C62828}
+input[type=range]{accent-color:var(--acc);width:220px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:14px;color:var(--mute)}
+.field input,.field select{font-size:17px;color:var(--fg);background:var(--card);border:var(--btnb);border-radius:var(--br);padding:5px 8px;width:130px}
+.out{font-family:var(--fm);font-size:16px}
+.big{font-family:var(--fh);font-size:34px;font-weight:700;color:var(--title)}
+.fb{font-size:17px;font-weight:700;min-height:1.4em}
+canvas{display:block}
+/* bar */
+#bar{position:fixed;left:0;right:0;bottom:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 max(16px,env(safe-area-inset-right,0px)) env(safe-area-inset-bottom,0px) max(16px,env(safe-area-inset-left,0px));background:var(--barbg);color:var(--barfg);z-index:60;font-family:var(--fb)}
+#bar button{background:none;border:1.5px solid var(--barline);color:var(--barfg);border-radius:6px;padding:4px 12px;font-size:15px;white-space:nowrap}
+#bar button:hover{border-color:var(--acc)}
+#count{font-family:var(--fm);font-size:15px;min-width:64px;text-align:center}
+#map{flex:1;display:flex;gap:3px;align-items:center;min-width:0;overflow:hidden}
+#map i{flex:1;height:8px;background:var(--barline);border-radius:2px;cursor:pointer;min-width:3px}
+#map i.done{background:var(--acc2)}#map i.cur{background:var(--acc);height:14px}
+@media (max-width:760px){#map{display:none}#bar{justify-content:space-between}#btnFs{display:none}}
+.overlay{position:fixed;inset:0 0 56px 0;background:rgba(0,0,0,.6);display:none;z-index:70;overflow:auto;padding:24px 16px}
+.overlay.open{display:block}
+#idxList{max-width:860px;margin:0 auto;background:var(--card);color:var(--fg);border-radius:10px;padding:16px 16px 16px 16px;list-style:none;columns:2;column-gap:16px}
+#idxList li{break-inside:avoid}
+#idxList button{display:flex;gap:10px;width:100%;text-align:left;background:none;border:0;padding:6px 8px;border-radius:6px;font-size:15px;color:var(--fg)}
+#idxList button:hover{background:var(--zebra)}
+#idxList span{font-family:var(--fm);color:var(--acc);min-width:26px}
+@media (max-width:760px){#idxList{columns:1}}
+#notes{position:fixed;left:16px;right:16px;bottom:68px;max-width:900px;margin:auto;background:#FFFDF6;color:#1b1b1b;border-left:6px solid var(--acc);border-radius:8px;padding:14px 18px;font-size:17px;line-height:1.45;z-index:65;display:none;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+#notes.open{display:block}
+
+
+.kicker{font-size:11px;line-height:1.6}
+.dv-num{font-size:110px}
+.light::before{content:"";position:absolute;top:30px;right:44px;width:12px;height:12px;background:#E63946;box-shadow:14px 0 #3A86FF,28px 0 #FFBE0B,14px 14px #2A9D8F,28px 14px #E63946,28px 28px #8338EC;z-index:0}
+.divider::before{content:"";position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:24px 24px}
+.mosaic{position:absolute;right:96px;top:50%;transform:translateY(-50%);image-rendering:pixelated}
+.cover .mosaic{right:80px;border:3px solid #fff;box-shadow:10px 10px 0 #E63946}
+.cover .mcap{position:absolute;right:80px;bottom:70px;width:440px;text-align:center;font-family:var(--fm);font-size:14px;color:#C9D3EE}
+.frame{border:2px solid #0B1530;box-shadow:5px 5px 0 #0B1530;background:#000;max-width:100%}
+.d-split{grid-template-columns:auto 1fr;align-items:start}
+.side{display:flex;flex-direction:column;gap:12px}
+.side hr{border:0;border-top:2px dashed #D5DEEE;width:100%;margin:2px 0}
+.mut{font-size:15.5px;color:var(--mute);margin:0}
+.side p{margin:0}
+.pxread{display:flex;gap:14px;align-items:center}.pxread i{width:64px;height:64px;border:2px solid #0B1530;flex:none}
+.pxread p{margin:0}
+.pxg{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;width:300px;margin:0 auto}.pxg i{aspect-ratio:1}
+.stat{font-family:var(--fh);font-size:46px;font-weight:700;color:#FFBE0B;text-align:center}
+.bigico{display:grid;place-items:center}.bigico svg{width:120px;height:120px;color:#FFBE0B}
+.sw{display:flex;gap:10px;flex-wrap:wrap}.sw>div{display:flex;flex-direction:column;align-items:center;gap:6px;font-family:var(--fm);font-size:13px;text-align:center}
+.sw i{width:72px;height:72px;border:2px solid currentColor;display:block}
+.vbox{position:relative;width:100%;height:320px;overflow:hidden;background:#000}
+.vbox svg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+#rvR{width:100%;height:320px}
+.paper-row{display:flex;gap:18px;align-items:center;justify-content:space-between}.paper-row p{margin:4px 0}
+.paper{position:relative;width:136px;height:176px;border:2px dashed #5B6684;background:#fff;flex:none}
+.paper span{position:absolute;bottom:4px;right:6px;font-size:12px;color:#5B6684}
+.paper i{position:absolute;left:0;top:0;background:rgba(58,134,255,.35);border:2px solid #3A86FF;max-width:none}
+.calc-inline{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:18px;padding:12px 18px}
+.calc-inline input,.calc-inline select{width:70px;font-size:17px;border:2px solid #0B1530;padding:2px 6px;background:#fff}
+.grab{cursor:grab;touch-action:none}
+.lic{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lic .card{display:flex;flex-direction:column;gap:8px;padding:12px 16px}.lic .card p{font-size:16.5px}
+.lic .ctrl .btn{font-size:14.5px;padding:4px 10px}.lic .fb{font-size:15px;font-weight:600;margin:0}
+.rgbbox{position:relative;width:420px;height:420px;background:#000;border:2px solid #0B1530;box-shadow:5px 5px 0 #0B1530;isolation:isolate}
+.rgbbox i{position:absolute;width:230px;height:230px;border-radius:50%;mix-blend-mode:screen}
+#mR{left:50px;top:40px}#mG{left:140px;top:40px}#mB{left:95px;top:150px}
+.sl{display:grid;grid-template-columns:24px 1fr 48px;gap:10px;align-items:center;font-family:var(--fm);font-weight:700}.sl input{width:100%}
+.mix{display:flex;gap:16px;align-items:center}.mix i{width:96px;height:96px;border:2px solid #0B1530;flex:none}.mix p{margin:2px 0}
+.wheelrow{display:flex;gap:18px;align-items:center}
+.wheel{position:relative;width:200px;height:200px;border-radius:50%;background:conic-gradient(from 90deg,hsl(0 80% 50%),hsl(60 80% 50%),hsl(120 80% 50%),hsl(180 80% 50%),hsl(240 80% 50%),hsl(300 80% 50%),hsl(360 80% 50%));flex:none;border:2px solid #0B1530}
+.wheel::after{content:"";position:absolute;inset:58px;border-radius:50%;background:#fff;border:2px solid #0B1530}
+.wheel i{position:absolute;width:22px;height:22px;border:3px solid #fff;outline:2px solid #0B1530;border-radius:50%;margin:-11px 0 0 -11px;z-index:1}
+#whS i{width:58px;height:58px}
+.ctprev{border:2px solid #0B1530;padding:16px;display:flex;flex-direction:column;gap:6px}.ctprev b{font-family:var(--fh);font-size:28px}.ctprev span{font-size:17px}
+.fq{display:flex;flex-direction:column;gap:20px;padding:34px 40px;flex:1;justify-content:center}
+.fq .fqq{font-family:var(--fh);font-size:38px;margin:0}
+.field input[type=color]{width:90px;height:42px;padding:2px}
+.wheelrow .ctrl .btn{font-size:14.5px;padding:5px 10px}
+.fq .btn{font-size:20px;padding:10px 22px;font-family:var(--fm)}
+.fq p{margin:0}.fq .fb{font-size:20px}
+.cover-art{}
+
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage">
+<section class="slide dark cover" data-title="Portada" data-notes="Bienvenida a la Unidad I. Esta unidad da el vocabulario de todo el curso: píxel, resolución, profundidad de bit, color y formatos. Todo lo que hagamos después en Photoshop parte de estos conceptos.">
+<div class="cov-txt"><p class="kicker" data-a="1">TESI 1104 · Diseño de Elementos para la Web</p><p class="unit" data-a="2">Unidad I</p><h1 data-a="3">Conceptos generales de la imagen digital</h1><p class="sub" data-a="4">Del píxel al formato correcto: cómo se forma, se obtiene y se guarda una imagen para la web.</p><p class="by" data-a="4">Prof. Eduardo O. De Jesús Arroyo · ITPR Recinto de Manatí · 2026-2027</p></div>
+</section>
+
+<section class="slide light" data-title="Objetivos" data-notes="Cinco objetivos. Al final de la unidad deben poder mirar cualquier imagen y decir qué es, de dónde salió, si sirve para la web y en qué formato se guarda.">
+<p class="kicker" data-a="1">Objetivos</p><h2 data-a="2">Al terminar la unidad podrás…</h2><div class="objs"><div class="obj" data-a="3"><b>Explicar</b><span>qué es una imagen de <b>mapa de bits</b> y cómo la forman los <b>píxeles</b>.</span></div><div class="obj" data-a="4"><b>Calcular</b><span>la <b>resolución</b> y el tamaño de impresión de una imagen, y reconocer la <b>pixelación</b>.</span></div><div class="obj" data-a="4"><b>Obtener</b><span>imágenes con <b>escáner, cámara, tomas de pantalla, bancos de fotos e internet</b>, respetando sus licencias.</span></div><div class="obj" data-a="4"><b>Aplicar</b><span>los <b>fundamentos del color</b> y los criterios de una <b>imagen exitosa</b>.</span></div><div class="obj" data-a="4"><b>Escoger</b><span>el <b>formato</b> adecuado para guardar y para exportar a la web.</span></div></div><p class="foot">Alineado al prontuario: objetivos capacitantes 1 y 3; objetivos terminales 1, 3 y 4.</p>
+</section>
+
+<section class="slide light" data-title="Mapa de la unidad" data-notes="El mapa de la unidad sigue el prontuario. Primero qué es una imagen (temas 1 a 4), luego de dónde la sacamos (5 a 9) y al final cómo la usamos bien (10 a 12).">
+<p class="kicker" data-a="1">Mapa de la unidad · prontuario</p><h2 data-a="2">Doce temas, en el orden del prontuario</h2><div class="map m3" data-a="3"><button class="tile" data-jump="01 · Imagen de mapa de bits: el píxel"><span>1</span>Imagen de mapa de bits: el píxel</button><button class="tile" data-jump="02 · Resolución de una imagen"><span>2</span>Resolución de una imagen</button><button class="tile" data-jump="03 · Pixelación de una imagen"><span>3</span>Pixelación de una imagen</button><button class="tile" data-jump="04 · Profundidad de bit"><span>4</span>Profundidad de bit</button><button class="tile" data-jump="05 · Escáner"><span>5</span>Escáner</button><button class="tile" data-jump="06 · Cámaras digitales"><span>6</span>Cámaras digitales</button><button class="tile" data-jump="07 · Tomas de la pantalla"><span>7</span>Tomas de la pantalla</button><button class="tile" data-jump="08 · Bancos de fotos"><span>8</span>Bancos de fotos</button><button class="tile" data-jump="09 · Internet"><span>9</span>Internet</button><button class="tile" data-jump="10 · Fundamentos del color"><span>10</span>Fundamentos del color</button><button class="tile" data-jump="11 · Imágenes exitosas"><span>11</span>Imágenes exitosas</button><button class="tile" data-jump="12 · Formatos para guardar y exportar"><span>12</span>Formatos para guardar y exportar</button></div><p class="foot">Pulsa un tema para ir directo a él.</p>
+</section>
+
+<section class="slide dark divider" data-title="01 · Imagen de mapa de bits: el píxel" data-notes="">
+<div class="dv-num" data-a="1">01</div><h2 data-a="2">Imagen de mapa de bits: el píxel</h2><p class="sub" data-a="3">Toda foto digital es una cuadrícula de pequeños cuadros de color.</p>
+</section>
+
+<section class="slide light" data-title="Una imagen raster es una cuadrícula de píxeles" data-notes="Acercar una foto en Photoshop al 1600 % deja ver los cuadros. Cada uno guarda un solo color. Por eso decimos que Photoshop no ve objetos: ve píxeles.">
+<p class="kicker" data-a="1">Tema 1 · El píxel</p><h2 data-a="2">Una imagen raster es una cuadrícula de píxeles</h2><div class="split"><div data-a="3"><ul class="bul"><li>El <b>píxel</b> (picture element) es la unidad mínima de una imagen digital: un cuadro con <b>un solo color</b>.</li><li>Una imagen de <b>mapa de bits</b> (raster o bitmap) es una cuadrícula de miles o millones de píxeles.</li><li>Sus medidas se dan en píxeles: <b>ancho × alto</b> (por ejemplo, 1920 × 1080 px).</li><li>Las fotos siempre son raster. Photoshop edita píxeles.</li><li>Lo contrario son los <b>gráficos vectoriales</b> (SVG, Illustrator): se forman con fórmulas y se pueden agrandar sin perder calidad.</li></ul></div><div class="panel" data-a="4"><div class="pxg"><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#FFC6FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFADAD"></i><i style="background:#FFD6A5"></i><i style="background:#FDFFB6"></i><i style="background:#CAFFBF"></i><i style="background:#9BF6FF"></i><i style="background:#A0C4FF"></i><i style="background:#BDB2FF"></i><i style="background:#FFC6FF"></i></div><p class="cap">8 × 8 = <b>64 píxeles</b>. Una foto de teléfono tiene más de <b>12 millones</b>.</p></div></div>
+</section>
+
+<section class="slide light" data-title="Explora los píxeles de una imagen" data-notes="Acerquen hasta ver la cuadrícula. Cada cuadro tiene un solo color, con su valor RGB y su código HEX. Pregunta: ¿cuántos números guarda cada píxel? Tres: rojo, verde y azul.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Explora los píxeles de una imagen</h2><div class="demo d-split"><div class="nodrag"><canvas id="pxCv" width="640" height="400" class="frame" aria-label="Imagen ampliada"></canvas></div>
+     <div class="card side"><div class="ctrl"><label for="pxZ">Ampliación</label><input id="pxZ" type="range" min="4" max="40" value="4"></div>
+     <div class="ctrl"><button class="btn" data-pz="4">Ajustar</button><button class="btn" data-pz="12">×3</button><button class="btn" data-pz="24">×6</button><button class="btn" data-pz="40">×10</button></div>
+     <p class="out" id="pxZo"></p><hr><p class="mut">Pasa el cursor sobre la imagen:</p><div class="pxread"><i id="pxSw"></i><div><p class="out" id="pxXY">Píxel —</p><p class="out" id="pxRGB">RGB —</p><p class="out" id="pxHex">HEX —</p></div></div>
+     <p class="mut">La imagen mide <b>160 × 100 = 16,000 píxeles</b>. Haz clic para centrar el zoom.</p></div></div>
+</section>
+
+<section class="slide light" data-title="Mapa de bits frente a vector" data-notes="Pregunta para la clase: ¿un logotipo para la web debe ser raster o vector? Vector en SVG, porque se ve nítido en cualquier pantalla.">
+<p class="kicker" data-a="1">Tema 1 · Raster o vector</p><h2 data-a="2">Mapa de bits frente a vector</h2><div class="grid c2"><div class="card cmp" data-a="3"><div class="cmph"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2M8 20H4v-4h4zm0-6H4v-4h4zm0-6H4V4h4zm6 12h-4v-4h4zm0-6h-4v-4h4zm0-6h-4V4h4zm6 12h-4v-4h4zm0-6h-4v-4h4zm0-6h-4V4h4z"></path></svg></div><h3>Mapa de bits (raster)</h3></div><ul class="bul"><li>Se forma con <b>píxeles</b>.</li><li>Ideal para <b>fotos</b> y texturas.</li><li>Pierde calidad al <b>ampliar</b>.</li><li>Formatos: JPG, PNG, GIF, WebP, PSD.</li><li>Programa: <b>Photoshop</b>.</li></ul></div><div class="card cmp" data-a="4"><div class="cmph"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M23 8c0 1.1-.9 2-2 2a1.7 1.7 0 0 1-.51-.07l-3.56 3.55c.05.16.07.34.07.52 0 1.1-.9 2-2 2s-2-.9-2-2c0-.18.02-.36.07-.52l-2.55-2.55c-.16.05-.34.07-.52.07s-.36-.02-.52-.07l-4.55 4.56c.05.16.07.33.07.51 0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2c.18 0 .35.02.51.07l4.56-4.55C8.02 9.36 8 9.18 8 9c0-1.1.9-2 2-2s2 .9 2 2c0 .18-.02.36-.07.52l2.55 2.55c.16-.05.34-.07.52-.07s.36.02.52.07l3.55-3.56A1.7 1.7 0 0 1 19 8c0-1.1.9-2 2-2s2 .9 2 2"></path></svg></div><h3>Vectorial</h3></div><ul class="bul"><li>Se forma con <b>puntos, líneas y curvas</b> (fórmulas).</li><li>Ideal para <b>logotipos, íconos</b> e ilustraciones.</li><li>Se amplía <b>sin perder calidad</b>.</li><li>Formatos: SVG, AI, EPS, PDF.</li><li>Programas: Illustrator, Figma, Canva.</li></ul></div></div>
+</section>
+
+<section class="slide light" data-title="Amplía: mapa de bits contra vector" data-notes="Suban la ampliación poco a poco. El mapa de bits deja ver los cuadros; el vector se mantiene nítido. Por eso los logotipos para la web se entregan en SVG.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Amplía: mapa de bits contra vector</h2><div class="ctrl" data-a="3"><label for="rvZ">Ampliación</label><input id="rvZ" type="range" min="1" max="10" step="0.5" value="1"><b class="out" id="rvZo">1×</b></div>
+     <div class="grid c2" data-a="4"><div class="card"><h3>Mapa de bits (PNG de 60 × 60 px)</h3><canvas id="rvR" width="500" height="320" class="frame"></canvas><p class="fb" id="rvRf"></p></div>
+     <div class="card"><h3>Vector (SVG)</h3><div class="frame vbox" id="rvV"></div><p class="fb">Siempre nítido: se recalcula con fórmulas.</p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="02 · Resolución de una imagen" data-notes="">
+<div class="dv-num" data-a="1">02</div><h2 data-a="2">Resolución de una imagen</h2><p class="sub" data-a="3">Cuántos píxeles caben en una pulgada… y cuándo importa.</p>
+</section>
+
+<section class="slide light" data-title="Resolución: píxeles por pulgada (ppi)" data-notes="Ejercicio en voz alta: 2400 × 3000 px a 300 ppi da 8 × 10 pulgadas. Para la web no hacemos esta cuenta: pensamos en píxeles.">
+<p class="kicker" data-a="1">Tema 2 · Resolución</p><h2 data-a="2">Resolución: píxeles por pulgada (ppi)</h2><div class="split"><div data-a="3"><ul class="bul"><li>La <b>resolución</b> indica cuántos píxeles se colocan en una pulgada al <b>imprimir</b>: <b>ppi</b> (pixels per inch).</li><li><b>dpi</b> (dots per inch) se refiere a los puntos de tinta de la impresora; en la práctica se usan como sinónimos.</li><li><b>Impresión de calidad: 300 ppi.</b> Un afiche visto de lejos puede ir a 150 ppi.</li><li><b>Pantalla y web:</b> lo que importa son las <b>dimensiones en píxeles</b>; el valor de ppi no cambia cómo se ve. Por costumbre se usa 72 ppi.</li><li>Fórmula: <b>pulgadas = píxeles ÷ ppi</b>.</li></ul></div><div class="panel" data-a="4"><div class="stat">3000 ÷ 300 = 10″</div><p class="cap">Una foto de <b>3000 × 2000 px</b> a <b>300 ppi</b> se imprime a <b>10 × 6.67 pulgadas</b>.</p></div></div>
+</section>
+
+<section class="slide light" data-title="Calculadora de resolución" data-notes="Prueben 3000 × 2000 a 72, 150 y 300 ppi: los píxeles no cambian, cambia el tamaño impreso. En la tarjeta derecha: un afiche de 8 × 10 a 300 ppi necesita 2400 × 3000 píxeles.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Calculadora de resolución</h2><div class="grid c2" data-a="3"><div class="card"><h3>De píxeles a pulgadas</h3><div class="ctrl"><label class="field">Ancho (px)<input id="rpW" type="number" value="3000"></label><label class="field">Alto (px)<input id="rpH" type="number" value="2000"></label><label class="field">Resolución (ppi)<input id="rpP" type="number" value="300"></label></div>
+       <div class="ctrl"><button class="btn" data-rp="72">72</button><button class="btn" data-rp="150">150</button><button class="btn" data-rp="300">300</button></div>
+       <div class="paper-row"><div><p class="big" id="rpOut"></p><p class="out" id="rpCm"></p><p class="fb" id="rpV"></p></div><div class="paper" title="Hoja carta 8.5 × 11 in"><i id="rpBox"></i><span>Carta</span></div></div></div>
+     <div class="card"><h3>¿Cuántos píxeles necesito?</h3><div class="ctrl"><label class="field">Ancho (in)<input id="rnW" type="number" value="8" step="0.5"></label><label class="field">Alto (in)<input id="rnH" type="number" value="10" step="0.5"></label><label class="field">Resolución (ppi)<input id="rnP" type="number" value="300"></label></div>
+       <p class="big" id="rnOut"></p><p class="out" id="rnMp"></p><p class="mut">Fórmula: <b>píxeles = pulgadas × ppi</b>. Para la web no se hace esta cuenta: se piensa directamente en píxeles.</p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="03 · Pixelación de una imagen" data-notes="">
+<div class="dv-num" data-a="1">03</div><h2 data-a="2">Pixelación de una imagen</h2><p class="sub" data-a="3">Cuando se ven los cuadros, la imagen no tenía suficientes píxeles.</p>
+</section>
+
+<section class="slide light" data-title="Por qué una imagen se ve «cuadriculada»" data-notes="Muestren la misma foto al 100 % y ampliada al 400 %. La pixelación no se arregla con filtros: hay que conseguir una imagen de mayor tamaño.">
+<p class="kicker" data-a="1">Tema 3 · Pixelación</p><h2 data-a="2">Por qué una imagen se ve «cuadriculada»</h2><div class="grid c2"><div class="card" data-a="3"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14"></path><path d="M12 10h-2v2H9v-2H7V9h2V7h1v2h2z"></path></svg></div><h3>Ampliar de más</h3><p>Al agrandar una imagen por encima de sus píxeles, Photoshop <b>inventa</b> los que faltan (interpolación) y la imagen se ve borrosa o en cuadros.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path fill="none" d="M0 0h24v24H0z"></path><path d="M8 19h3v3h2v-3h3l-4-4zm8-15h-3V1h-2v3H8l4 4zM4 9v2h16V9zM4 12h16v2H4z"></path></svg></div><h3>Comprimir de más</h3><p>Un JPEG con calidad muy baja muestra <b>bloques y halos</b> alrededor de los bordes (artefactos de compresión).</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M20 3H4c-1.11 0-2 .89-2 2v12a2 2 0 0 0 2 2h4v2h8v-2h4c1.1 0 2-.9 2-2V5a2 2 0 0 0-2-2m0 14H4V5h16z"></path><path d="M6.5 7.5H9V6H5v4h1.5zM19 12h-1.5v2.5H15V16h4z"></path></svg></div><h3>Copiar de capturas</h3><p>Tomar una imagen pequeña de una pantalla o red social y usarla grande produce pixelación.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8z"></path></svg></div><h3>La regla de oro</h3><p><b>Reducir sí, agrandar no.</b> Empieza con la imagen más grande posible y redúcela al tamaño final.</p></div></div>
+</section>
+
+<section class="slide light" data-title="Laboratorio: agrandar y comprimir" data-notes="Tarjeta 1: reduzcan el tamaño original al 10 % y vean cómo queda al ampliarlo; alternen suavizado y vecino más cercano. Tarjeta 2: bajen la calidad del JPEG a 10 y observen los bloques y halos, y cuánto baja el peso. Calidad 60 a 80 es el punto medio para la web.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Laboratorio: agrandar y comprimir</h2><div class="grid c2" data-a="3"><div class="card"><h3>1. Agrandar una imagen pequeña</h3><canvas id="enC" width="520" height="325" class="frame"></canvas>
+       <div class="ctrl"><label for="enS">Tamaño original</label><input id="enS" type="range" min="3" max="100" value="100"><button class="btn" id="enM">Vecino más cercano</button></div><p class="out" id="enO"></p></div>
+     <div class="card"><h3>2. Comprimir un JPEG (detalle al 200 %)</h3><canvas id="jqC" width="520" height="325" class="frame"></canvas>
+       <div class="ctrl"><label for="jqQ">Calidad</label><input id="jqQ" type="range" min="1" max="100" value="80"></div><p class="out" id="jqO"></p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="04 · Profundidad de bit" data-notes="">
+<div class="dv-num" data-a="1">04</div><h2 data-a="2">Profundidad de bit</h2><p class="sub" data-a="3">Cuántos colores puede guardar cada píxel.</p>
+</section>
+
+<section class="slide light" data-title="Más bits por píxel = más colores posibles" data-notes="La cuenta: 256 × 256 × 256 = 16,777,216 colores. El canal alfa guarda la transparencia de cada píxel: por eso un PNG puede tener fondo transparente y un JPEG no.">
+<p class="kicker" data-a="1">Tema 4 · Profundidad de bit</p><h2 data-a="2">Más bits por píxel = más colores posibles</h2><table class="tbl" data-a="3"><thead><tr><th>Profundidad</th><th>Colores posibles</th><th>Uso típico</th></tr></thead><tbody><tr><td><b>1 bit</b></td><td>2 (blanco y negro)</td><td>Dibujos de línea, escaneo de texto</td></tr><tr><td><b>8 bits (escala de grises)</b></td><td>256 tonos de gris</td><td>Fotos en blanco y negro</td></tr><tr><td><b>8 bits (indexado)</b></td><td>Hasta 256 colores</td><td>GIF, íconos sencillos</td></tr><tr><td><b>24 bits (8 por canal RGB)</b></td><td>16,777,216 colores</td><td>Fotos para la web y la pantalla</td></tr><tr><td><b>32 bits (24 + canal alfa)</b></td><td>16.7 millones + transparencia</td><td>PNG con fondo transparente</td></tr><tr><td><b>16 bits por canal</b></td><td>Miles de millones</td><td>Edición profesional y fotos RAW</td></tr></tbody></table><p class="foot">En Photoshop: Image › Mode › 8 Bits/Channel. La pestaña del documento lo muestra, por ejemplo «RGB/8».</p>
+</section>
+
+<section class="slide light" data-title="Prueba la profundidad de bit" data-notes="Bajen de 8 a 4 bits por canal y miren el cielo: aparecen bandas. Con 1 bit por canal solo hay 8 colores. El botón de 1 bit muestra un dibujo de línea en blanco y negro.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Prueba la profundidad de bit</h2><div class="demo d-split" data-a="3"><canvas id="bdC" width="640" height="400" class="frame"></canvas>
+     <div class="card side"><div class="ctrl"><label for="bdB">Bits por canal</label><input id="bdB" type="range" min="1" max="8" value="8"></div>
+     <p class="big" id="bdN"></p><p class="out" id="bdL"></p><div class="ctrl"><button class="btn" id="bd1">1 bit (blanco y negro)</button><button class="btn" id="bdG">Escala de grises</button><button class="btn" id="bdR">Color RGB</button></div>
+     <p class="mut">Con pocos bits aparecen <b>bandas</b> (posterización) en el cielo: no hay suficientes tonos para un degradado suave.</p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="05 · Escáner" data-notes="">
+<div class="dv-num" data-a="1">05</div><h2 data-a="2">Escáner</h2><p class="sub" data-a="3">Convertir fotos, documentos y dibujos en papel en imágenes digitales.</p>
+</section>
+
+<section class="slide light" data-title="Cómo escanear bien una imagen" data-notes="Si escanean una foto de 4 × 6 pulgadas a 300 ppi obtienen 1200 × 1800 píxeles. A 600 ppi, 2400 × 3600.">
+<p class="kicker" data-a="1">Tema 5 · Escáner</p><h2 data-a="2">Cómo escanear bien una imagen</h2><p class="lead" data-a="3">Escáner <b>plano</b> (de cama) para fotos y libros; de <b>alimentación</b> para muchas hojas. Fíjate en la <b>resolución óptica</b>, no en la «interpolada».</p><ol class="steps" data-a="4"><li><span class="n">1</span><h3>Limpia el vidrio</h3><p>El polvo y las huellas salen en la imagen. Usa un paño suave.</p></li><li><span class="n">2</span><h3>Escoge la resolución</h3><p><b>300 ppi</b> para fotos al mismo tamaño; <b>600 ppi o más</b> si la vas a ampliar.</p></li><li><span class="n">3</span><h3>Escoge el modo</h3><p>Color para fotos; escala de grises para texto; blanco y negro (1 bit) para dibujos de línea.</p></li><li><span class="n">4</span><h3>Guarda sin pérdida</h3><p>TIFF o PNG para el original. El JPEG se hace después, al exportar.</p></li><li><span class="n">5</span><h3>Endereza y recorta</h3><p>En Photoshop: Crop Tool (C) con Straighten.</p></li></ol><div class="card calc-inline" data-a="4"><b>Calcula tu escaneo:</b> una foto de <input id="scW" type="number" value="4" min="1" max="40" step="0.5"> × <input id="scH" type="number" value="6" min="1" max="40" step="0.5"> pulgadas a <select id="scP"><option>150</option><option selected>300</option><option>600</option><option>1200</option></select> ppi = <span class="out" id="scOut"></span></div>
+</section>
+
+<section class="slide dark divider" data-title="06 · Cámaras digitales" data-notes="">
+<div class="dv-num" data-a="1">06</div><h2 data-a="2">Cámaras digitales</h2><p class="sub" data-a="3">El sensor convierte la luz en píxeles.</p>
+</section>
+
+<section class="slide light" data-title="Lo que hay que saber de una cámara (o de tu teléfono)" data-notes="Pídanles que revisen en su teléfono la resolución de la cámara y que activen la cuadrícula. Es la cámara que más van a usar.">
+<p class="kicker" data-a="1">Tema 6 · Cámaras digitales</p><h2 data-a="2">Lo que hay que saber de una cámara (o de tu teléfono)</h2><div class="grid c3"><div class="card" data-a="3"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><circle cx="12" cy="12" r="3.2"></circle><path d="M9 2 7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5"></path></svg></div><h3>Sensor y megapíxeles</h3><p>El sensor tiene millones de celdas. <b>6000 × 4000 = 24 megapíxeles</b>. Más megapíxeles permiten recortar o imprimir más grande.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M6.5 9H3v6h1.5v-2h1.1l.9 2H8l-.9-2.1c.5-.3.9-.8.9-1.4v-1C8 9.7 7.3 9 6.5 9m0 2.5h-2v-1h2zM10.25 9l-1.5 6h1.5l.38-1.5h1.75l.37 1.5h1.5l-1.5-6zm.75 3 .25-1h.5l.25 1zM19.98 9l-.74 3-.74-3h-1.52l-.74 3-.74-3H14l1.5 6h1.48l.76-3.04.76 3.04h1.48l1.5-6z"></path></svg></div><h3>RAW o JPEG</h3><p><b>RAW</b> guarda todos los datos del sensor (edición profesional). <b>JPEG</b> sale procesado y comprimido, listo para usar.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="m6.76 4.84-1.8-1.79-1.41 1.41 1.79 1.79zM4 10.5H1v2h3zm9-9.95h-2V3.5h2zm7.45 3.91-1.41-1.41-1.79 1.79 1.41 1.41zm-3.21 13.7 1.79 1.8 1.41-1.41-1.8-1.79zM20 10.5v2h3v-2zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6m-1 16.95h2V19.5h-2zm-7.45-3.91 1.41 1.41 1.79-1.8-1.41-1.41z"></path></svg></div><h3>Luz</h3><p>La luz natural de lado da mejores fotos. Con poca luz sube el <b>ISO</b> y aparece <b>ruido</b> (granos).</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4m-7 7H3v4c0 1.1.9 2 2 2h4v-2H5zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2m0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2z"></path></svg></div><h3>Enfoque</h3><p>Toca la pantalla del teléfono sobre el sujeto para enfocarlo y fijar la exposición.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2M8 20H4v-4h4zm0-6H4v-4h4zm0-6H4V4h4zm6 12h-4v-4h4zm0-6h-4v-4h4zm0-6h-4V4h4zm6 12h-4v-4h4zm0-6h-4v-4h4zm0-6h-4V4h4z"></path></svg></div><h3>Composición</h3><p>Activa la <b>cuadrícula</b> de la cámara y usa la <b>regla de los tercios</b>.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M19 4H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2m-8 11H9.5v-2h-2v2H6V9h1.5v2.5h2V9H11zm7-1c0 .55-.45 1-1 1h-.75v1.5h-1.5V15H14c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1h3c.55 0 1 .45 1 1zm-3.5-.5h2v-3h-2z"></path></svg></div><h3>Calidad máxima</h3><p>Configura la máxima resolución y calidad. Siempre se puede reducir después.</p></div></div>
+</section>
+
+<section class="slide light" data-title="Composición: la regla de los tercios" data-notes="Un voluntario arrastra la palma al centro y luego a un cruce de los tercios. ¿Cuál deja espacio para el título de un banner?">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Composición: la regla de los tercios</h2><div class="demo d-split" data-a="3"><div class="nodrag"><canvas id="rtC" width="640" height="400" class="frame grab"></canvas></div>
+     <div class="card side"><p>Arrastra la <b>palma</b> por la foto. Los puntos fuertes son los cuatro cruces de la cuadrícula.</p>
+     <div class="ctrl"><button class="btn on" id="rtG">Cuadrícula</button><button class="btn" id="rtCtr">Centrar</button></div><p class="fb" id="rtF"></p>
+     <p class="mut">El horizonte también se coloca en una línea de tercio, no en el centro. Activa la cuadrícula de la cámara de tu teléfono.</p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="07 · Tomas de la pantalla" data-notes="">
+<div class="dv-num" data-a="1">07</div><h2 data-a="2">Tomas de la pantalla</h2><p class="sub" data-a="3">Capturar lo que se ve en el monitor.</p>
+</section>
+
+<section class="slide light" data-title="Atajos para capturar la pantalla" data-notes="Truco de Photoshop: después de copiar, Ctrl+N ya propone el tamaño exacto de la captura. Las capturas se guardan en PNG porque tienen texto y bordes nítidos.">
+<p class="kicker" data-a="1">Tema 7 · Tomas de la pantalla</p><h2 data-a="2">Atajos para capturar la pantalla</h2><div class="keys" data-a="3"><div class="key"><span class="kk"><kbd>Impr Pant</kbd></span><span>Copiar toda la pantalla (Windows)</span></div><div class="key"><span class="kk"><kbd>Win</kbd><i>+</i><kbd>Shift</kbd><i>+</i><kbd>S</kbd></span><span>Recorte de una zona (Windows)</span></div><div class="key"><span class="kk"><kbd>Win</kbd><i>+</i><kbd>Impr Pant</kbd></span><span>Guardar en Imágenes › Capturas</span></div><div class="key"><span class="kk"><kbd>Alt</kbd><i>+</i><kbd>Impr Pant</kbd></span><span>Copiar solo la ventana activa</span></div><div class="key"><span class="kk"><kbd>Cmd</kbd><i>+</i><kbd>Shift</kbd><i>+</i><kbd>3</kbd></span><span>Toda la pantalla (Mac)</span></div><div class="key"><span class="kk"><kbd>Cmd</kbd><i>+</i><kbd>Shift</kbd><i>+</i><kbd>4</kbd></span><span>Una zona (Mac)</span></div><div class="key"><span class="kk"><kbd>Ctrl</kbd><i>+</i><kbd>V</kbd></span><span>Pegar en Photoshop o Word</span></div><div class="key"><span class="kk"><kbd>Ctrl</kbd><i>+</i><kbd>N</kbd></span><span>Documento nuevo con el tamaño copiado</span></div><div class="key"><span class="kk"><kbd>PNG</kbd></span><span>Mejor formato para capturas</span></div></div><p class="foot">Las capturas tienen la resolución de tu pantalla: no sirven para imprimir grande. Antes de compartirlas, oculta datos personales.</p>
+</section>
+
+<section class="slide dark divider" data-title="08 · Bancos de fotos" data-notes="">
+<div class="dv-num" data-a="1">08</div><h2 data-a="2">Bancos de fotos</h2><p class="sub" data-a="3">Fotos profesionales con permiso de uso.</p>
+</section>
+
+<section class="slide light" data-title="Bancos de fotos y licencias Creative Commons" data-notes="Creative Commons tiene seis licencias combinando BY, SA, NC y ND, más CC0. Lean siempre la licencia en la página de la foto antes de usarla.">
+<p class="kicker" data-a="1">Tema 8 · Bancos de fotos y licencias</p><h2 data-a="2">Bancos de fotos y licencias Creative Commons</h2><table class="tbl" data-a="3"><thead><tr><th>Licencia o banco</th><th>Qué permite</th><th>Qué pide</th></tr></thead><tbody><tr><td><b>Pexels, Unsplash, Pixabay</b></td><td>Uso gratuito, incluso comercial</td><td>Atribución opcional; no vender la foto tal cual</td></tr><tr><td><b>Adobe Stock, Shutterstock</b></td><td>Uso según la licencia comprada</td><td>Pago por imagen o suscripción</td></tr><tr><td><b>CC0 (dominio público)</b></td><td>Cualquier uso</td><td>Nada (se agradece el crédito)</td></tr><tr><td><b>CC BY</b></td><td>Cualquier uso, incluso modificar</td><td>Dar crédito al autor</td></tr><tr><td><b>CC BY-SA</b></td><td>Uso y modificación</td><td>Crédito y compartir igual</td></tr><tr><td><b>CC BY-NC</b></td><td>Uso no comercial</td><td>Crédito; no vender ni usar en anuncios</td></tr></tbody></table><p class="foot">Crédito completo (TASL): Título · Autor · Fuente (enlace) · Licencia.</p>
+</section>
+
+<section class="slide light" data-title="¿Puedo usar esta imagen?" data-notes="Resuelvan los seis casos en grupo antes de pulsar. La clave está en leer la licencia: NC prohíbe el uso comercial; BY pide crédito; sin licencia clara, no se usa.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">¿Puedo usar esta imagen?</h2><div class="lic" data-a="3"></div><p class="foot">Pulsa una respuesta en cada caso. Crédito completo (TASL): Título · Autor · Fuente · Licencia.</p>
+</section>
+
+<section class="slide dark divider" data-title="09 · Internet" data-notes="">
+<div class="dv-num" data-a="1">09</div><h2 data-a="2">Internet</h2><p class="sub" data-a="3">Que una imagen esté en internet no significa que sea libre.</p>
+</section>
+
+<section class="slide light" data-title="Buscar imágenes en internet con responsabilidad" data-notes="Caso para discutir: una tienda usa sin permiso una foto encontrada en Google y recibe una reclamación. ¿Qué debió hacer? Buscar con filtro de licencia o comprar la foto.">
+<p class="kicker" data-a="1">Tema 9 · Imágenes de internet</p><h2 data-a="2">Buscar imágenes en internet con responsabilidad</h2><div class="split"><div data-a="3"><ul class="bul"><li>Toda imagen tiene <b>derechos de autor</b> desde que se crea, aunque no diga «©».</li><li>Usa filtros de licencia: en Google Imágenes, <b>Herramientas › Derechos de uso › Licencias Creative Commons</b>.</li><li>Fuentes confiables: <b>Wikimedia Commons</b>, bancos de fotos, sitios de agencias públicas (NASA, NOAA) con su aviso de uso.</li><li>Revisa el <b>tamaño real</b> antes de descargar: las miniaturas se pixelan.</li><li>Imágenes creadas con <b>IA</b>: lee los términos de la herramienta y decláralo cuando lo uses.</li><li>Sin permiso claro, <b>no la uses</b>: toma tu propia foto o busca otra.</li></ul></div><div class="panel" data-a="4"><div class="bigico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M11.88 9.14c1.28.06 1.61 1.15 1.63 1.66h1.79c-.08-1.98-1.49-3.19-3.45-3.19C9.64 7.61 8 9 8 12.14c0 1.94.93 4.24 3.84 4.24 2.22 0 3.41-1.65 3.44-2.95h-1.79c-.03.59-.45 1.38-1.63 1.44-1.31-.04-1.86-1.06-1.86-2.73 0-2.89 1.28-2.98 1.88-3M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8"></path></svg></div><p class="cap" style="text-align:center"><b>Derechos de autor</b>: proteger el trabajo de otros también protege el tuyo.</p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="10 · Fundamentos del color" data-notes="">
+<div class="dv-num" data-a="1">10</div><h2 data-a="2">Fundamentos del color</h2><p class="sub" data-a="3">Luz, tinta y números: tres formas de describir un color.</p>
+</section>
+
+<section class="slide light" data-title="RGB para pantallas, CMYK para imprimir" data-notes="La K es de Key, la plancha clave, que es el negro. Si un trabajo va a la web, se queda en RGB de principio a fin.">
+<p class="kicker" data-a="1">Tema 10 · Modelos de color</p><h2 data-a="2">RGB para pantallas, CMYK para imprimir</h2><div class="grid c2"><div class="card cmp" data-a="3"><div class="cmph"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M20 3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h3l-1 1v2h12v-2l-1-1h3c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m0 13H4V5h16z"></path></svg></div><h3>RGB · aditivo (luz)</h3></div><ul class="bul"><li>Rojo, verde y azul de <b>luz</b>.</li><li>Los tres al máximo dan <b>blanco</b>.</li><li>Cada canal va de <b>0 a 255</b>.</li><li>Para <b>pantallas, web y video</b>.</li><li>En la web se escribe en <b>HEX</b>: #FF0000 es rojo.</li></ul></div><div class="card cmp" data-a="4"><div class="cmph"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3m-3 11H8v-5h8zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1m-1-9H6v4h12z"></path></svg></div><h3>CMYK · sustractivo (tinta)</h3></div><ul class="bul"><li>Cian, magenta, amarillo y negro (<b>K</b>) de <b>tinta</b>.</li><li>Mezclar tintas oscurece.</li><li>Valores en <b>porcentaje</b> (0–100 %).</li><li>Para <b>impresión</b>.</li><li>Tiene menos colores que RGB: los neones de pantalla no se imprimen igual.</li></ul></div></div>
+</section>
+
+<section class="slide light" data-title="Mezcla luz: el modelo RGB" data-notes="La luz se suma: rojo más verde da amarillo; los tres al máximo dan blanco. En tinta pasa lo contrario. El código HEX es el mismo número RGB escrito en base 16: FF es 255.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Mezcla luz: el modelo RGB</h2><div class="demo d-split" data-a="3"><div class="rgbbox nodrag"><i id="mR"></i><i id="mG"></i><i id="mB"></i></div>
+     <div class="card side"><div class="sl"><label>R</label><input id="sR" type="range" min="0" max="255" value="255"><span class="out" id="vR"></span></div>
+     <div class="sl"><label>G</label><input id="sG" type="range" min="0" max="255" value="190"><span class="out" id="vG"></span></div>
+     <div class="sl"><label>B</label><input id="sB" type="range" min="0" max="255" value="11"><span class="out" id="vB"></span></div>
+     <div class="mix"><i id="mSw"></i><div><p class="big" id="mHex"></p><p class="out" id="mRgb"></p><p class="out" id="mCmyk"></p></div></div>
+     <div class="ctrl"><button class="btn" data-m="255,255,255">Blanco</button><button class="btn" data-m="255,255,0">Amarillo</button><button class="btn" data-m="0,255,255">Cian</button><button class="btn" data-m="255,0,255">Magenta</button><button class="btn" data-m="0,0,0">Negro</button></div>
+     <p class="mut">Los valores CMYK son una aproximación; Photoshop los calcula con un perfil de color.</p></div></div>
+</section>
+
+<section class="slide light" data-title="Combinar colores con intención" data-notes="Hagan la prueba de contraste con un verificador en línea: gris claro sobre blanco no pasa. Esto vuelve en la Unidad IX con los banners.">
+<p class="kicker" data-a="1">Tema 10 · Armonías y contraste</p><h2 data-a="2">Combinar colores con intención</h2><div class="split"><div data-a="3"><ul class="bul"><li><b>Rueda de color</b>: los primarios, secundarios y terciarios en círculo.</li><li><b>Complementarios</b>: opuestos en la rueda (azul y naranja). Mucho contraste.</li><li><b>Análogos</b>: vecinos (azul, turquesa, verde). Calma y armonía.</li><li><b>Triádicos</b>: tres colores a igual distancia. Variedad equilibrada.</li><li><b>HSB</b>: tono (Hue), saturación y brillo; así piensa el selector de color de Photoshop.</li><li>Accesibilidad: texto con contraste de <b>4.5 : 1</b> como mínimo (WCAG 2.2).</li></ul></div><div class="panel" data-a="4"><p class="cap"><b>Complementarios y su valor HEX</b></p><div class="sw"><div><i style="background:#1D4ED8"></i><span>Azul<br>#1D4ED8</span></div><div><i style="background:#F97316"></i><span>Naranja<br>#F97316</span></div><div><i style="background:#7C3AED"></i><span>Violeta<br>#7C3AED</span></div><div><i style="background:#EAB308"></i><span>Amarillo<br>#EAB308</span></div></div></div></div>
+</section>
+
+<section class="slide light" data-title="Rueda de color y contraste" data-notes="Escojan un tono y comparen las tres armonías. En la prueba de contraste, gris claro sobre blanco no pasa: hace falta 4.5 : 1 para el texto normal y 3 : 1 para el texto grande.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Rueda de color y contraste</h2><div class="grid c2" data-a="3"><div class="card"><h3>Armonías</h3><div class="wheelrow"><div class="wheel nodrag" id="whW"><i></i><i></i><i></i></div>
+       <div><div class="ctrl"><label for="whH">Tono</label><input id="whH" type="range" min="0" max="359" value="220" style="width:160px"></div>
+       <div class="ctrl"><button class="btn on" data-wh="comp">Complementarios</button><button class="btn" data-wh="anal">Análogos</button><button class="btn" data-wh="tri">Triádicos</button></div>
+       <div class="sw" id="whS"></div></div></div></div>
+     <div class="card"><h3>Prueba de contraste (WCAG 2.2)</h3><div class="ctrl"><label class="field">Texto<input type="color" id="ctT" value="#9aa3b5"></label><label class="field">Fondo<input type="color" id="ctB" value="#ffffff"></label><button class="btn" id="ctS">Intercambiar</button></div>
+       <div class="ctprev" id="ctP"><b>Título del banner</b><span>Texto de párrafo para la web</span></div><p class="big" id="ctR"></p><p class="fb" id="ctF"></p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="11 · Imágenes exitosas" data-notes="">
+<div class="dv-num" data-a="1">11</div><h2 data-a="2">Imágenes exitosas</h2><p class="sub" data-a="3">Una buena imagen comunica, se ve bien y carga rápido.</p>
+</section>
+
+<section class="slide light" data-title="Seis criterios de una imagen exitosa para la web" data-notes="Muestren dos fotos del mismo tema: una con el sujeto en un cruce de tercios y espacio para texto, y otra centrada y recargada. Que la clase decida cuál sirve mejor como banner y por qué.">
+<p class="kicker" data-a="1">Tema 11 · Imágenes exitosas</p><h2 data-a="2">Seis criterios de una imagen exitosa para la web</h2><div class="grid c3"><div class="card" data-a="3"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M14.4 6 14 4H5v17h2v-7h5.6l.4 2h7V6z"></path></svg></div><h3>Propósito</h3><p>Comunica <b>una idea</b> que apoya el mensaje de la página.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2M8 20H4v-4h4zm0-6H4v-4h4zm0-6H4V4h4zm6 12h-4v-4h4zm0-6h-4v-4h4zm0-6h-4V4h4zm6 12h-4v-4h4zm0-6h-4v-4h4zm0-6h-4V4h4z"></path></svg></div><h3>Composición</h3><p>Regla de los tercios, líneas que guían la mirada y <b>espacio</b> para el texto.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4m-7 7H3v4c0 1.1.9 2 2 2h4v-2H5zM5 5h4V3H5c-1.1 0-2 .9-2 2v4h2zm14-2h-4v2h4v4h2V5c0-1.1-.9-2-2-2m0 16h-4v2h4c1.1 0 2-.9 2-2v-4h-2z"></path></svg></div><h3>Calidad técnica</h3><p>Enfocada, bien expuesta, sin ruido ni pixelación.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 2C6.49 2 2 6.49 2 12s4.49 10 10 10a2.5 2.5 0 0 0 2.5-2.5c0-.61-.23-1.2-.64-1.67a.53.53 0 0 1-.13-.33c0-.28.22-.5.5-.5H16c3.31 0 6-2.69 6-6 0-4.96-4.49-9-10-9m5.5 11c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5m-3-4c-.83 0-1.5-.67-1.5-1.5S13.67 6 14.5 6s1.5.67 1.5 1.5S15.33 9 14.5 9M5 11.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5S7.33 13 6.5 13 5 12.33 5 11.5m6-4c0 .83-.67 1.5-1.5 1.5S8 8.33 8 7.5 8.67 6 9.5 6s1.5.67 1.5 1.5"></path></svg></div><h3>Coherencia</h3><p>Colores y estilo que van con la <b>identidad</b> del sitio.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="m20.38 8.57-1.23 1.85a8 8 0 0 1-.22 7.58H5.07A8 8 0 0 1 15.58 6.85l1.85-1.23A10 10 0 0 0 3.35 19a2 2 0 0 0 1.72 1h13.85a2 2 0 0 0 1.74-1 10 10 0 0 0-.27-10.44zm-9.79 6.84a2 2 0 0 0 2.83 0l5.66-8.49-8.49 5.66a2 2 0 0 0 0 2.83"></path></svg></div><h3>Peso</h3><p>Del tamaño justo: un banner de <b>300 KB o menos</b> carga rápido.</p></div><div class="card" data-a="4"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2m9 7h-6v13h-2v-6h-2v6H9V9H3V7h18z"></path></svg></div><h3>Accesibilidad</h3><p>Lleva <b>texto alternativo</b> (alt) que la describe para lectores de pantalla.</p></div></div>
+</section>
+
+<section class="slide dark divider" data-title="12 · Formatos para guardar y exportar" data-notes="">
+<div class="dv-num" data-a="1">12</div><h2 data-a="2">Formatos para guardar y exportar</h2><p class="sub" data-a="3">Un formato para trabajar y otro para publicar.</p>
+</section>
+
+<section class="slide light" data-title="¿En qué formato guardo esta imagen?" data-notes="Regla práctica: se guarda en PSD para seguir trabajando y se exporta en JPG, PNG o WebP para publicar.">
+<p class="kicker" data-a="1">Tema 12 · Formatos</p><h2 data-a="2">¿En qué formato guardo esta imagen?</h2><table class="tbl" data-a="3"><thead><tr><th>Formato</th><th>Compresión</th><th>Transparencia</th><th>Úsalo para</th></tr></thead><tbody><tr><td><b>PSD</b></td><td>Sin pérdida</td><td>Sí (capas)</td><td>Trabajar en Photoshop: conserva capas, texto y máscaras</td></tr><tr><td><b>TIFF</b></td><td>Sin pérdida</td><td>Sí</td><td>Imprimir y archivar originales</td></tr><tr><td><b>JPEG (JPG)</b></td><td>Con pérdida</td><td>No</td><td>Fotos para la web; ajusta la calidad (60–80)</td></tr><tr><td><b>PNG</b></td><td>Sin pérdida</td><td>Sí (alfa)</td><td>Logotipos, capturas, gráficos con texto</td></tr><tr><td><b>GIF</b></td><td>Sin pérdida (256 colores)</td><td>Sí (1 bit)</td><td>Animaciones sencillas</td></tr><tr><td><b>WebP / AVIF</b></td><td>Con o sin pérdida</td><td>Sí</td><td>Web moderna: menos peso que JPEG y PNG</td></tr><tr><td><b>SVG</b></td><td>Vectorial</td><td>Sí</td><td>Íconos y logotipos en la web</td></tr></tbody></table>
+</section>
+
+<section class="slide light" data-title="Juego: ¿qué formato uso?" data-notes="Seis casos. Pidan que voten con la mano antes de pulsar. Algunos casos aceptan dos respuestas, por ejemplo JPEG o WebP para una foto.">
+<p class="kicker" data-a="1">Laboratorio interactivo</p><h2 data-a="2">Juego: ¿qué formato uso?</h2><div class="card fq" data-a="3"><p class="out" id="fqN"></p><p class="fqq" id="fqQ"></p><div class="ctrl" id="fqB"></div><p class="fb" id="fqF"></p><div class="ctrl"><button class="btn pri" id="fqNext">Siguiente caso ▶</button><span class="out" id="fqS"></span></div></div>
+</section>
+
+<section class="slide light" data-title="Guardar no es lo mismo que exportar" data-notes="Flujo correcto: foto.psd para trabajar y foto-web.jpg para publicar. Si solo guardan el JPG, pierden las capas para siempre.">
+<p class="kicker" data-a="1">Tema 12 · Guardar o exportar</p><h2 data-a="2">Guardar no es lo mismo que exportar</h2><div class="grid c2"><div class="card cmp" data-a="3"><div class="cmph"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M17 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14c1.1 0 2-.9 2-2V7zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3m3-10H5V5h10z"></path></svg></div><h3>Guardar (Save / Save As)</h3></div><ul class="bul"><li><b>Ctrl + S</b> y <b>Shift + Ctrl + S</b>.</li><li>Guarda el <b>archivo de trabajo</b> en <b>PSD</b>.</li><li>Conserva capas, texto editable y máscaras.</li><li>Pesa más; no se publica en la web.</li></ul></div><div class="card cmp" data-a="4"><div class="cmph"><div class="ico"><svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" aria-hidden="true" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="m16 5-1.42 1.42-1.59-1.59V16h-1.98V4.83L9.42 6.42 8 5l4-4zm4 5v11c0 1.1-.9 2-2 2H6a2 2 0 0 1-2-2V10c0-1.11.89-2 2-2h3v2H6v11h12V10h-3V8h3a2 2 0 0 1 2 2"></path></svg></div><h3>Exportar (Save for Web)</h3></div><ul class="bul"><li><b>Alt + Shift + Ctrl + S</b> en Photoshop CS6.</li><li>Crea una <b>copia optimizada</b> para publicar.</li><li>Escoges formato, calidad y tamaño en píxeles, y ves el peso final.</li><li>Aplana las capas: el PSD original no cambia.</li></ul></div></div>
+</section>
+
+<section class="slide light" data-title="Repaso" data-notes="">
+<p class="kicker" data-a="1">Repaso</p><h2 data-a="2">Compruebe lo aprendido</h2><div class="grid c2"><button class="card qa" data-a="3"><span class="qn">1</span><span class="q">¿Qué diferencia hay entre una imagen de <b>mapa de bits</b> y una <b>vectorial</b>? Da un ejemplo de cada una.</span><span class="ans">La de mapa de bits se forma con píxeles (una foto); la vectorial con fórmulas (un logotipo en SVG) y se amplía sin perder calidad.</span></button><button class="card qa" data-a="4"><span class="qn">2</span><span class="q">Una foto mide <b>2400 × 1800 px</b>. ¿De qué tamaño se imprime a <b>300 ppi</b>?</span><span class="ans">8 × 6 pulgadas.</span></button><button class="card qa" data-a="4"><span class="qn">3</span><span class="q">¿Cuántos colores permite una imagen RGB de <b>8 bits por canal</b>?</span><span class="ans">16,777,216 colores (256 × 256 × 256).</span></button><button class="card qa" data-a="4"><span class="qn">4</span><span class="q">Tienes un logotipo con fondo transparente para la web. ¿JPEG o PNG? ¿Por qué?</span><span class="ans">PNG (o SVG), porque JPEG no admite transparencia.</span></button></div><p class="foot">Pulse cada pregunta para revelar la respuesta.</p>
+</section>
+
+<section class="slide light" data-title="Referencias" data-notes="">
+<p class="kicker" data-a="1">Fuentes</p><h2 data-a="2">Referencias</h2><div class="card refs" data-a="3"><p>Chavez, C. (2024). Adobe Photoshop classroom in a book (2025 release) (1.ª ed.). Adobe Press.</p><p>Beaird, J., &amp; George, J. (2023). The principles of beautiful web design (5th ed.). SitePoint.</p><p>Krug, S. (2022). Don’t make me think, revisited: A common sense approach to web usability (3rd ed.). New Riders.</p><p>Williams, R., &amp; Tollett, J. (2022). The non-designer’s web book (5th ed.). Peachpit Press.</p><p>Duckett, J. (2022). HTML &amp; CSS: Design and build websites (2nd ed.). Wiley.</p><p>Freeman, E. (2023). Head First HTML and CSS (3rd ed.). O’Reilly Media.</p><p>Creative Commons. (s.f.). Sobre las licencias CC. https://creativecommons.org/licenses/</p><p>W3C. (2023). Web Content Accessibility Guidelines (WCAG) 2.2. https://www.w3.org/TR/WCAG22/</p></div>
+</section>
+</div></div>
+<nav id="bar" aria-label="Navegación de la presentación">
+  <button id="prev" aria-label="Lámina anterior">◀</button>
+  <span id="count">1 / 42</span>
+  <button id="next" aria-label="Lámina siguiente">▶</button>
+  <div id="map"></div>
+  <button id="btnIdx">Índice (I)</button>
+  <button id="btnNotes">Notas (N)</button>
+  <button id="btnFs">Pantalla (F)</button>
+</nav>
+<div class="overlay" id="index"><ol id="idxList"></ol></div>
+<div id="notes"></div>
+<script>
+const UNIT_LABEL="TESI 1104 · Unidad I: Conceptos generales";
+
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+(function(){
+const stage=$('#stage'),vp=$('#viewport'),slides=$$('.slide');let cur=0;
+slides.forEach((s,i)=>{if(!s.classList.contains('cover')){const p=document.createElement('div');p.className='pg';p.innerHTML='<span>'+UNIT_LABEL+'</span><span>'+(i+1)+'</span>';s.appendChild(p)}});
+function fit(){const k=Math.min(vp.clientWidth/1280,vp.clientHeight/720);stage.style.transform='scale('+k+')';window.STAGE_K=k}
+addEventListener('resize',fit);fit();
+const map=$('#map'),idx=$('#idxList');
+slides.forEach((s,i)=>{const b=document.createElement('i');b.title=(i+1)+'. '+s.dataset.title;b.onclick=()=>go(i);map.appendChild(b);
+  const li=document.createElement('li');const bt=document.createElement('button');bt.innerHTML='<span>'+(i+1)+'</span>';bt.appendChild(document.createTextNode(s.dataset.title));bt.onclick=()=>{go(i);toggleIdx(false)};li.appendChild(bt);idx.appendChild(li)});
+const hooks={};window.slideHook=(t,f)=>{hooks[t]=f};
+function go(n){n=Math.max(0,Math.min(slides.length-1,n));slides[cur].classList.remove('on');cur=n;const s=slides[cur];s.classList.add('on');
+  [...map.children].forEach((b,i)=>{b.classList.toggle('cur',i===cur);b.classList.toggle('done',i<cur)});
+  $('#count').textContent=(cur+1)+' / '+slides.length;$('#notes').textContent=s.dataset.notes||'(Sin notas)';
+  try{history.replaceState(null,'',location.pathname+location.search+'#'+(cur+1))}catch(e){}
+  if(hooks[s.dataset.title])try{hooks[s.dataset.title]()}catch(e){console.error(e)}}
+window.goTitle=t=>{const i=slides.findIndex(s=>s.dataset.title===t);if(i>=0)go(i)};
+function toggleIdx(v){$('#index').classList.toggle('open',v)}
+$('#prev').onclick=()=>go(cur-1);$('#next').onclick=()=>go(cur+1);
+$('#btnIdx').onclick=()=>toggleIdx();$('#btnNotes').onclick=()=>$('#notes').classList.toggle('open');
+$('#index').onclick=e=>{if(e.target.id==='index')toggleIdx(false)};
+function fs(){try{if(!document.fullscreenElement)document.documentElement.requestFullscreen().catch(()=>{});else document.exitFullscreen()}catch(e){}}
+$('#btnFs').onclick=fs;
+$$('[data-jump]').forEach(b=>b.onclick=()=>goTitle(b.dataset.jump));
+$$('.qa').forEach(b=>b.onclick=()=>b.classList.toggle('open'));
+addEventListener('keydown',e=>{
+  const tg=e.target;if(tg.matches&&tg.matches('input,textarea,select'))return;
+  if(e.ctrlKey||e.metaKey||e.altKey)return;
+  if(window.KEYTRAP&&window.KEYTRAP(e,slides[cur]))return;
+  if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(['ArrowLeft','PageUp'].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==='Home')go(0);else if(e.key==='End')go(slides.length-1);
+  else if(e.key==='i'||e.key==='I')toggleIdx();
+  else if(e.key==='f'||e.key==='F')fs();
+  else if(e.key==='n'||e.key==='N')$('#notes').classList.toggle('open');
+  else if(e.key==='Escape'){toggleIdx(false);$('#notes').classList.remove('open')}
+});
+let tx=null;vp.addEventListener('touchstart',e=>{tx=e.touches[0].clientX},{passive:true});
+vp.addEventListener('touchend',e=>{if(tx===null)return;const dx=e.changedTouches[0].clientX-tx;if(Math.abs(dx)>70&&!e.target.closest('canvas,input,button,.nodrag'))go(cur+(dx<0?1:-1));tx=null});
+window.addEventListener('load',()=>{const h=parseInt((location.hash||'').slice(1));go(isNaN(h)?0:h-1)});
+addEventListener('hashchange',()=>{const h=parseInt((location.hash||'').slice(1));if(!isNaN(h)&&h-1!==cur)go(h-1)});
+// stage-space pointer coords helper
+window.ptr=(el,e)=>{const r=el.getBoundingClientRect();return{x:(e.clientX-r.left)*(el.width||r.width)/r.width,y:(e.clientY-r.top)*(el.height||r.height)/r.height}};
+})();
+
+
+const PAL=['#E63946','#2A9D8F','#3A86FF','#FFBE0B','#FB5607','#8338EC'];
+function rng(s){return()=>(s=(s*16807)%2147483647)/2147483647}
+function palm(x,X,Y,k,col){x.save();x.translate(X,Y);x.scale(k,k);x.fillStyle=col;x.strokeStyle=col;x.lineCap='round';
+  x.lineWidth=9;x.beginPath();x.moveTo(0,0);x.quadraticCurveTo(-14,-80,10,-170);x.stroke();
+  const fr=[[-95,-120],[-70,-185],[10,-215],[85,-180],[105,-120],[45,-205],[-30,-210]];
+  fr.forEach(([dx,dy])=>{x.beginPath();x.moveTo(10,-170);x.quadraticCurveTo((10+dx)/2,-200+(dy+170)*.1-25,dx,dy);x.quadraticCurveTo((10+dx)/2,-185,10,-163);x.fill()});
+  x.beginPath();x.arc(4,-163,7,0,7);x.arc(16,-160,7,0,7);x.fill();x.restore()}
+function scene(w,h,opt){opt=opt||{};const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');
+  const g=x.createLinearGradient(0,0,0,h*.62);g.addColorStop(0,'#1D2B6B');g.addColorStop(.45,'#8338EC');g.addColorStop(.78,'#FB5607');g.addColorStop(1,'#FFBE0B');x.fillStyle=g;x.fillRect(0,0,w,h*.62);
+  const sx=w*.66,sy=h*.6,sr=h*.15;const gl=x.createRadialGradient(sx,sy,sr*.3,sx,sy,sr*3);gl.addColorStop(0,'rgba(255,230,140,.9)');gl.addColorStop(1,'rgba(255,190,11,0)');x.fillStyle=gl;x.fillRect(0,0,w,h*.62);
+  x.fillStyle='#FFE58A';x.beginPath();x.arc(sx,sy,sr,0,7);x.fill();
+  x.fillStyle='#2B1450';x.beginPath();x.moveTo(0,h*.62);x.lineTo(0,h*.42);x.lineTo(w*.12,h*.36);x.lineTo(w*.24,h*.47);x.lineTo(w*.36,h*.4);x.lineTo(w*.5,h*.62);x.fill();
+  const s=x.createLinearGradient(0,h*.6,0,h);s.addColorStop(0,'#3A2A7A');s.addColorStop(1,'#0B1530');x.fillStyle=s;x.fillRect(0,h*.6,w,h*.4);
+  x.fillStyle='rgba(255,214,120,.85)';for(let i=0;i<9;i++){const yy=h*.63+i*h*.035,ww=sr*(1.6-i*.12);x.fillRect(sx-ww/2+(i%2?6:-6)*w/640,yy,ww,Math.max(1,h*.008))}
+  x.fillStyle='#E9C46A';x.beginPath();x.moveTo(0,h);x.lineTo(0,h*.84);x.quadraticCurveTo(w*.3,h*.8,w*.55,h);x.fill();
+  if(!opt.noPalm)palm(x,w*.2,h*.92,h/420,'#0B1530');
+  const r=rng(11),d=x.getImageData(0,0,w,h),p=d.data;for(let i=0;i<p.length;i+=4){const n=(r()-.5)*14;p[i]+=n;p[i+1]+=n;p[i+2]+=n}x.putImageData(d,0,0);return c}
+function onSlide(el){return el.closest('.slide').classList.contains('on')}
+/* ---- portada y divisores ---- */
+(function(){const cov=document.createElement('canvas');cov.width=cov.height=440;cov.className='mosaic';const cs=$('.cover');cs.appendChild(cov);
+  const cap=document.createElement('div');cap.className='mcap';cs.appendChild(cap);
+  const src=scene(440,440),cx=cov.getContext('2d');cx.imageSmoothingEnabled=false;const steps=[55,44,40,22,11,8,5,4,2,1];let k=0,dir=1,t0=0;
+  const tmp=document.createElement('canvas'),tx=tmp.getContext('2d');
+  function drawB(b){const n=Math.max(1,Math.round(440/b));tmp.width=tmp.height=n;tx.drawImage(src,0,0,n,n);cx.drawImage(tmp,0,0,n,n,0,0,440,440);cap.textContent=n+' × '+n+' píxeles'}
+  $$('.divider').forEach((d,i)=>{const c=document.createElement('canvas');c.width=c.height=12;c.className='mosaic';c.style.width=c.style.height='300px';d.appendChild(c);
+    const x=c.getContext('2d'),r=rng(7+i*13);for(let a=0;a<12;a++)for(let b=0;b<12;b++){if(r()<.35)continue;x.globalAlpha=.25+r()*.75;x.fillStyle=PAL[Math.floor(r()*6)];x.fillRect(b,a,1,1)}});
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function loop(t){if(onSlide(cov)&&t-t0>(k===steps.length-1?2200:420)){t0=t;drawB(steps[k]);k+=dir;if(k>=steps.length){k=steps.length-1;dir=-1}else if(k<0){k=0;dir=1}}
+    $$('.divider.on .mosaic').forEach(c=>{if(Math.random()<.25){const x=c.getContext('2d');x.globalAlpha=.3+Math.random()*.7;x.fillStyle=Math.random()<.2?'rgba(0,0,0,0)':PAL[Math.floor(Math.random()*6)];const a=Math.floor(Math.random()*12),b=Math.floor(Math.random()*12);x.clearRect(a,b,1,1);if(Math.random()>.2)x.fillRect(a,b,1,1)}});
+    if(!reduce)requestAnimationFrame(loop)}
+  drawB(1);if(!reduce)requestAnimationFrame(loop)})();
+/* ---- explora los píxeles ---- */
+(function(){const cv=$('#pxCv'),x=cv.getContext('2d'),src=scene(160,100),sd=src.getContext('2d').getImageData(0,0,160,100).data;let z=4,cx=80,cy=50;
+  function draw(){const vw=640/z,vh=400/z;cx=Math.max(vw/2,Math.min(160-vw/2,cx));cy=Math.max(vh/2,Math.min(100-vh/2,cy));const sx=cx-vw/2,sy=cy-vh/2;
+    x.imageSmoothingEnabled=false;x.clearRect(0,0,640,400);x.drawImage(src,sx,sy,vw,vh,0,0,640,400);
+    if(z>=12){x.strokeStyle='rgba(0,0,0,.35)';x.lineWidth=1;x.beginPath();for(let i=Math.ceil(sx);i<=sx+vw;i++){const X=Math.round((i-sx)*z)+.5;x.moveTo(X,0);x.lineTo(X,400)}for(let j=Math.ceil(sy);j<=sy+vh;j++){const Y=Math.round((j-sy)*z)+.5;x.moveTo(0,Y);x.lineTo(640,Y)}x.stroke()}
+    $('#pxZo').textContent='1 píxel de la imagen = '+z+' × '+z+' píxeles de pantalla ('+Math.round(z/4*100)+' %)';$('#pxZ').value=z;draw.s={sx,sy}}
+  function at(e){const p=ptr(cv,e);return{X:Math.floor(draw.s.sx+p.x/z),Y:Math.floor(draw.s.sy+p.y/z)}}
+  cv.addEventListener('pointermove',e=>{const {X,Y}=at(e);if(X<0||Y<0||X>=160||Y>=100)return;const i=(Y*160+X)*4,r=sd[i],g=sd[i+1],b=sd[i+2];const hx='#'+[r,g,b].map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();
+    $('#pxSw').style.background=hx;$('#pxXY').textContent='Píxel ('+X+', '+Y+')';$('#pxRGB').textContent='RGB('+r+', '+g+', '+b+')';$('#pxHex').textContent='HEX '+hx});
+  cv.addEventListener('click',e=>{const {X,Y}=at(e);cx=X;cy=Y;if(z<12)z=16;draw()});
+  $('#pxZ').oninput=e=>{z=+e.target.value;draw()};$$('[data-pz]').forEach(b=>b.onclick=()=>{z=+b.dataset.pz;draw()});draw()})();
+/* ---- raster vs vector ---- */
+(function(){const svg='<svg viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="27" fill="#E63946"/><path d="M30 9l5.6 13.2 14.3 1.2-10.9 9.4 3.3 14L30 39.4l-12.3 7.4 3.3-14-10.9-9.4 14.3-1.2z" fill="#FFBE0B"/><circle cx="30" cy="30" r="27" fill="none" stroke="#fff" stroke-width="2"/></svg>';
+  const small=document.createElement('canvas');small.width=small.height=60;const im=new Image();im.onload=()=>{small.getContext('2d').drawImage(im,0,0,60,60);draw()};im.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+  const v=$('#rvV');v.innerHTML=svg;const vs=v.firstChild,cv=$('#rvR'),x=cv.getContext('2d');
+  function draw(){const k=+$('#rvZ').value,S=96*k;$('#rvZo').textContent=k+'×';x.fillStyle='#000';x.fillRect(0,0,500,320);x.imageSmoothingEnabled=false;
+    x.drawImage(small,250-S/2,160-S/2,S,S);vs.setAttribute('width',S);vs.setAttribute('height',S);
+    $('#rvRf').textContent=k<=1.5?'A su tamaño se ve bien.':k<3?'Empiezan a notarse los bordes en escalera.':'Se ven los píxeles: la imagen no tiene más información.'}
+  $('#rvZ').oninput=draw})();
+/* ---- resolución ---- */
+(function(){const f=n=>(Math.round(n*100)/100).toLocaleString('es-PR');
+  function a(){const w=+$('#rpW').value,h=+$('#rpH').value,p=Math.max(1,+$('#rpP').value);const iw=w/p,ih=h/p;$('#rpOut').textContent=f(iw)+' × '+f(ih)+' in';$('#rpCm').textContent=f(iw*2.54)+' × '+f(ih*2.54)+' cm';
+    $('#rpV').textContent=p>=300?'✔ Calidad de impresión':p>=150?'≈ Aceptable para ver de lejos':'✖ Baja para imprimir (bien para pantalla)';$('#rpV').style.color=p>=300?'#1F9D55':p>=150?'#B7791F':'#C62828';
+    const sc=136/8.5,bx=$('#rpBox');bx.style.width=Math.min(iw*sc,400)+'px';bx.style.height=Math.min(ih*sc,400)+'px';$$('[data-rp]').forEach(b=>b.classList.toggle('on',+b.dataset.rp===p))}
+  function b(){const w=+$('#rnW').value,h=+$('#rnH').value,p=+$('#rnP').value,W=Math.round(w*p),H=Math.round(h*p);$('#rnOut').textContent=W.toLocaleString('es-PR')+' × '+H.toLocaleString('es-PR')+' px';$('#rnMp').textContent=f(W*H/1e6)+' megapíxeles'}
+  ['rpW','rpH','rpP'].forEach(i=>$('#'+i).oninput=a);['rnW','rnH','rnP'].forEach(i=>$('#'+i).oninput=b);$$('[data-rp]').forEach(x=>x.onclick=()=>{$('#rpP').value=x.dataset.rp;a()});a();b();
+  function sc(){const w=+$('#scW').value,h=+$('#scH').value,p=+$('#scP').value;$('#scOut').textContent=Math.round(w*p).toLocaleString('es-PR')+' × '+Math.round(h*p).toLocaleString('es-PR')+' píxeles'}
+  ['scW','scH','scP'].forEach(i=>$('#'+i).oninput=sc);sc()})();
+/* ---- agrandar y comprimir ---- */
+(function(){const src=scene(520,325),ec=$('#enC'),ex=ec.getContext('2d'),t=document.createElement('canvas'),tx=t.getContext('2d');let nn=false;
+  function en(){const s=+$('#enS').value/100,w=Math.max(4,Math.round(520*s)),h=Math.max(3,Math.round(325*s));t.width=w;t.height=h;tx.drawImage(src,0,0,w,h);ex.imageSmoothingEnabled=!nn;ex.imageSmoothingQuality='high';ex.drawImage(t,0,0,520,325);
+    $('#enO').textContent='Original de '+w+' × '+h+' px ampliado al '+Math.round(520/w*100)+' %'}
+  $('#enS').oninput=en;$('#enM').onclick=()=>{nn=!nn;$('#enM').classList.toggle('on',nn);en()};en();
+  const jc=$('#jqC'),jx=jc.getContext('2d'),img=new Image();let png=src.toDataURL('image/png').length*.75/1024,pend=false;
+  img.onload=()=>{jx.imageSmoothingEnabled=false;jx.drawImage(img,40,110,260,163,0,0,520,325)};
+  function jq(){const q=+$('#jqQ').value;const u=src.toDataURL('image/jpeg',q/100);img.src=u;const kb=u.length*.75/1024;$('#jqO').textContent='Calidad '+q+' · '+kb.toFixed(1)+' KB   (el mismo archivo en PNG: '+png.toFixed(0)+' KB)'}
+  $('#jqQ').oninput=()=>{if(pend)return;pend=true;requestAnimationFrame(()=>{pend=false;jq()})};jq()})();
+/* ---- profundidad de bit ---- */
+(function(){const src=scene(640,400),c=$('#bdC'),x=c.getContext('2d'),sd=src.getContext('2d').getImageData(0,0,640,400);let mode='rgb';
+  function draw(){const b=+$('#bdB').value,L=2**b,d=new ImageData(new Uint8ClampedArray(sd.data),640,400),p=d.data;
+    for(let i=0;i<p.length;i+=4){if(mode==='1'){const y=.3*p[i]+.59*p[i+1]+.11*p[i+2],v=y>110?255:0;p[i]=p[i+1]=p[i+2]=v}
+      else if(mode==='g'){const y=.3*p[i]+.59*p[i+1]+.11*p[i+2],v=Math.round(Math.round(y/255*(L-1))/(L-1)*255);p[i]=p[i+1]=p[i+2]=v}
+      else for(let k=0;k<3;k++)p[i+k]=Math.round(Math.round(p[i+k]/255*(L-1))/(L-1)*255)}x.putImageData(d,0,0);
+    const n=mode==='1'?2:mode==='g'?L:L**3;$('#bdN').textContent=n.toLocaleString('es-PR')+' colores';
+    $('#bdL').textContent=mode==='1'?'Mapa de bits · 1 bit por píxel':mode==='g'?'Escala de grises · '+b+' bits · '+L+' tonos':'RGB/'+b+' · '+L+' niveles por canal · '+(3*b)+' bits por píxel';
+    [['bd1','1'],['bdG','g'],['bdR','rgb']].forEach(([id,m])=>$('#'+id).classList.toggle('on',mode===m))}
+  $('#bdB').oninput=draw;$('#bd1').onclick=()=>{mode='1';draw()};$('#bdG').onclick=()=>{mode='g';draw()};$('#bdR').onclick=()=>{mode='rgb';draw()};draw()})();
+/* ---- regla de los tercios ---- */
+(function(){const c=$('#rtC'),x=c.getContext('2d'),bg=scene(640,400,{noPalm:true});let P={x:320,y:388},grid=true,drag=null;
+  function draw(){x.drawImage(bg,0,0);palm(x,P.x,P.y,1.05,'#0B1530');if(grid){x.strokeStyle='rgba(255,255,255,.85)';x.lineWidth=1.5;x.beginPath();[1,2].forEach(i=>{x.moveTo(640*i/3,0);x.lineTo(640*i/3,400);x.moveTo(0,400*i/3);x.lineTo(640,400*i/3)});x.stroke();
+      [[1,1],[2,1],[1,2],[2,2]].forEach(([a,b])=>{x.fillStyle='#FFBE0B';x.beginPath();x.arc(640*a/3,400*b/3,6,0,7);x.fill()})}
+    const crown={x:P.x+10*1.05,y:P.y-170*1.05};let best=1e9;[[1,1],[2,1],[1,2],[2,2]].forEach(([a,b])=>{best=Math.min(best,Math.hypot(crown.x-640*a/3,crown.y-400*b/3))});
+    const f=$('#rtF');if(best<45){f.textContent='✔ ¡En un punto fuerte! Queda espacio para el texto.';f.style.color='#1F9D55'}else if(Math.abs(crown.x-320)<50){f.textContent='Centrado: la foto se siente estática.';f.style.color='#B7791F'}else{f.textContent='Acércala a uno de los cruces amarillos.';f.style.color='#5B6684'}}
+  c.addEventListener('pointerdown',e=>{const p=ptr(c,e);if(Math.abs(p.x-P.x)<110&&p.y<P.y+20&&p.y>P.y-240){drag={dx:p.x-P.x,dy:p.y-P.y};c.setPointerCapture(e.pointerId);c.style.cursor='grabbing'}});
+  c.addEventListener('pointermove',e=>{if(!drag)return;const p=ptr(c,e);P.x=Math.max(60,Math.min(580,p.x-drag.dx));P.y=Math.max(230,Math.min(470,p.y-drag.dy));draw()});
+  c.addEventListener('pointerup',()=>{drag=null;c.style.cursor=''});
+  $('#rtG').onclick=()=>{grid=!grid;$('#rtG').classList.toggle('on',grid);draw()};$('#rtCtr').onclick=()=>{P={x:310,y:388};draw()};draw()})();
+/* ---- licencias ---- */
+(function(){const C=[['Una foto de <b>Pexels</b> para el banner del sitio de una tienda.','si','Sí: la licencia de Pexels permite el uso comercial; el crédito es opcional.'],
+  ['Una foto <b>CC BY-NC</b> de Flickr en un anuncio pagado.','no','No: NC prohíbe el uso comercial, y un anuncio lo es.'],
+  ['Una foto <b>CC BY</b> de Wikimedia Commons en tu proyecto de clase.','cr','Sí, dando crédito: Título · Autor · Fuente · Licencia.'],
+  ['Una imagen de Google Imágenes <b>sin licencia indicada</b> en tu sitio web.','no','No: tiene derechos de autor aunque no diga «©». Busca con el filtro de licencias.'],
+  ['Una foto <b>CC0</b> (dominio público) recortada para tu portafolio.','si','Sí: CC0 permite cualquier uso, incluso modificarla. El crédito se agradece.'],
+  ['Una foto <b>CC BY-SA</b> que modificaste y publicas en tu blog.','cr','Sí, con crédito, y tu versión debe compartirse con la misma licencia (SA).']];
+  const L={si:'Sí',cr:'Sí, con crédito',no:'No'};$('.lic').innerHTML=C.map((c,i)=>'<div class="card"><p>'+c[0]+'</p><div class="ctrl">'+Object.keys(L).map(k=>'<button class="btn" data-l="'+i+'" data-k="'+k+'">'+L[k]+'</button>').join('')+'</div><p class="fb"></p></div>').join('');
+  $$('[data-l]').forEach(b=>b.onclick=()=>{const c=C[+b.dataset.l],card=b.closest('.card');card.querySelectorAll('.btn').forEach(x=>x.classList.remove('ok','bad'));const ok=b.dataset.k===c[1];b.classList.add(ok?'ok':'bad');
+    if(!ok)card.querySelector('[data-k="'+c[1]+'"]').classList.add('ok');const f=card.querySelector('.fb');f.textContent=(ok?'✔ ':'✖ ')+c[2];f.style.color=ok?'#1F9D55':'#C62828'})})();
+/* ---- RGB ---- */
+(function(){const h=v=>v.toString(16).padStart(2,'0').toUpperCase();
+  function u(){const r=+$('#sR').value,g=+$('#sG').value,b=+$('#sB').value;$('#vR').textContent=r;$('#vG').textContent=g;$('#vB').textContent=b;
+    $('#mR').style.background='rgb('+r+',0,0)';$('#mG').style.background='rgb(0,'+g+',0)';$('#mB').style.background='rgb(0,0,'+b+')';
+    const hx='#'+h(r)+h(g)+h(b);$('#mSw').style.background=hx;$('#mHex').textContent=hx;$('#mRgb').textContent='rgb('+r+', '+g+', '+b+')';
+    const k=1-Math.max(r,g,b)/255,cm=v=>k>=1?0:Math.round((1-v/255-k)/(1-k)*100);$('#mCmyk').textContent='≈ CMYK '+cm(r)+' / '+cm(g)+' / '+cm(b)+' / '+Math.round(k*100)+' %'}
+  ['sR','sG','sB'].forEach(i=>$('#'+i).oninput=u);$$('[data-m]').forEach(b=>b.onclick=()=>{const [r,g,bb]=b.dataset.m.split(',');$('#sR').value=r;$('#sG').value=g;$('#sB').value=bb;u()});u()})();
+/* ---- rueda y contraste ---- */
+(function(){let mode='comp';const hsl2hex=(H,S,L)=>{S/=100;L/=100;const k=n=>(n+H/30)%12,a=S*Math.min(L,1-L),f=n=>L-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1));return'#'+[f(0),f(8),f(4)].map(v=>Math.round(v*255).toString(16).padStart(2,'0')).join('').toUpperCase()};
+  const N={comp:'Complementarios',anal:'Análogos',tri:'Triádicos'};
+  function w(){const H=+$('#whH').value,hs=mode==='comp'?[H,H+180]:mode==='anal'?[H-30,H,H+30]:[H,H+120,H+240];const dots=$$('#whW i');
+    dots.forEach((d,i)=>{const h=hs[i];if(h===undefined){d.style.display='none';return}d.style.display='';const a=((h%360)+360)%360*Math.PI/180;d.style.left=(100+79*Math.cos(a))+'px';d.style.top=(100+79*Math.sin(a))+'px';d.style.background=hsl2hex(((h%360)+360)%360,80,50)});
+    $('#whS').innerHTML=hs.map(h=>{const c=hsl2hex(((h%360)+360)%360,80,50);return'<div><i style="background:'+c+'"></i><span>'+c+'</span></div>'}).join('');$$('[data-wh]').forEach(b=>b.classList.toggle('on',b.dataset.wh===mode))}
+  $('#whH').oninput=w;$$('[data-wh]').forEach(b=>b.onclick=()=>{mode=b.dataset.wh;w()});w();
+  const lum=hx=>{const v=[1,3,5].map(i=>parseInt(hx.substr(i,2),16)/255).map(c=>c<=.03928?c/12.92:((c+.055)/1.055)**2.4);return .2126*v[0]+.7152*v[1]+.0722*v[2]};
+  function ct(){const t=$('#ctT').value,b=$('#ctB').value,L1=lum(t),L2=lum(b),r=(Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05);$('#ctP').style.color=t;$('#ctP').style.background=b;$('#ctR').textContent=r.toFixed(2)+' : 1';
+    const f=$('#ctF');f.innerHTML=(r>=4.5?'✔ Pasa para texto normal (4.5 : 1)':'✖ No pasa para texto normal (4.5 : 1)')+'<br>'+(r>=3?'✔ Pasa para texto grande (3 : 1)':'✖ No pasa ni para texto grande (3 : 1)');f.style.color=r>=4.5?'#1F9D55':r>=3?'#B7791F':'#C62828'}
+  $('#ctT').oninput=ct;$('#ctB').oninput=ct;$('#ctS').onclick=()=>{const a=$('#ctT').value;$('#ctT').value=$('#ctB').value;$('#ctB').value=a;ct()};ct()})();
+/* ---- juego de formatos ---- */
+(function(){const F=['JPEG','PNG','GIF','SVG','PSD','WebP'];const Q=[['Una foto de la playa para el banner de un sitio web.',['JPEG','WebP'],'Fotos para la web: JPEG con calidad 60–80, o WebP, que pesa menos.'],
+  ['El logotipo de un negocio con fondo transparente.',['PNG','SVG'],'PNG admite transparencia; SVG además se amplía sin perder calidad.'],
+  ['Tu archivo de trabajo con capas, para seguir editándolo mañana.',['PSD'],'PSD conserva capas, texto editable y máscaras.'],
+  ['Un ícono que parpadea, como animación sencilla.',['GIF'],'GIF admite animación por cuadros (hasta 256 colores).'],
+  ['Un ícono que debe verse nítido en cualquier pantalla.',['SVG'],'SVG es vectorial: nítido a cualquier tamaño.'],
+  ['La captura de pantalla de un tutorial, con mucho texto.',['PNG'],'PNG no tiene pérdida: el texto y los bordes quedan nítidos.']];
+  let i=0,sc=0,done=false;function show(){const q=Q[i];done=false;$('#fqN').textContent='Caso '+(i+1)+' de '+Q.length;$('#fqQ').textContent=q[0];$('#fqF').textContent='';$('#fqS').textContent='Puntuación: '+sc+' / '+Q.length;
+    $('#fqB').innerHTML=F.map(f=>'<button class="btn" data-f="'+f+'">'+f+'</button>').join('');$('#fqNext').textContent=i===Q.length-1?'Ver resultado ▶':'Siguiente caso ▶';
+    $$('[data-f]').forEach(b=>b.onclick=()=>{if(done)return;done=true;const ok=q[1].includes(b.dataset.f);if(ok)sc++;b.classList.add(ok?'ok':'bad');$$('[data-f]').forEach(x=>{if(q[1].includes(x.dataset.f))x.classList.add('ok')});
+      const f=$('#fqF');f.textContent=(ok?'✔ Correcto. ':'✖ No. ')+q[2];f.style.color=ok?'#1F9D55':'#C62828';$('#fqS').textContent='Puntuación: '+sc+' / '+Q.length})}
+  $('#fqNext').onclick=()=>{if(i<Q.length-1){i++;show()}else if(i===Q.length-1){i=Q.length;$('#fqN').textContent='Resultado';$('#fqQ').textContent='¡Terminaste! '+sc+' de '+Q.length+' correctas.';$('#fqB').innerHTML='';$('#fqF').textContent='Regla: se guarda en PSD para trabajar y se exporta en JPEG, PNG o WebP para publicar.';$('#fqF').style.color='';$('#fqS').textContent='';$('#fqNext').textContent='Jugar otra vez ↺'}else{i=0;sc=0;show()}};show()})();
+
+</script>
+</body>
+</html>
