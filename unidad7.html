@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-photos="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -320,6 +320,15 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
   #canvasWrap{order:-1}
   .st-side{border:0;border-top:1px solid #2E2740;max-height:none}
 }
+
+/* fotos de Pexels */
+.eyecatch.hasph .card{max-width:600px;transform:translateX(-260px) rotate(-2deg)}.eyecatch.hasph h2{font-size:50px}.eyecatch.hasph .num{font-size:92px;white-space:nowrap}
+.kph{position:absolute;right:90px;top:50%;width:400px;height:470px;margin:-235px 0 0;border:6px solid var(--ink);box-shadow:12px 12px 0 var(--sun);transform:rotate(3deg);background:var(--ink);z-index:2;overflow:hidden}
+.kph img{width:100%;height:100%;object-fit:cover;display:block}
+.kph .tone{position:absolute;inset:0;background:radial-gradient(circle,rgba(0,0,0,.35) 1.2px,transparent 1.7px) 0 0/7px 7px;mix-blend-mode:multiply;pointer-events:none}
+.kph figcaption{position:absolute;left:-6px;bottom:-6px;background:var(--sun);color:var(--ink);border:4px solid var(--ink);font-family:var(--f-osd);font-size:18px;padding:4px 12px;letter-spacing:.06em}
+.cover .kph{right:120px;top:auto;bottom:40px;width:290px;height:250px;margin:0;transform:rotate(-3deg);box-shadow:12px 12px 0 var(--pink)}
+.phcred{color:var(--mute);margin-top:6px}
 </style>
 </head>
 <body>
@@ -327,7 +336,8 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
 <div id="viewport"><div id="stage">
 
 <!-- 1 PORTADA -->
-<section class="slide cover" data-title="Portada" data-notes="Bienvenida. Unidad VII del prontuario: Texto. Hoy veremos cómo se crea, espacia, alinea, transforma, formatea y decora el texto en Photoshop, y lo aplicaremos a una página web de cómic. En el laboratorio darán su primer paso con herramientas tipo Figma.">
+<section class="slide cover hasph" data-title="Portada" data-notes="Bienvenida. Unidad VII del prontuario: Texto. Hoy veremos cómo se crea, espacia, alinea, transforma, formatea y decora el texto en Photoshop, y lo aplicaremos a una página web de cómic. En el laboratorio darán su primer paso con herramientas tipo Figma.">
+  <figure class="kph"><img src="https://images.pexels.com/photos/33059167/pexels-photo-33059167.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Calle de Tokio de noche con letreros de neón" decoding="async" onerror="this.style.visibility='hidden'"><span class="tone"></span><figcaption>TEXTO EN TODAS PARTES</figcaption></figure>
   <canvas id="coverCv" width="1280" height="720"></canvas>
   <div class="sun"></div>
   <div class="jp" aria-hidden="true">テキスト</div>
@@ -354,7 +364,8 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
 </section>
 
 <!-- 3 EYECATCH 1 -->
-<section class="slide eyecatch" data-ch="1" data-title="Parte A · El texto en Photoshop" data-notes="Primera parte: los seis temas de la Unidad VII del prontuario.">
+<section class="slide eyecatch hasph" data-ch="1" data-title="Parte A · El texto en Photoshop" data-notes="Primera parte: los seis temas de la Unidad VII del prontuario.">
+  <figure class="kph"><img src="https://images.pexels.com/photos/4140925/pexels-photo-4140925.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Gavetas con tipos de imprenta antiguos" decoding="async" onerror="this.style.visibility='hidden'"><span class="tone"></span><figcaption>TIPOS DE IMPRENTA</figcaption></figure>
   <div class="burst"></div>
   <div class="card"><div class="num">PARTE A</div><h2>El texto en Photoshop</h2><div class="sub">UNIDAD VII · TEMAS 1 AL 6</div></div>
 </section>
@@ -479,7 +490,8 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
 </section>
 
 <!-- 11 EYECATCH 2 -->
-<section class="slide eyecatch" data-ch="1" data-title="Parte B · La página de cómic" data-notes="Segunda parte: aplicamos el texto a una página de cómic y luego a una página web.">
+<section class="slide eyecatch hasph" data-ch="1" data-title="Parte B · La página de cómic" data-notes="Segunda parte: aplicamos el texto a una página de cómic y luego a una página web.">
+  <figure class="kph"><img src="https://images.pexels.com/photos/8085954/pexels-photo-8085954.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Persona dibujando las viñetas de un guion gráfico" decoding="async" onerror="this.style.visibility='hidden'"><span class="tone"></span><figcaption>VIÑETAS</figcaption></figure>
   <div class="burst"></div>
   <div class="card"><div class="num">PARTE B</div><h2>La página de cómic</h2><div class="sub">DEL PAPEL A LA PANTALLA</div></div>
 </section>
@@ -565,7 +577,8 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
 </section>
 
 <!-- 16 EYECATCH 3 -->
-<section class="slide eyecatch" data-ch="1" data-title="Parte C · Primer contacto con Figma" data-notes="Tercera parte: Figma, la herramienta que usa la industria para diseñar interfaces.">
+<section class="slide eyecatch hasph" data-ch="1" data-title="Parte C · Primer contacto con Figma" data-notes="Tercera parte: Figma, la herramienta que usa la industria para diseñar interfaces.">
+  <figure class="kph"><img src="https://images.pexels.com/photos/196645/pexels-photo-196645.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Bocetos de una interfaz en papel" decoding="async" onerror="this.style.visibility='hidden'"><span class="tone"></span><figcaption>BOCETO DE INTERFAZ</figcaption></figure>
   <div class="burst"></div>
   <div class="card"><div class="num">PARTE C</div><h2>Primer contacto con Figma</h2><div class="sub">DISEÑO DE INTERFACES EN EL NAVEGADOR</div></div>
 </section>
@@ -636,7 +649,8 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
 </section>
 
 <!-- 20 EYECATCH LAB -->
-<section class="slide eyecatch" data-ch="1" data-title="Laboratorio 10" data-notes="Ahora el laboratorio.">
+<section class="slide eyecatch hasph" data-ch="1" data-title="Laboratorio 10" data-notes="Ahora el laboratorio.">
+  <figure class="kph"><img src="https://images.pexels.com/photos/12903003/pexels-photo-12903003.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Diseñadora usando una tableta gráfica y una laptop" decoding="async" onerror="this.style.visibility='hidden'"><span class="tone"></span><figcaption>MANOS A LA OBRA</figcaption></figure>
   <div class="burst" style="background:repeating-conic-gradient(from 0deg at 50% 50%,var(--cyan) 0 4deg,var(--ink) 4deg 12deg)"></div>
   <div class="card" style="box-shadow:14px 14px 0 var(--pink)"><div class="num" style="color:var(--sun)">LAB 10</div><h2>Tu página de cómic web</h2><div class="sub">ESTUDIO KOMA · 3 HORAS</div></div>
 </section>
@@ -750,6 +764,7 @@ table.t th{font-family:var(--f-osd);font-weight:400;font-size:17px;letter-spacin
     <li>Figma. (s. f.). <i>Figma for Education</i>. https://www.figma.com/education/</li>
   </ul>
   <p class="small" data-a="2" style="color:var(--mute)">Imágenes del estudio generadas por computadora. Fuentes tipográficas de Google Fonts (SIL Open Font License).</p>
+<p class="small phcred">Fotos: Pexels (licencia libre de Pexels) · Calle de Tokio de noche con letreros de neón (pexels.com/photo/vibrant-tokyo-night-street-with-neon-signs-33059167) · Gavetas con tipos de imprenta antiguos (pexels.com/photo/cabinet-drawers-with-various-vintage-letterpress-4140925) · Persona dibujando las viñetas de un guion gráfico (pexels.com/photo/woman-filling-storyboard-in-8085954) · Bocetos de una interfaz en papel (pexels.com/photo/white-printer-paper-196645) · Diseñadora usando una tableta gráfica y una laptop (pexels.com/photo/graphic-designer-using-graphic-tablet-and-laptop-12903003).</p>
 </section>
 
 <div id="scan"></div>
