@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" data-photos="1">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -275,6 +275,15 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
   .st-tools hr{display:none}
   .st-side{border:0;border-top:1px solid #1d1d1d}
 }
+
+/* fotos de Pexels */
+.eyecatch.hasph{padding-right:560px}
+.tvph{position:absolute;right:96px;top:50%;width:440px;height:330px;margin:-165px 0 0;padding:16px;background:var(--card);border:3px solid var(--acc);border-radius:22px;box-shadow:0 18px 40px rgba(0,0,0,.35),0 0 30px color-mix(in srgb,var(--acc) 35%,transparent);z-index:2}
+.tvph img{width:100%;height:100%;object-fit:cover;display:block;border-radius:10px;background:#000}
+.tvph .scan{position:absolute;inset:16px;border-radius:10px;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px);pointer-events:none}
+.tvph figcaption{position:absolute;left:24px;bottom:-14px;background:var(--acc);color:var(--bg);font-family:var(--f-mono);font-size:14px;letter-spacing:.14em;padding:3px 12px;border-radius:6px}
+.cover .tvph{right:90px;top:auto;bottom:70px;margin:0;width:380px;height:250px}
+.phcred{opacity:.75;margin-top:6px}
 </style>
 </head>
 <body>
@@ -309,7 +318,8 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
 </section>
 
 <!-- 3 EYECATCH 1 -->
-<section class="slide g1 eyecatch" data-ch="1" data-title="Nivel 1 · Selecciones" data-notes="Nivel 1, con la paleta gris de la primera generación: las selecciones.">
+<section class="slide g1 eyecatch hasph" data-ch="1" data-title="Nivel 1 · Selecciones" data-notes="Nivel 1, con la paleta gris de la primera generación: las selecciones.">
+  <figure class="tvph"><img src="https://images.pexels.com/photos/14139165/pexels-photo-14139165.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Mano sobre el ratón de la computadora" decoding="async" onerror="this.style.visibility='hidden'"><span class="scan"></span><figcaption>SELECT</figcaption></figure>
   <div class="gen" data-a="1">GEN 1 · 1994 · 32 BITS</div>
   <div class="ring" data-a="2">1</div>
   <h2 data-a="3">Selecciones</h2>
@@ -357,7 +367,8 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
 </section>
 
 <!-- 6 EYECATCH 2 -->
-<section class="slide g2 eyecatch" data-ch="1" data-title="Nivel 2 · Máscaras" data-notes="Nivel 2, con el negro y el azul profundo de la segunda generación: las máscaras.">
+<section class="slide g2 eyecatch hasph" data-ch="1" data-title="Nivel 2 · Máscaras" data-notes="Nivel 2, con el negro y el azul profundo de la segunda generación: las máscaras.">
+  <figure class="tvph"><img src="https://images.pexels.com/photos/39320125/pexels-photo-39320125.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Máscaras venecianas de colores" decoding="async" onerror="this.style.visibility='hidden'"><span class="scan"></span><figcaption>MASK</figcaption></figure>
   <div class="gen" data-a="1">GEN 2 · 2000 · 128 BITS</div>
   <div class="ring" data-a="2">2</div>
   <h2 data-a="3">Máscaras</h2>
@@ -413,7 +424,8 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
 </section>
 
 <!-- 9 EYECATCH 3 -->
-<section class="slide g3 eyecatch" data-ch="1" data-title="Nivel 3 · Recorte y distorsión" data-notes="Nivel 3, en negro piano y plata, como la tercera generación: recorte y distorsión.">
+<section class="slide g3 eyecatch hasph" data-ch="1" data-title="Nivel 3 · Recorte y distorsión" data-notes="Nivel 3, en negro piano y plata, como la tercera generación: recorte y distorsión.">
+  <figure class="tvph"><img src="https://images.pexels.com/photos/20263132/pexels-photo-20263132.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Espejo redondo que refleja un camino" decoding="async" onerror="this.style.visibility='hidden'"><span class="scan"></span><figcaption>CROP · WARP</figcaption></figure>
   <div class="gen" data-a="1">GEN 3 · 2006 · ALTA DEFINICIÓN</div>
   <div class="ring" data-a="2">3</div>
   <h2 data-a="3">Recorte y distorsión</h2>
@@ -478,7 +490,8 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
 </section>
 
 <!-- 12 EYECATCH 4 -->
-<section class="slide g4 eyecatch" data-ch="1" data-title="Nivel 4 · Transformación de objetos" data-notes="Nivel 4, en el azul de la cuarta generación: transformación de objetos.">
+<section class="slide g4 eyecatch hasph" data-ch="1" data-title="Nivel 4 · Transformación de objetos" data-notes="Nivel 4, en el azul de la cuarta generación: transformación de objetos.">
+  <figure class="tvph"><img src="https://images.pexels.com/photos/7776189/pexels-photo-7776189.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Cubo de colores girando" decoding="async" onerror="this.style.visibility='hidden'"><span class="scan"></span><figcaption>TRANSFORM</figcaption></figure>
   <div class="gen" data-a="1">GEN 4 · 2013 · BARRA DE LUZ</div>
   <div class="ring" data-a="2">4</div>
   <h2 data-a="3">Transformación de objetos</h2>
@@ -548,7 +561,8 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
 </section>
 
 <!-- 16 EYECATCH 5 -->
-<section class="slide g5 eyecatch" data-ch="1" data-title="Nivel 5 · Laboratorio 11" data-notes="Nivel 5, en el blanco y negro de la quinta generación: el laboratorio.">
+<section class="slide g5 eyecatch hasph" data-ch="1" data-title="Nivel 5 · Laboratorio 11" data-notes="Nivel 5, en el blanco y negro de la quinta generación: el laboratorio.">
+  <figure class="tvph"><img src="https://images.pexels.com/photos/6071593/pexels-photo-6071593.jpeg?auto=compress&amp;cs=tinysrgb&amp;w=900" alt="Máquinas de arcade con pantallas de colores" decoding="async" onerror="this.style.visibility='hidden'"><span class="scan"></span><figcaption>LAB 11</figcaption></figure>
   <div class="gen" data-a="1">GEN 5 · 2020 · LABORATORIO</div>
   <div class="ring" data-a="2" style="background:linear-gradient(90deg,#fff 50%,#0D0E12 50%);color:var(--acc)">L</div>
   <h2 data-a="3">Laboratorio 11</h2>
@@ -705,6 +719,7 @@ canvas.demo{display:block;border-radius:calc(var(--r) / 2);background:#000;touch
     <p class="small">Mozilla. (s.f.). <i>MDN Web Docs</i>: <code>transform</code>, <code>clip-path</code>, <code>mask-image</code>, <code>background-clip</code>, <code>aspect-ratio</code>, <code>object-fit</code>.</p>
   </div>
   <p class="small mute" data-a="3">Imágenes de la presentación y del Taller GEN generadas por computadora. Paletas inspiradas en los colores de cinco generaciones de consolas; no se usan logotipos ni marcas. Fuentes de Google Fonts (SIL Open Font License).</p>
+<p class="small phcred">Fotos: Pexels (licencia libre de Pexels) · Mano sobre el ratón de la computadora (pexels.com/photo/close-up-of-woman-hand-on-computer-mouse-14139165) · Máscaras venecianas de colores (pexels.com/photo/colorful-venetian-masks-in-a-vibrant-display-39320125) · Espejo redondo que refleja un camino (pexels.com/photo/person-hand-holding-mirror-with-reflection-of-dirt-road-20263132) · Cubo de colores girando (pexels.com/photo/3-x-3-rubiks-cube-7776189) · Máquinas de arcade con pantallas de colores (pexels.com/photo/arcade-machines-with-colorful-monitors-in-entertainment-club-6071593).</p>
 </section>
 
 <div id="osd"><span><span class="dot"></span><span id="osdGen">GEN 1 · 1994</span></span><span id="osdSlot">01 / 22</span></div>
